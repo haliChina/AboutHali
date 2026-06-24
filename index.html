@@ -22,7 +22,7 @@
     <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
     <link rel="dns-prefetch" href="https://github-readme-stats.vercel.app">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=33">
+    <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body class="intro-lock">
     <!-- ===== Intro animation ===== -->
@@ -30,7 +30,7 @@
         <div class="intro-stage">
             <span class="intro-prefix">WELCOME&nbsp;TO</span>
             <span class="intro-brand">
-                <span class="intro-first">U</span><span class="intro-rest">SERHALI.COM</span>
+                <span class="intro-first">U</span><span class="intro-rest">serHali</span>
             </span>
         </div>
         <div class="intro-skip">点击任意处跳过</div>
@@ -146,6 +146,30 @@
             <div class="island-layer island-toast">
                 <span class="island-toast-icon"></span>
                 <span class="island-toast-msg"></span>
+            </div>
+
+            <!-- autoplay prompt -->
+            <div class="island-layer island-autoplay">
+                <div class="autoplay-head">
+                    <span class="autoplay-icon">
+                        <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                    <div class="autoplay-text">
+                        <span class="autoplay-title">开启背景音乐</span>
+                        <span class="autoplay-sub">进入即播放 · 沉浸氛围</span>
+                    </div>
+                </div>
+                <div class="autoplay-foot">
+                    <label class="autoplay-check">
+                        <input type="checkbox" class="autoplay-checkbox" id="autoplay-no-ask">
+                        <span class="autoplay-check-box"></span>
+                        <span>不再提示</span>
+                    </label>
+                    <div class="autoplay-actions">
+                        <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
+                        <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -362,7 +386,7 @@
 
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
-    <script src="shader.js?v=3" defer></script>
-    <script src="animations.js?v=14" defer></script>
+    <script src="shader.js?v=4" defer></script>
+    <script src="animations.js?v=16" defer></script>
 </body>
 </html>

@@ -4,10 +4,16 @@
     const canvas = document.getElementById('sakura-canvas');
     if (!canvas) return;
 
+    // ===== Mobile detection (used for both render scale and CSS filter) =====
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
     // ===== Hardware acceleration hints =====
     canvas.style.willChange = 'contents';
     canvas.style.transform = 'translateZ(0)';
     canvas.style.backfaceVisibility = 'hidden';
+
+    // Reduce filter blur on mobile — full blur(2px) is a major GPU cost
+    if (isMobile) canvas.style.filter = 'blur(1px) brightness(.85) saturate(.95)';
 
     const glOpts = {
         antialias: false,
@@ -149,7 +155,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
 
     // ===== Adaptive render scale: lower on high-DPI / mobile for performance =====
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const RENDER_SCALE = isMobile ? 0.45 : (dpr > 1.5 ? 0.55 : 0.7);
 
     let lastResW = 0, lastResH = 0;
