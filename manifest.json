@@ -1,0 +1,18 @@
+{
+  "name": "Hali · userhali.com",
+  "short_name": "Hali",
+  "description": "Hali's personal portfolio - Code is like humor. When you have to explain it, it's bad.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070b",
+  "theme_color": "#07070b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/contact/Githubzhanghao.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

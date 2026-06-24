@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Hali</title>
+    <meta name="description" content="Hali's personal portfolio - Code is like humor. When you have to explain it, it's bad.">
+    <meta name="theme-color" content="#07070b">
+    <meta property="og:title" content="About Hali">
+    <meta property="og:description" content="Hali's personal portfolio - Code is like humor. When you have to explain it, it's bad.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://userhali.com">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="About Hali">
+    <meta name="twitter:description" content="Hali's personal portfolio">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://api.github.com" crossorigin>
+    <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
+    <link rel="dns-prefetch" href="https://github-readme-stats.vercel.app">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=33">
+</head>
+<body class="intro-lock">
+    <!-- ===== Intro animation ===== -->
+    <div class="intro" id="intro">
+        <div class="intro-stage">
+            <span class="intro-prefix">WELCOME&nbsp;TO</span>
+            <span class="intro-brand">
+                <span class="intro-first">U</span><span class="intro-rest">SERHALI.COM</span>
+            </span>
+        </div>
+        <div class="intro-skip">点击任意处跳过</div>
+    </div>
+
+    <!-- ===== Sakura shader background ===== -->
+    <div class="bg">
+        <canvas id="sakura-canvas"></canvas>
+        <div class="bg-scrim"></div>
+    </div>
+
+    <!-- ===== Dynamic Island ===== -->
+    <div class="dynamic-island">
+        <div class="island-content island-state-default" id="island" data-state="default">
+            <div class="island-specular"></div>
+
+            <!-- collapsed / default -->
+            <div class="island-layer island-default active-content">
+                <span class="island-idle-brand">userhali.com</span>
+            </div>
+
+            <!-- collapsed music live-activity bar -->
+            <div class="island-layer island-music-bar">
+                <img class="ib-cover" src="https://y.qq.com/music/photo_new/T002R500x500M000004P3Tg53u1o9m_1.jpg?max_age=2592000" alt="" decoding="async" loading="lazy" width="28" height="28">
+                <div class="island-eq"><i></i><i></i><i></i><i></i></div>
+            </div>
+
+            <!-- expanded navigation -->
+            <nav class="island-layer island-nav">
+                <div class="nav-buttons pill-nav" id="pillNav">
+                    <div class="pill-indicator" id="indicator"></div>
+                    <a href="#home" class="island-nav-btn nav-item active" data-index="0">首页</a>
+                    <a href="#github" class="island-nav-btn nav-item" data-index="1">GitHub</a>
+                    <a href="#netease" class="island-nav-btn nav-item" data-index="2">QQ音乐</a>
+                    <a href="#galgame" class="island-nav-btn nav-item" data-index="3">Projects</a>
+                </div>
+                <div class="scroll-progress">
+                    <div class="scroll-progress-meta">
+                        <span class="sp-section">首页</span>
+                        <span class="sp-pct">0%</span>
+                    </div>
+                    <div class="scroll-progress-container">
+                        <div class="scroll-progress-bar"><span class="sp-head"></span></div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- expanded now-playing card -->
+            <div class="island-layer island-music-card">
+                <img class="mc-cover" src="https://y.qq.com/music/photo_new/T002R500x500M000004P3Tg53u1o9m_1.jpg?max_age=2592000" alt="" decoding="async" loading="lazy" width="96" height="96">
+                <div class="mc-main">
+                    <div class="island-eq"><i></i><i></i><i></i><i></i></div>
+                    <div class="mc-title">渡口</div>
+                    <div class="mc-artist">蔡琴 · QQ音乐</div>
+                    <input type="range" class="mc-scrub" min="0" max="1000" value="0" aria-label="进度">
+                    <div class="mc-bottom">
+                        <span class="mc-cur">0:00</span>
+                        <div class="mc-ctrls">
+                            <button class="mc-prev island-mini-btn island-mini-btn--ghost" aria-label="上一首">
+                                <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg>
+                            </button>
+                            <button class="mc-toggle island-mini-btn" aria-label="播放/暂停">
+                                <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                            </button>
+                            <button class="mc-next island-mini-btn island-mini-btn--ghost" aria-label="下一首">
+                                <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg>
+                            </button>
+                        </div>
+                        <span class="mc-dur">0:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- confirm external link -->
+            <div class="island-layer island-confirm">
+                <div class="island-confirm-info">
+                    <div class="island-confirm-icon">
+                        <img class="confirm-favicon" alt="">
+                        <svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
+                    </div>
+                    <div class="island-confirm-meta">
+                        <div class="island-confirm-title"><span class="confirm-site">外部链接</span></div>
+                        <div class="island-confirm-host"></div>
+                    </div>
+                </div>
+                <div class="island-confirm-countdown"><span class="island-confirm-countdown-bar"></span></div>
+                <div class="island-confirm-actions">
+                    <button class="island-btn island-btn-cancel">取消</button>
+                    <button class="island-btn island-btn-confirm">
+                        <span>前往</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- email -->
+            <div class="island-layer island-email">
+                <div class="island-email-title">联系邮箱</div>
+                <div class="island-email-list">
+                    <div class="island-email-item">
+                        <span class="island-email-addr">admin@userhali.com</span>
+                        <button class="island-email-copy" data-mail="admin@userhali.com">复制</button>
+                    </div>
+                    <div class="island-email-item">
+                        <span class="island-email-addr">8661415@qq.com</span>
+                        <button class="island-email-copy" data-mail="8661415@qq.com">复制</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- toast feedback -->
+            <div class="island-layer island-toast">
+                <span class="island-toast-icon"></span>
+                <span class="island-toast-msg"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Home ===== -->
+    <section id="home" class="page home">
+        <div class="home-inner reveal">
+            <p class="home-greet">Hello, I'm</p>
+            <h1 class="home-name">Hali</h1>
+            <div class="typewriter">
+                <span class="typewriter-text"></span><span class="typewriter-caret"></span>
+            </div>
+
+            <div class="social">
+                <div class="section-label">我的账户 · Account</div>
+                <div class="social-grid">
+                    <a href="https://space.bilibili.com/1300732833" class="social-btn social-btn-svg" style="--brand:#fb7299" title="Bilibili">
+                        <img src="icons/contact/bilibilizhanghao.svg" alt="Bilibili" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="https://qm.qq.com/q/SCmKcHTXma" class="social-btn social-btn-svg" style="--brand:#12b7f5" title="QQ">
+                        <img src="icons/contact/QQzhanghao.svg" alt="QQ" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="https://discordapp.com/users/b_bbb_b" class="social-btn social-btn-svg" style="--brand:#5865f2" title="Discord">
+                        <img src="icons/contact/Discordzhanghao.svg" alt="Discord" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="https://c6.y.qq.com/base/fcgi-bin/u?__=NnFiRZw27wAJ" class="social-btn social-btn-svg" style="--brand:#31c27c" title="QQ音乐">
+                        <img src="icons/contact/QQyinyuezhanghao.svg" alt="QQ音乐" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="https://github.com/haliChina" class="social-btn social-btn-svg" style="--brand:#ffffff" title="GitHub">
+                        <img src="icons/contact/Githubzhanghao.svg" alt="GitHub" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="https://x.com/HaliForX" class="social-btn social-btn-svg" style="--brand:#ffffff" title="X">
+                        <img src="icons/contact/Xzhanghao.svg" alt="X" decoding="async" width="44" height="44">
+                    </a>
+                    <a href="" class="social-btn social-btn-svg" id="email-link" style="--brand:#ea4335" title="邮箱">
+                        <img src="icons/contact/youxiangdenglu.svg" alt="Email" decoding="async" width="44" height="44">
+                    </a>
+                </div>
+            </div>
+
+            <button class="explore-btn">Explore More About Me</button>
+        </div>
+
+        <div class="scroll-hint">
+            <span>继续滚动</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- ===== GitHub ===== -->
+    <section id="github" class="page section">
+        <div class="card reveal">
+            <div class="card-header">
+                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@16.23.0/icons/github.svg" alt="GitHub" class="card-logo gh-logo">
+                <h2>GitHub · Coding</h2>
+            </div>
+            <div class="card-body">
+                <div class="gh-profile">
+                    <img class="gh-avatar" src="https://avatars.githubusercontent.com/u/168755253?v=4" alt="avatar" decoding="async" loading="lazy" width="96" height="96">
+                    <div class="gh-meta">
+                        <div class="gh-name">UserHali <span class="gh-handle">@haliChina</span></div>
+                        <p class="gh-bio">Code is like humor. When you have to explain it, it's bad.</p>
+                        <a href="https://github.com/haliChina" class="gh-follow">前往我的 GitHub →</a>
+                    </div>
+                </div>
+
+                <div class="gh-stats-wrap">
+                    <img class="gh-stats-card" src="https://github-readme-stats.vercel.app/api?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub Stats" decoding="async" loading="lazy">
+                    <img class="gh-stats-card" src="https://github-readme-stats.vercel.app/api/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" decoding="async" loading="lazy">
+                </div>
+
+                <div class="section-label section-label-left">技能栈 · Skills</div>
+                <div class="skill-grid">
+                    <div class="skill" style="--brand:#f7df1e">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>JavaScript</b><span>动态语言 · 前端核心</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#3178c6">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>TypeScript</b><span>类型安全 · 大型项目</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#339933">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Node.js</b><span>服务端运行时</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#61dafb">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>React</b><span>组件化 UI 框架</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#42b883">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Vue</b><span>渐进式前端框架</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#3776ab">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Python</b><span>脚本 · 数据处理</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#f89820">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Java</b><span>JVM · 企业级后端</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#6db33f">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Spring Boot</b><span>企业级后端框架</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#00599c">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>C++</b><span>高性能 · 系统级</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#336791">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>PostgreSQL</b><span>关系型数据库</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#f05032">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Git</b><span>版本控制</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#2088ff">
+                        <img class="skill-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/githubactions/githubactions-original.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>GitHub Actions</b><span>CI/CD 自动化</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#ff9900">
+                        <img class="skill-icon skill-icon--mono" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@latest/icons/amazonwebservices.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>AWS</b><span>云服务 · 云原生</span></div>
+                    </div>
+                    <div class="skill" style="--brand:#f6821f">
+                        <img class="skill-icon skill-icon--mono" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@latest/icons/cloudflare.svg" alt="" decoding="async" loading="lazy" width="34" height="34" onerror="this.remove()">
+                        <div class="skill-text"><b>Cloudflare</b><span>边缘计算 · CDN</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== QQ Music ===== -->
+    <section id="netease" class="page section">
+        <div class="card reveal">
+            <div class="card-header">
+                <img src="icons/contact/QQyinyuezhanghao.svg" alt="QQ音乐" class="card-logo ne-logo">
+                <h2>我的QQ音乐</h2>
+            </div>
+            <div class="card-body netease-body">
+                <div class="netease-profile">
+                    <img class="netease-avatar" src="https://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaELhlPWt03BicbfDHOWhCeZCSdmOaMr49cM5aQukEfnebnqLhHy1MlDncictqxF2YqrN2VOYbibKmU62uQibnibzGK1FOQib7IxicaxlgnxpTtjc9tI3w/132" alt="QQ音乐头像" decoding="async" loading="lazy" width="84" height="84">
+                    <div class="netease-name-row">
+                        <span class="netease-name">Hali</span>
+                        <img class="ne-badge" src="https://y.qq.com/music/common/upload/t_cm3_photo_publish/6063612.png" alt="徽章" decoding="async" height="18">
+                        <img class="ne-vip" src="https://y.qq.com/mediastyle/lv-icon/v14/2x/vip10.png" alt="VIP" decoding="async" height="16">
+                        <img class="ne-rank" src="https://y.gtimg.cn/music/common/upload/t_SoundPowerValue/4376060.png" alt="等级" decoding="async" height="16">
+                    </div>
+                    <div class="netease-info-row">
+                        <span class="netease-loc">男 · 处女座 · 广东</span>
+                    </div>
+                    <div class="netease-stats">
+                        <div class="netease-stat"><b>85</b><span>关注</span></div>
+                        <div class="netease-stat"><b>2</b><span>粉丝</span></div>
+                        <div class="netease-stat"><b>10</b><span>访客</span></div>
+                    </div>
+                    <div class="netease-gene">
+                        <span class="netease-gene-label">音乐基因</span>
+                    </div>
+                    <div class="netease-artist">
+                        <span class="netease-artist-label">我的歌手榜</span>
+                        <div class="netease-artist-item">
+                            <img class="netease-artist-avatar" src="https://y.gtimg.cn/music/photo_new/T001R150x150M000001IHUH4422GJh_33.jpg?max_age=2592000" alt="MKMS" decoding="async" loading="lazy" width="36" height="36">
+                            <span>MKMS</span>
+                        </div>
+                        <p class="netease-artist-desc">点播TA们的歌不止一首</p>
+                    </div>
+                </div>
+                <div class="netease-player">
+                    <div class="np-cover-wrap" id="np-cover-wrap">
+                        <img class="np-cover" src="https://y.qq.com/music/photo_new/T002R500x500M000004P3Tg53u1o9m_1.jpg?max_age=2592000" alt="封面" decoding="async" loading="lazy" width="154" height="154">
+                        <div class="np-cover-hole"></div>
+                    </div>
+                    <div class="np-song">
+                        <div class="np-title">渡口</div>
+                        <div class="np-artist">蔡琴</div>
+                    </div>
+                    <audio class="np-audio" id="np-audio" preload="metadata" src=""></audio>
+                    <div class="np-controls">
+                        <button class="np-prev island-mini-btn island-mini-btn--ghost" aria-label="上一首">
+                            <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg>
+                        </button>
+                        <button class="np-toggle island-mini-btn" aria-label="播放/暂停">
+                            <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                        </button>
+                        <button class="np-next island-mini-btn island-mini-btn--ghost" aria-label="下一首">
+                            <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg>
+                        </button>
+                    </div>
+                    <div class="np-scrub-row">
+                        <span class="np-cur">0:00</span>
+                        <input type="range" class="np-scrub" min="0" max="1000" value="0" aria-label="进度">
+                        <span class="np-dur">0:00</span>
+                    </div>
+                    <div class="np-playlist" id="np-playlist"></div>
+                </div>
+            </div>
+            <a href="https://c6.y.qq.com/base/fcgi-bin/u?__=NnFiRZw27wAJ" class="card-btn">前往QQ音乐</a>
+        </div>
+    </section>
+
+    <!-- ===== Projects ===== -->
+    <section id="galgame" class="page section">
+        <div class="projects-wrap reveal">
+            <div class="section-label">我的项目 · My Projects</div>
+            <div class="projects-grid" id="projects-grid">
+                <div class="projects-loading" id="projects-loading">加载中...</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
+
+    <script src="shader.js?v=3" defer></script>
+    <script src="animations.js?v=14" defer></script>
+</body>
+</html>
