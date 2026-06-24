@@ -22,7 +22,7 @@
     <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
     <link rel="dns-prefetch" href="https://github-readme-stats.vercel.app">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=38">
+    <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body class="intro-lock">
     <!-- ===== Intro animation ===== -->
@@ -150,10 +150,8 @@
 
             <!-- autoplay prompt -->
             <div class="island-layer island-autoplay">
-                <div class="autoplay-glow"></div>
                 <div class="autoplay-head">
                     <span class="autoplay-icon">
-                        <span class="autoplay-icon-pulse"></span>
                         <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
                     </span>
                     <div class="autoplay-text">
@@ -161,14 +159,16 @@
                         <span class="autoplay-sub">进入即播放 · 沉浸氛围</span>
                     </div>
                 </div>
-                <button class="autoplay-primary" id="autoplay-enable">开启背景音乐</button>
                 <div class="autoplay-foot">
-                    <button class="autoplay-later" id="autoplay-later">稍后</button>
                     <label class="autoplay-check">
                         <input type="checkbox" class="autoplay-checkbox" id="autoplay-no-ask">
                         <span class="autoplay-check-box"></span>
                         <span>不再提示</span>
                     </label>
+                    <div class="autoplay-actions">
+                        <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
+                        <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
+                    </div>
                 </div>
             </div>
         </div>
