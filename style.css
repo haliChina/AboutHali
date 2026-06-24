@@ -459,12 +459,13 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-icon svg{width:15px;height:15px;fill:#1a0610;position:relative;z-index:1}
 /* 音频脉冲环：从图标向外扩散并淡出 */
 .autoplay-icon-pulse{position:absolute;inset:0;border-radius:50%;
-    border:1.5px solid var(--accent);opacity:0;pointer-events:none;
+    border:1.5px solid #ffd8e7;opacity:0;pointer-events:none;
+    box-shadow:0 0 8px rgba(255,143,182,.45);
     animation:apPulse 2.4s var(--ease) infinite}
 @keyframes apPulse{
-    0%{transform:scale(1);opacity:.55}
-    70%{transform:scale(1.7);opacity:0}
-    100%{transform:scale(1.7);opacity:0}}
+    0%{transform:scale(1);opacity:.7}
+    70%{transform:scale(1.9);opacity:0}
+    100%{transform:scale(1.9);opacity:0}}
 
 .autoplay-head-text{display:flex;flex-direction:column;gap:1px;min-width:0}
 .autoplay-title{font-size:.92rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
@@ -478,13 +479,13 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-check{display:flex;align-items:center;gap:7px;font-size:.72rem;color:rgba(255,255,255,.62);
     cursor:pointer;user-select:none;letter-spacing:.2px}
 .autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.autoplay-check-box{display:inline-block;width:15px;height:15px;min-width:15px;flex-shrink:0;
-    border:1.4px solid rgba(255,255,255,.32);border-radius:5px;background:transparent;cursor:pointer;
+.autoplay-check-box{display:inline-block;width:16px;height:16px;min-width:16px;flex-shrink:0;
+    border:1.5px solid rgba(255,255,255,.38);border-radius:4px;background:rgba(255,255,255,.03);cursor:pointer;
     position:relative;transition:border-color .18s var(--ease),background .18s var(--ease)}
-.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.6)}
+.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.06)}
 .autoplay-checkbox:checked + .autoplay-check-box{
     background:linear-gradient(135deg,var(--accent),var(--accent-3));border-color:transparent;
-    box-shadow:0 2px 6px rgba(255,107,157,.3)}
+    box-shadow:0 2px 6px rgba(255,107,157,.35)}
 .autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
     left:4px;top:1px;width:4px;height:8px;border:solid #1a0610;border-width:0 2px 2px 0;
     transform:rotate(45deg);animation:apCheck .22s var(--spring)}
@@ -493,9 +494,9 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-actions{display:flex;gap:7px}
 .autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:6px 15px;border-radius:14px;
     font-size:.76rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
-    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease)}
-.autoplay-later{background:rgba(255,255,255,.07);color:rgba(255,255,255,.82)}
-.autoplay-later:hover{background:rgba(255,255,255,.14)}
+    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease)}
+.autoplay-later{background:rgba(255,255,255,.10);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.08)}
+.autoplay-later:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.18)}
 .autoplay-later:active{transform:scale(.94)}
 .autoplay-enable{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#1a0610;
     box-shadow:0 3px 12px rgba(255,107,157,.32)}
