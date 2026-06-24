@@ -561,7 +561,17 @@
     }
     island.addEventListener('mouseenter', () => { hovering = true; clearTimeout(collapseTimer); hoverExpand(); });
     island.addEventListener('mouseleave', () => { hovering = false; if (!userScrolling && !scrubbing) scheduleCollapse(); });
-    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; armIdle(); });
+    // ===== Mouse tracking: rAF-throttled, skipped on touch devices =====
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    let mouseMovePending = false;
+    function onMouseMove(e) {
+        if (isTouchDevice) return; // touch 设备不需要 mouseenter 逻辑
+        mouse.x = e.clientX; mouse.y = e.clientY;
+        if (mouseMovePending) return;
+        mouseMovePending = true;
+        requestAnimationFrame(() => { mouseMovePending = false; armIdle(); });
+    }
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
     document.addEventListener('keydown', armIdle);
     document.addEventListener('touchstart', armIdle, { passive: true });
 

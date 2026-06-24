@@ -50,7 +50,8 @@ body::before{
 
 body.intro-lock{overflow:hidden}
 .intro{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 50% 42%,#16131f 0%,#0a0a11 55%,#06060a 100%)}
+    background:radial-gradient(120% 120% at 50% 42%,#16131f 0%,#0a0a11 55%,#06060a 100%);
+    overscroll-behavior:contain}
 .intro.done{pointer-events:none}
 .intro-stage{display:flex;align-items:baseline;white-space:nowrap;font-weight:800;padding:0 16px;max-width:100vw}
 .intro-prefix{font-size:clamp(1.1rem,3.6vw,2rem);color:#fff;letter-spacing:2px;margin-right:18px;opacity:0;transform:translateY(12px);align-self:center}
@@ -277,12 +278,13 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
     border:1px solid rgba(255,255,255,.06);
     display:flex;align-items:center;justify-content:center;
-    /* 关键：外壳弹性形变（0.6s 弹性回弹） */
+    /* 仅在状态切换时短暂启用 will-change，避免长期占 GPU 合成层 */
     transition:width 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
                height 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
                border-radius 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
                background-color 0.4s ease;
-    will-change:width,height,border-radius}
+    touch-action:manipulation;
+    contain:layout paint}
 /* island 默认可见，revealIsland 仅是触发 idle 计时器（不再做动画覆盖） */
 
 .island-specular{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:6;
@@ -307,7 +309,8 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .island-mini-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
     border:none;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;width:28px;height:28px;padding:0;
-    transition:transform .25s var(--spring),background .25s var(--ease)}
+    transition:transform .25s var(--spring),background .25s var(--ease);
+    touch-action:manipulation}
 .island-mini-btn:hover{background:linear-gradient(120deg,var(--accent-3),var(--accent-2));transform:scale(1.1)}
 .island-mini-btn svg{width:15px;height:15px;fill:currentColor;pointer-events:none}
 .island-mini-btn--ghost{background:transparent;width:24px;height:24px}
@@ -461,7 +464,9 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-icon-pulse{position:absolute;inset:0;border-radius:50%;
     border:1.5px solid #ffd8e7;opacity:0;pointer-events:none;
     box-shadow:0 0 8px rgba(255,143,182,.45);
-    animation:apPulse 2.4s var(--ease) infinite}
+    animation:apPulse 2.4s var(--ease) infinite;
+    animation-play-state:paused}
+.island-content.island-state-autoplay .autoplay-icon-pulse{animation-play-state:running}
 @keyframes apPulse{
     0%{transform:scale(1);opacity:.7}
     70%{transform:scale(1.9);opacity:0}
@@ -494,7 +499,8 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-actions{display:flex;gap:7px}
 .autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:6px 15px;border-radius:14px;
     font-size:.76rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
-    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease)}
+    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease);
+    touch-action:manipulation}
 .autoplay-later{background:rgba(255,255,255,.10);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.08)}
 .autoplay-later:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.18)}
 .autoplay-later:active{transform:scale(.94)}
@@ -538,4 +544,27 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 }
 @media (prefers-reduced-motion:reduce){
     *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+
+/* ===== 移动端性能优化 ===== */
+@media (max-width:768px){
+    /* 1. 关闭 backdrop-filter：背后是动态 canvas，每帧重模糊是移动端最大瓶颈 */
+    .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:rgba(12,12,16,.94)}
+    /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
+    .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
+    /* 3. 远距视口外的 section 跳过渲染（content-visibility: auto） */
+    .page{content-visibility:auto;contain-intrinsic-size:1px 100vh}
+    /* 4. 投影与滤镜降级：阴影在移动端吃 GPU */
+    .autoplay-enable{box-shadow:0 2px 6px rgba(255,107,157,.25)}
+    .autoplay-icon{box-shadow:0 2px 6px rgba(255,107,157,.28),inset 0 1px 0 rgba(255,255,255,.28)}
+    /* 5. 关闭脉冲环的 box-shadow（持续动画 + 阴影 = 移动端灾难） */
+    .autoplay-icon-pulse{box-shadow:none}
+    /* 6. 减少 blurriness：text-shadow 在岛内很轻量，保留 */
+    /* 7. 关闭 intro-first 的远距投影 */
+    .intro-first{text-shadow:0 4px 18px rgba(237,165,179,.28)}
+    /* 8. 触摸点击不要高亮 -webkit-tap-highlight-color 透明 */
+    .island-content,.island-mini-btn,.island-btn,.autoplay-btn,.nav-item,.social-btn,.explore-btn,.mc-toggle,.np-toggle,.island-email-copy,.autoplay-check{
+        -webkit-tap-highlight-color:transparent}
+    /* 9. 减少 idle 动效 */
+    .island-specular{display:none}
 }
