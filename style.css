@@ -140,8 +140,10 @@ body.intro-lock{overflow:hidden}
 .scroll-arrow{width:14px;height:14px;border-right:2px solid var(--text-faint);border-bottom:2px solid var(--text-faint);transform:rotate(45deg)}
 @keyframes hintFloat{0%,100%{opacity:.4;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,8px)}}
 
-.card{width:100%;max-width:880px;background:var(--glass);border:1px solid var(--line);border-radius:26px;
-    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;
+.card{width:100%;max-width:880px;
+    background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
+    border:1px solid var(--line);border-radius:26px;
+    backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);overflow:hidden;
     box-shadow:0 30px 70px -30px rgba(0,0,0,.8),0 0 60px -20px rgba(255,143,182,.04);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
 .card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),0 0 80px -20px rgba(255,143,182,.08)}
 .card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--line);
@@ -239,8 +241,8 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
 .projects-retry{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:14px;border:1px solid var(--line);color:var(--text);background:var(--glass-strong);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .projects-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);border-color:var(--accent)}
-.proj-card{border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);padding:20px;display:flex;flex-direction:column;gap:12px;
-    transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.55),rgba(16,14,22,.65));border:1px solid rgba(255,255,255,.14);padding:20px;display:flex;flex-direction:column;gap:12px;
+    transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);position:relative;overflow:hidden;backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
 .proj-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
 .proj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:opacity .35s var(--ease)}
 .proj-card:hover::before{opacity:1}
@@ -533,17 +535,20 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
     .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:rgba(12,12,16,1)}
     /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
     .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
-    /* 3. 远距视口外的 section 跳过渲染（content-visibility: auto） */
+    /* 3. 关闭卡片 backdrop-filter：背后动态 canvas 每帧重模糊，移动端瓶颈；改用更不透明的背景兜底 */
+    .card,.proj-card{backdrop-filter:none;-webkit-backdrop-filter:none;
+        background:linear-gradient(160deg,rgba(28,24,36,.82),rgba(16,14,22,.9))}
+    /* 4. 远距视口外的 section 跳过渲染（content-visibility: auto） */
     .page{content-visibility:auto;contain-intrinsic-size:1px 100vh}
-    /* 4. 投影与滤镜降级：阴影在移动端吃 GPU */
+    /* 5. 投影与滤镜降级：阴影在移动端吃 GPU */
     .autoplay-enable{box-shadow:0 2px 6px rgba(255,107,157,.25)}
     .autoplay-icon{box-shadow:0 2px 5px rgba(255,107,157,.25),inset 0 1px 0 rgba(255,255,255,.28)}
-    /* 5. 减少 blurriness：text-shadow 在岛内很轻量，保留 */
-    /* 6. 关闭 intro-first 的远距投影 */
+    /* 6. 减少 blurriness：text-shadow 在岛内很轻量，保留 */
+    /* 7. 关闭 intro-first 的远距投影 */
     .intro-first{text-shadow:0 4px 18px rgba(237,165,179,.28)}
-    /* 7. 触摸点击不要高亮 -webkit-tap-highlight-color 透明 */
+    /* 8. 触摸点击不要高亮 -webkit-tap-highlight-color 透明 */
     .island-content,.island-mini-btn,.island-btn,.autoplay-btn,.nav-item,.social-btn,.explore-btn,.mc-toggle,.np-toggle,.island-email-copy,.autoplay-check{
         -webkit-tap-highlight-color:transparent}
-    /* 8. 减少 idle 动效 */
+    /* 9. 减少 idle 动效 */
     .island-specular{display:none}
 }
