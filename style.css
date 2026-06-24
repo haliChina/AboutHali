@@ -459,7 +459,9 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
     width:30px;height:30px;border-radius:50%;flex-shrink:0;
     background:linear-gradient(135deg,var(--accent),var(--accent-3));
     box-shadow:0 3px 10px rgba(255,107,157,.32),inset 0 1px 0 rgba(255,255,255,.28)}
-.autoplay-icon svg{width:15px;height:15px;fill:#1a0610;position:relative;z-index:1}
+.autoplay-icon svg{width:15px;height:15px;fill:#1a0610;position:relative;z-index:1;
+/* play 三角几何中心偏右，视觉上向左微调以获得光学居中 */}
+.autoplay-icon .ic-play{transform:translateX(-1px)}
 /* 音频脉冲环：从图标向外扩散并淡出 */
 .autoplay-icon-pulse{position:absolute;inset:0;border-radius:50%;
     border:1.5px solid #ffd8e7;opacity:0;pointer-events:none;
