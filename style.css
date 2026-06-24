@@ -454,13 +454,14 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .autoplay-glow::after{content:'';position:absolute;inset:-14px 0 0 0;height:30px;pointer-events:none;
     background:radial-gradient(60% 100% at 50% 0%,rgba(255,143,182,.10),transparent 70%)}
 
-.autoplay-head{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+/* 第 1 行：图标 + 标题副标题（信息层） */
+.autoplay-head{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
 .autoplay-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;
-    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
     background:linear-gradient(135deg,var(--accent),var(--accent-3));
     box-shadow:0 3px 10px rgba(255,107,157,.32),inset 0 1px 0 rgba(255,255,255,.28)}
-.autoplay-icon svg{width:15px;height:15px;fill:#1a0610;position:relative;z-index:1;
-/* play 三角几何中心偏右，视觉上向左微调以获得光学居中 */}
+.autoplay-icon svg{width:16px;height:16px;fill:#1a0610;position:relative;z-index:1}
+/* play 三角几何中心偏右，视觉上向左微调以获得光学居中 */
 .autoplay-icon .ic-play{transform:translateX(-1px)}
 /* 音频脉冲环：从图标向外扩散并淡出 */
 .autoplay-icon-pulse{position:absolute;inset:0;border-radius:50%;
@@ -474,47 +475,51 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
     70%{transform:scale(1.9);opacity:0}
     100%{transform:scale(1.9);opacity:0}}
 
-.autoplay-head-text{display:flex;flex-direction:column;gap:1px;min-width:0}
-.autoplay-title{font-size:.92rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
-.autoplay-sub{font-size:.7rem;color:rgba(255,255,255,.5);line-height:1.3;letter-spacing:.2px}
+.autoplay-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.autoplay-title{font-size:.94rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
+.autoplay-sub{font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.3;letter-spacing:.2px}
 
-.autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    position:relative;z-index:1;padding-top:9px}
-.autoplay-foot::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.09) 20%,rgba(255,255,255,.09) 80%,transparent)}
+/* 第 2 行：全宽主 CTA */
+.autoplay-primary{
+    appearance:none;-webkit-appearance:none;border:0;width:100%;
+    margin-top:12px;padding:9px 16px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#1a0610;
+    font-size:.84rem;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;line-height:1.2;
+    box-shadow:0 4px 14px rgba(255,107,157,.32);
+    transition:transform .2s var(--spring),filter .2s var(--ease),box-shadow .2s var(--ease);
+    touch-action:manipulation;position:relative;z-index:1}
+.autoplay-primary:hover{filter:brightness(1.07);box-shadow:0 5px 18px rgba(255,107,157,.42)}
+.autoplay-primary:active{transform:scale(.98)}
 
-.autoplay-check{display:flex;align-items:center;gap:7px;font-size:.72rem;color:rgba(255,255,255,.62);
+/* 第 3 行：稍后 + 不再提示（辅助选项） */
+.autoplay-foot{display:flex;align-items:center;justify-content:space-between;
+    margin-top:8px;position:relative;z-index:1;padding:0 2px}
+.autoplay-later{appearance:none;-webkit-appearance:none;background:none;border:0;
+    color:rgba(255,255,255,.6);font-size:.74rem;letter-spacing:.2px;cursor:pointer;
+    font-family:inherit;padding:4px 0;transition:color .2s var(--ease);
+    touch-action:manipulation}
+.autoplay-later:hover{color:#fff}
+
+.autoplay-check{display:flex;align-items:center;gap:6px;font-size:.72rem;color:rgba(255,255,255,.55);
     cursor:pointer;user-select:none;letter-spacing:.2px}
 .autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.autoplay-check-box{display:inline-block;width:16px;height:16px;min-width:16px;flex-shrink:0;
-    border:1.5px solid rgba(255,255,255,.38);border-radius:4px;background:rgba(255,255,255,.03);cursor:pointer;
+.autoplay-check-box{display:inline-block;width:14px;height:14px;min-width:14px;flex-shrink:0;
+    border:1.4px solid rgba(255,255,255,.32);border-radius:4px;background:rgba(255,255,255,.03);cursor:pointer;
     position:relative;transition:border-color .18s var(--ease),background .18s var(--ease)}
-.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.06)}
+.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
 .autoplay-checkbox:checked + .autoplay-check-box{
     background:linear-gradient(135deg,var(--accent),var(--accent-3));border-color:transparent;
     box-shadow:0 2px 6px rgba(255,107,157,.35)}
 .autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
-    left:4px;top:1px;width:4px;height:8px;border:solid #1a0610;border-width:0 2px 2px 0;
+    left:3.5px;top:.5px;width:3.5px;height:7px;border:solid #1a0610;border-width:0 2px 2px 0;
     transform:rotate(45deg);animation:apCheck .22s var(--spring)}
 @keyframes apCheck{0%{transform:rotate(45deg) scale(0)}60%{transform:rotate(45deg) scale(1.15)}100%{transform:rotate(45deg) scale(1)}}
-
-.autoplay-actions{display:flex;gap:7px}
-.autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:6px 15px;border-radius:14px;
-    font-size:.76rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
-    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease);
-    touch-action:manipulation}
-.autoplay-later{background:rgba(255,255,255,.10);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.08)}
-.autoplay-later:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.18)}
-.autoplay-later:active{transform:scale(.94)}
-.autoplay-enable{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#1a0610;
-    box-shadow:0 3px 12px rgba(255,107,157,.32)}
-.autoplay-enable:hover{filter:brightness(1.07);box-shadow:0 4px 16px rgba(255,107,157,.42)}
-.autoplay-enable:active{transform:scale(.94)}
 
 /* 进入时内容错峰浮现，增强层次感 */
 .island-content.island-state-autoplay .island-autoplay{animation:toastPop .5s var(--spring)}
 .island-content.island-state-autoplay .autoplay-head{animation:apRise .5s var(--ease) both}
-.island-content.island-state-autoplay .autoplay-foot{animation:apRise .5s var(--ease) .08s both}
+.island-content.island-state-autoplay .autoplay-primary{animation:apRise .5s var(--ease) .06s both}
+.island-content.island-state-autoplay .autoplay-foot{animation:apRise .5s var(--ease) .12s both}
 @keyframes apRise{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
 
 @media (max-width:1024px){
@@ -557,7 +562,7 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
     /* 3. 远距视口外的 section 跳过渲染（content-visibility: auto） */
     .page{content-visibility:auto;contain-intrinsic-size:1px 100vh}
     /* 4. 投影与滤镜降级：阴影在移动端吃 GPU */
-    .autoplay-enable{box-shadow:0 2px 6px rgba(255,107,157,.25)}
+    .autoplay-primary{box-shadow:0 2px 6px rgba(255,107,157,.25)}
     .autoplay-icon{box-shadow:0 2px 6px rgba(255,107,157,.28),inset 0 1px 0 rgba(255,255,255,.28)}
     /* 5. 关闭脉冲环的 box-shadow（持续动画 + 阴影 = 移动端灾难） */
     .autoplay-icon-pulse{box-shadow:none}
@@ -565,7 +570,7 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
     /* 7. 关闭 intro-first 的远距投影 */
     .intro-first{text-shadow:0 4px 18px rgba(237,165,179,.28)}
     /* 8. 触摸点击不要高亮 -webkit-tap-highlight-color 透明 */
-    .island-content,.island-mini-btn,.island-btn,.autoplay-btn,.nav-item,.social-btn,.explore-btn,.mc-toggle,.np-toggle,.island-email-copy,.autoplay-check{
+    .island-content,.island-mini-btn,.island-btn,.autoplay-primary,.autoplay-later,.nav-item,.social-btn,.explore-btn,.mc-toggle,.np-toggle,.island-email-copy,.autoplay-check{
         -webkit-tap-highlight-color:transparent}
     /* 9. 减少 idle 动效 */
     .island-specular{display:none}

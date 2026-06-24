@@ -143,7 +143,7 @@
         'confirm':     { width: '440px', height: '156px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
         'email':       { width: '384px', height: '124px', radius: '30px', bg: 'rgba(12,12,16,.86)' },
         'toast':       { width: '236px', height: '50px',  radius: '25px', bg: 'rgba(12,12,16,.86)' },
-        'autoplay':    { width: '300px', height: '132px', radius: '26px', bg: 'rgba(12,12,16,.86)' }
+        'autoplay':    { width: '300px', height: '142px', radius: '26px', bg: 'rgba(12,12,16,.86)' }
     };
     // ===== 状态内容映射表（与 Gemini stateContents 一致） =====
     const STATE_CONTENTS = {
