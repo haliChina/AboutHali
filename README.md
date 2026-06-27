@@ -2,7 +2,7 @@
 
 > Code is like humor. When you have to explain it, it's bad.
 
-一个零依赖、纯前端、面向个人展示的霓虹风格主页。围绕 macOS 风格的 **Dynamic Island** 导航展开，搭配 WebGL 樱花着色器背景、内嵌音乐卡片与可点击的社交入口。
+一个零依赖、纯前端、面向个人展示的霓虹风格主页。围绕 iOS 风格的 **Dynamic Island** 导航展开，搭配 WebGL 樱花着色器背景、内嵌音乐卡片与可点击的社交入口。
 
 🌐 线上地址：[https://userhali.com](https://userhali.com)
 
