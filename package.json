@@ -1,0 +1,14 @@
+{
+  "name": "about-hali",
+  "version": "1.0.0",
+  "description": "Hali's personal portfolio website",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  },
+  "author": "Hali",
+  "license": "MIT"
+}
