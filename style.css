@@ -436,7 +436,7 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .island-email-copy{padding:4px 14px;border-radius:12px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;color:#fff;background:rgba(255,255,255,.12);transition:transform .25s var(--spring),background .25s var(--ease)}
 .island-email-copy:hover{background:linear-gradient(120deg,var(--accent),var(--accent-3));transform:translateY(-2px)}
 
-.island-toast{gap:8px;font-size:.95rem;font-weight:600}
+.island-toast{gap:8px;font-size:.95rem;font-weight:500;letter-spacing:.3px;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;font-synthesis:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 .island-toast-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.8rem;color:#fff}
 .island-content.toast-success .island-toast{color:#4cd964}
 .island-content.toast-success .island-toast-icon{background:#4cd964}
