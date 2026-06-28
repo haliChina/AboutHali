@@ -1,0 +1,6 @@
+node_modules/
+.vercel/
+*.zip
+.DS_Store
+*.log
+test_*.py
