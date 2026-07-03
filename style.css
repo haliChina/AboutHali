@@ -70,7 +70,7 @@ body.intro-lock{overflow:hidden}
 #home{padding-top:100px}
 #github{padding-top:150px}
 #netease{padding-top:110px}
-#galgame{padding-top:170px}
+#project{padding-top:170px}
 
 .reveal{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .reveal.in{opacity:1;transform:none}
