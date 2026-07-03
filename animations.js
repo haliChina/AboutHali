@@ -166,16 +166,10 @@
         const current = getCurrentState();
         if (current === target && !opts.force) return;
 
-        // music-bar ↔ music-card 切换时启用 View Transitions API 形变
-        const isMorph = document.startViewTransition &&
-            ((current === 'music-bar' && target === 'music-card') ||
-             (current === 'music-card' && target === 'music-bar'));
-
         // Step 1: 隐藏旧内容（fade-out 0.2s）
         if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
         // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
-        if (isMorph) island.classList.add('vt-morphing');
         const layout = STATE_LAYOUTS[target];
         if (layout) {
             island.style.width      = layout.width;
@@ -197,16 +191,8 @@
             island.classList.remove('toast-success', 'toast-error');
         }
 
-        // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）；形变模式下包在 startViewTransition 内
-        if (isMorph) {
-            const vt = document.startViewTransition(() => {
-                if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
-            });
-            const cleanup = () => island.classList.remove('vt-morphing');
-            vt.finished.then(cleanup).catch(cleanup);
-        } else {
-            if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
-        }
+        // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）
+        if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
 
         // 空闲 idle 计时器（仅在 default 且无活动时触发）
         clearTimeout(idleTimer);
@@ -639,13 +625,6 @@
         islandRevealed = true;
         // island 默认已可见（CSS 移除 opacity:0），只需启动 idle 计时器
         armIdle();
-        // 灵动岛入场动画（0.75s 弹性放大，结束自动移除类）
-        island.classList.add('island-entrance');
-        island.addEventListener('animationend', function h() {
-            if (h.fired) return; h.fired = true;
-            island.classList.remove('island-entrance');
-            island.removeEventListener('animationend', h);
-        });
     }
     function runIntro() {
         const intro = document.getElementById('intro');
