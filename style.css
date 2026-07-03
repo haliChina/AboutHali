@@ -531,6 +531,40 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 @keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 .island-entrance{animation:islandEntrance .75s var(--spring);transform-origin:center top}
 
+/* ===== 鼠标点击水波纹(ripple.js) =====
+   - 径向渐变环带:波峰高光(白)+波谷(粉渐隐),有体积感不是细线
+   - scale 放大让环带自然变宽,符合水波色散物理
+   - 一个延迟次波,不是多个独立圆环
+   - pointer-events:none,不拦截任何点击 / 滚动 / 关键逻辑 */
+.click-ripple{
+    position:fixed;width:80px;height:80px;
+    transform:translate(-50%,-50%) scale(0);
+    border-radius:50%;pointer-events:none;opacity:0;
+    background:radial-gradient(circle,
+        transparent 0,
+        transparent 42%,
+        rgba(255,107,157,.18) 45%,
+        rgba(255,200,220,.6) 49%,
+        rgba(255,255,255,.85) 50%,
+        rgba(255,200,220,.6) 51%,
+        rgba(255,107,157,.18) 55%,
+        transparent 58%,
+        transparent 100%);
+    animation:rippleWave .9s cubic-bezier(.1,.7,.2,1) forwards;
+    will-change:transform,opacity;
+    filter:blur(.4px)
+}
+.click-ripple--echo{
+    animation-delay:.14s;
+    animation-duration:1s;
+    opacity:.6
+}
+@keyframes rippleWave{
+    0%  {transform:translate(-50%,-50%) scale(0);  opacity:0}
+    18% {opacity:1}
+    100%{transform:translate(-50%,-50%) scale(3);  opacity:0}
+}
+
 @media (max-width:1024px){
     .island-content.island-state-nav[data-state="nav"]{width:min(94vw,460px)}
     .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,500px)}
