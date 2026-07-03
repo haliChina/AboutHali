@@ -129,8 +129,9 @@
 
     let musicActive = false;
     let pendingHref = null;
-    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null;
+    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null;
     const CONFIRM_AUTO_MS = 8000;
+    const ISLAND_TRANSITION_MS = 600; // 与 .island-content 的 width/height 过渡时长一致
     let hovering = false, userScrolling = false, scrubbing = false;
     const mouse = { x: -1, y: -1 };
 
@@ -166,33 +167,59 @@
         const current = getCurrentState();
         if (current === target && !opts.force) return;
 
-        // Step 1: 隐藏旧内容（fade-out 0.2s）
-        if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
+        // 检测是否启用 View Transitions 形变(music-bar <-> music-card 时由浏览器接管 width/height 过渡)
+        const useVT = !!document.startViewTransition &&
+            ((current === 'music-bar' && target === 'music-card') ||
+             (current === 'music-card' && target === 'music-bar'));
 
-        // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
-        const layout = STATE_LAYOUTS[target];
-        if (layout) {
-            island.style.width      = layout.width;
-            island.style.height     = layout.height;
-            island.style.borderRadius = layout.radius;
-            island.style.backgroundColor = layout.bg;
-        }
-        // 同步清理残留的 vs-* class（兼容老 CSS）
-        island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
-        // 新机制：data-state 驱动子级动画延迟
-        island.setAttribute('data-state', target);
-        island.classList.add('island-state-' + target);
+        const applyChanges = () => {
+            // Step 1: 隐藏旧内容（fade-out 0.2s）
+            if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
-        // toast 主题色
-        if (target === 'toast') {
-            island.classList.remove('toast-success', 'toast-error');
-            island.classList.add(opts.kind === 'error' ? 'toast-error' : 'toast-success');
+            // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
+            const layout = STATE_LAYOUTS[target];
+            if (layout) {
+                island.style.width      = layout.width;
+                island.style.height     = layout.height;
+                island.style.borderRadius = layout.radius;
+                island.style.backgroundColor = layout.bg;
+            }
+            // 同步清理残留的 vs-* class（兼容老 CSS）
+            island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
+            // 新机制：data-state 驱动子级动画延迟
+            island.setAttribute('data-state', target);
+            island.classList.add('island-state-' + target);
+
+            // toast 主题色
+            if (target === 'toast') {
+                island.classList.remove('toast-success', 'toast-error');
+                island.classList.add(opts.kind === 'error' ? 'toast-error' : 'toast-success');
+            } else {
+                island.classList.remove('toast-success', 'toast-error');
+            }
+
+            // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）
+            if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
+        };
+
+        if (useVT) {
+            // vt-morphing: 临时关掉 .island-content 的 width/height 过渡,让 VT API 接管形变
+            island.classList.add('vt-morphing');
+            const vt = document.startViewTransition(applyChanges);
+            // finished 优先,失败时用 ready兜底,避免 vt-morphing 残留
+            (vt.finished || vt.ready || Promise.resolve()).then(
+                () => island.classList.remove('vt-morphing'),
+                () => island.classList.remove('vt-morphing')
+            );
         } else {
-            island.classList.remove('toast-success', 'toast-error');
+            applyChanges();
         }
 
-        // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）
-        if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
+        // 指示器在外壳过渡结束后再定位(过渡中 getBoundingClientRect 会读到裁剪过的错误尺寸)
+        if (target === 'nav' || target === 'music-card' || target === 'music-bar') {
+            clearTimeout(indicatorRealignTimer);
+            indicatorRealignTimer = setTimeout(repositionIndicator, ISLAND_TRANSITION_MS + 20);
+        }
 
         // 空闲 idle 计时器（仅在 default 且无活动时触发）
         clearTimeout(idleTimer);
@@ -623,6 +650,12 @@
     function revealIsland() {
         if (islandRevealed) return;
         islandRevealed = true;
+        // 入场动画:scale(.6) -> 1.08 -> 1 的弹性放大,结束后自动移除 class 释放 will-change
+        island.classList.add('island-entrance');
+        island.addEventListener('animationend', function h() {
+            island.classList.remove('island-entrance');
+            island.removeEventListener('animationend', h);
+        });
         // island 默认已可见（CSS 移除 opacity:0），只需启动 idle 计时器
         armIdle();
     }
