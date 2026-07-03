@@ -465,7 +465,7 @@
         audio.addEventListener('timeupdate', updateProgress);
     }
 
-    const sections = ['#home', '#github', '#netease', '#galgame'].map(id => document.querySelector(id));
+    const sections = ['#home', '#github', '#netease', '#project'].map(id => document.querySelector(id));
     const SECTION_NAMES = ['首页', 'GitHub', 'QQ音乐', 'Projects'];
     const pillNav = document.getElementById('pillNav');
     const indicator = document.getElementById('indicator');
