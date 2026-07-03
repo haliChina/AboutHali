@@ -565,6 +565,23 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     100%{transform:translate(-50%,-50%) scale(3);  opacity:0}
 }
 
+/* ===== FPS 实时显示(左上角) =====
+   - 半透明毛玻璃背景,固定位置,点击穿透
+   - 颜色随性能等级变化:绿(>=50)/黄(30-49)/红(<30) */
+#fpsCounter{
+    position:fixed;top:10px;left:10px;z-index:999999;
+    font-family:var(--font-mono);font-size:11px;font-weight:600;
+    color:#fff;background:rgba(0,0,0,.45);
+    padding:4px 9px;border-radius:6px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    pointer-events:none;user-select:none;letter-spacing:.4px;
+    transition:color .25s ease,background .25s ease;
+    text-shadow:0 1px 2px rgba(0,0,0,.4)
+}
+#fpsCounter[data-level="good"]{color:#4ade80}
+#fpsCounter[data-level="ok"]{color:#fbbf24}
+#fpsCounter[data-level="bad"]{color:#f87171}
+
 @media (max-width:1024px){
     .island-content.island-state-nav[data-state="nav"]{width:min(94vw,460px)}
     .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,500px)}
