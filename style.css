@@ -245,33 +245,37 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .np-song-item .nm{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .np-song-item .ar{color:var(--text-faint);font-size:.74rem;flex-shrink:0;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.projects-wrap{width:100%;max-width:980px}
-.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;align-items:start}
+.projects-wrap{width:100%;max-width:1080px}
+.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
 .projects-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-dim);font-size:.95rem}
 .projects-error{grid-column:1/-1;text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
 .projects-retry{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:14px;border:1px solid var(--line);color:var(--text);background:var(--glass-strong);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .projects-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);border-color:var(--accent)}
-.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.55),rgba(16,14,22,.65));border:1px solid rgba(255,255,255,.14);padding:20px;display:flex;flex-direction:column;gap:12px;
-    transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);position:relative;overflow:hidden;backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
+.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
+    border:1px solid rgba(255,255,255,.12);padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;
+    transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);
+    position:relative;overflow:hidden;backdrop-filter:blur(10px) saturate(125%);-webkit-backdrop-filter:blur(10px) saturate(125%);
+    box-shadow:0 8px 24px -16px rgba(0,0,0,.6)}
 .proj-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
 .proj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:opacity .35s var(--ease)}
 .proj-card:hover::before{opacity:1}
-.proj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.proj-name{font-size:1.1rem;font-weight:700;color:#fff;text-decoration:none;word-break:break-word}
+.proj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-height:0}
+.proj-name{font-size:1.25rem;font-weight:800;color:#fff;text-decoration:none;word-break:break-word;line-height:1.25;letter-spacing:-.01em}
 .proj-name:hover{color:var(--accent-2)}
-.proj-desc{font-size:.85rem;color:var(--text-dim);line-height:1.5;flex:1 1 auto}
-.proj-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--text-faint);font-family:var(--font-mono)}
-.proj-lang{display:flex;align-items:center;gap:5px}
-.proj-lang i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.proj-stats{display:flex;gap:12px}
-.proj-stats span{display:flex;align-items:center;gap:3px}
-.proj-links{display:flex;gap:8px;margin-top:2px}
-.proj-link{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;font-size:.8rem;font-weight:600;text-decoration:none;
-    border:1px solid var(--line);color:var(--text);transition:background .25s var(--ease),transform .25s var(--spring)}
-.proj-link:hover{background:var(--glass-strong);transform:translateY(-1px)}
-.proj-link--primary{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent}
-.proj-link--primary:hover{filter:brightness(1.08)}
+.proj-desc{font-size:.92rem;color:var(--text-dim);line-height:1.55;flex:1 1 auto;margin:2px 0 4px}
+.proj-meta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--text-faint);font-family:var(--font-mono)}
+.proj-lang{display:flex;align-items:center;gap:6px}
+.proj-lang i{width:11px;height:11px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,.06)}
+.proj-stats{display:flex;gap:14px;align-items:center}
+.proj-stats span{display:flex;align-items:center;gap:4px}
+.proj-time{margin-left:auto}
+.proj-links{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+.proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 18px;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;
+    border:1px solid var(--line);color:var(--text);transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
+.proj-link:hover{background:var(--glass-strong);transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
+.proj-link--primary{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent;box-shadow:0 6px 18px -8px rgba(255,107,157,.55)}
+.proj-link--primary:hover{filter:brightness(1.08);box-shadow:0 10px 24px -8px rgba(255,107,157,.7)}
 .proj-source{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px;flex-shrink:0}
 .proj-source[src="github"],.proj-source:not([src="dns"]){background:rgba(255,255,255,.08);color:var(--text-dim)}
 .proj-card .proj-source{background:rgba(255,255,255,.08);color:var(--text-dim)}
@@ -533,6 +537,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .island-content.island-state-confirm[data-state="confirm"]{width:min(94vw,400px)}
     .card{max-width:680px}
     .projects-wrap{max-width:880px}
+    .projects-grid{grid-template-columns:repeat(2,1fr)}
     .page{padding-left:18px;padding-right:18px}
 }
 @media (max-width:768px){
@@ -553,6 +558,8 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
     .social-grid{justify-content:center}
+    .projects-grid{grid-template-columns:1fr;gap:18px}
+    .proj-card{padding:20px 18px}
 }
 @media (prefers-reduced-motion:reduce){
     *{animation-duration:.001ms!important;transition-duration:.001ms!important}
