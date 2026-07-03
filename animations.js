@@ -836,7 +836,7 @@
             const lang = r.language ? '<span class="proj-lang"><i style="background:'+langColor(r.language)+'"></i>'+esc(r.language)+'</span>' : '';
             const stars = r.stars ? '<span>★ '+r.stars+'</span>' : '';
             const forks = r.forks ? '<span>⑂ '+r.forks+'</span>' : '';
-            const updated = r.pushed_at ? '<span>'+timeAgo(r.pushed_at)+'</span>' : '';
+            const updated = r.pushed_at ? '<span class="proj-time">'+timeAgo(r.pushed_at)+'</span>' : '';
             const sourceTag = '<span class="proj-source">GitHub</span>';
             const homepage = r.homepage ? '<a class="proj-link proj-link--primary" href="'+esc(r.homepage)+'" target="_blank" rel="noopener">在线预览</a>' : '';
             const sourceLink = r.html_url
