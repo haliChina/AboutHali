@@ -42,11 +42,6 @@ body::before{
 
 .bg{position:fixed;inset:0;z-index:-10;overflow:hidden;background:#0a0a10}
 #sakura-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(2px) brightness(.82) saturate(.92);transform:translateZ(0);will-change:transform}
-.bg-scrim{position:absolute;inset:0;pointer-events:none;
-    background:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E") 0 0/200px 200px,
-        radial-gradient(135% 125% at 50% 2%,rgba(9,7,13,.62),rgba(6,5,10,.84) 80%);
-    opacity:.35;mix-blend-mode:overlay}
 
 body.intro-lock{overflow:hidden}
 .intro{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;
