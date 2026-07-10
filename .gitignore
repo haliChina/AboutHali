@@ -4,3 +4,8 @@ node_modules/
 .DS_Store
 *.log
 test_*.py
+
+# Security: never commit environment files with secrets
+.env
+.env.local
+.env.*
