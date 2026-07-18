@@ -87,13 +87,35 @@
     function loadSong(i, autoplay) {
         curIdx = ((i % PLAYLIST.length) + PLAYLIST.length) % PLAYLIST.length;
         const s = PLAYLIST[curIdx];
-        if (audio) audio.src = s.src;
+        if (audio) {
+            // 切歌前先暂停并清理旧 src，避免浏览器在重定向链路上持锁导致下一次 play() 静默 reject
+            try { audio.pause(); } catch(_) {}
+            audio.removeAttribute('src');
+            try { audio.load(); } catch(_) {}
+            audio.src = s.src;
+            audio.load();
+        }
         setText('.np-title', s.name); setText('.np-artist', s.artist);
         setText('.mc-title', s.name); setText('.mc-artist', s.artist);
         setSrc('.np-cover', s.cover); setCoverAnimated('.mc-cover', s.cover); setCoverAnimated('.ib-cover', s.cover);
         markActive();
         updateProgress();
-        if (autoplay && audio) audio.play().catch(() => {});
+        if (autoplay && audio) {
+            // 显式等待 canplay 再 play，跨域 302 重定向链路下 play() 会 reject
+            const onReady = () => {
+                audio.removeEventListener('canplay', onReady);
+                audio.removeEventListener('loadedmetadata', onReady);
+                audio.play().catch(err => console.warn('[Audio] play() rejected:', err && err.name, s.src));
+            };
+            audio.addEventListener('canplay', onReady);
+            audio.addEventListener('loadedmetadata', onReady);
+            // 兜底：5s 后若仍未触发，主动尝试一次
+            setTimeout(() => {
+                audio.removeEventListener('canplay', onReady);
+                audio.removeEventListener('loadedmetadata', onReady);
+                if (audio.paused) audio.play().catch(() => {});
+            }, 5000);
+        }
     }
 
     let audioUnlockArmed = false;
@@ -892,6 +914,34 @@
         }
     }
     loadProjects();
+
+    // ===== GitHub Stats / Top Languages 加载失败时的本地兜底卡片 =====
+    // 用 inline SVG 替代原图，保持布局占位并提供"加载失败"提示与重试入口
+    window.__ghStatsFallback = function(label) {
+        const wrap = document.createElement('div');
+        wrap.className = 'gh-stats-card gh-stats-fallback';
+        wrap.setAttribute('role', 'img');
+        wrap.setAttribute('aria-label', label + ' 加载失败');
+        wrap.innerHTML =
+            '<div class="gh-fb-title">' + label + '</div>' +
+            '<div class="gh-fb-msg">加载失败</div>' +
+            '<button class="gh-fb-retry" type="button">重试</button>';
+        // 点击重试：把容器替换回 <img>，让浏览器重新发起请求
+        wrap.querySelector('.gh-fb-retry').addEventListener('click', () => {
+            const img = document.createElement('img');
+            img.className = 'gh-stats-card';
+            img.alt = label;
+            img.decoding = 'async';
+            img.loading = 'lazy';
+            const base = 'https://github-stats-extended.vercel.app/api';
+            img.src = (label === 'Stats')
+                ? base + '?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true&_r=' + Date.now()
+                : base + '/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true&_r=' + Date.now();
+            img.onerror = function() { this.replaceWith(window.__ghStatsFallback(label)); };
+            wrap.replaceWith(img);
+        });
+        return wrap;
+    };
 
     if (document.readyState === 'complete') runIntro();
     else window.addEventListener('load', runIntro);

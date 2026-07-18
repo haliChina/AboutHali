@@ -160,7 +160,9 @@ body.intro-lock{overflow:hidden}
 .card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--line);
     background:linear-gradient(120deg,rgba(255,255,255,.05),transparent)}
 .card-logo{width:30px;height:30px}
-.gh-logo,.ne-logo{filter:brightness(0) invert(1)}
+.gh-logo{filter:brightness(0) invert(1)}
+/* QQ音乐 SVG 是多路径彩色图标(深灰底+白圆+灰音符)，brightness(0) invert(1) 会全白糊掉，这里只保留深灰底+白圆对比 */
+.ne-logo{filter:brightness(0.85) saturate(0.8)}
 .card-header h2{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:.5px;font-family:var(--font-display)}
 .card-body{padding:28px 30px}
 .card-btn{display:block;width:fit-content;margin:0 auto 26px;padding:11px 30px;border-radius:30px;text-decoration:none;font-weight:600;
@@ -179,6 +181,14 @@ body.intro-lock{overflow:hidden}
 
 .gh-stats-wrap{display:flex;gap:16px;margin:28px 0 4px;flex-wrap:wrap;justify-content:center}
 .gh-stats-card{width:100%;max-width:380px;height:auto;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);padding:4px;object-fit:contain}
+/* GitHub Stats / Top Languages 加载失败时的兜底卡片 */
+.gh-stats-fallback{min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    color:var(--text-dim);font-family:var(--font-body);padding:18px;text-align:center}
+.gh-stats-fallback .gh-fb-title{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.5px}
+.gh-stats-fallback .gh-fb-msg{font-size:.82rem;color:var(--text-faint)}
+.gh-stats-fallback .gh-fb-retry{padding:7px 18px;border-radius:12px;border:1px solid var(--line);background:var(--glass-strong);
+    color:var(--text);font-size:.8rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
+.gh-stats-fallback .gh-fb-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-1px);border-color:var(--accent)}
 
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .skill{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);
@@ -246,7 +256,7 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .np-song-item .ar{color:var(--text-faint);font-size:.74rem;flex-shrink:0;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .projects-wrap{width:100%;max-width:1080px}
-.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
 .projects-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-dim);font-size:.95rem}
 .projects-error{grid-column:1/-1;text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
@@ -270,7 +280,7 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .proj-stats{display:flex;gap:14px;align-items:center}
 .proj-stats span{display:flex;align-items:center;gap:4px}
 .proj-time{margin-left:auto}
-.proj-links{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+.proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
 .proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 18px;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;
     border:1px solid var(--line);color:var(--text);transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .proj-link:hover{background:var(--glass-strong);transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
@@ -615,6 +625,21 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 @media (prefers-reduced-motion:reduce){
     *{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
+
+/* ===== 窄屏隐藏时长显示（Island 与 QQ音乐播放器）=====
+   music-card 在 560px 宽度下，cur/dur 与控件并排，<400px 会挤压控件 */
+@media (max-width:400px){
+    .mc-cur,.mc-dur{display:none}
+}
+@media (max-width:480px){
+    .np-cur,.np-dur{display:none}
+    /* 收起进度条两端时长，让 scrub 占满 */
+    .np-scrub-row{gap:0}
+}
+
+/* ===== QQ音乐播放器：歌曲名左对齐（与播放列表对齐）===== */
+.netease-player .np-song{text-align:left;align-self:stretch;width:100%}
+.netease-player .np-title,.netease-player .np-artist{display:block;text-align:left}
 
 /* ===== 移动端性能优化 ===== */
 @media (max-width:768px){

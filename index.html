@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=52">
+    <link rel="stylesheet" href="style.css?v=53">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
@@ -241,8 +241,10 @@
                 </div>
 
                 <div class="gh-stats-wrap">
-                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub Stats" decoding="async" loading="lazy">
-                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" decoding="async" loading="lazy">
+                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub Stats" decoding="async" loading="lazy"
+                         onerror="this.replaceWith(window.__ghStatsFallback('Stats'))">
+                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" decoding="async" loading="lazy"
+                         onerror="this.replaceWith(window.__ghStatsFallback('Top Languages'))">
                 </div>
 
                 <div class="section-label section-label-left">技能栈 · Skills</div>
@@ -391,7 +393,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
     <script src="shader.js?v=4" defer></script>
-    <script src="animations.js?v=18" defer></script>
+    <script src="animations.js?v=19" defer></script>
     <script src="ripple.js?v=2" defer></script>
     <script src="fps.js?v=1" defer></script>
     
