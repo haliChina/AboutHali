@@ -59,8 +59,8 @@
     }
 
     const PLAYLIST = [
+        { name: 'All The Things She Said', artist: 't.A.T.u.', cover: 'https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=224y224', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=27810034' },
         { name: '渡口',     artist: '蔡琴',                  cover: 'https://p4.music.126.net/4pltwvzYfOy1PSWM6X5_hQ==/109951167871247765.jpg?param=224y224', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=211277' },
-        { name: '去寻找',   artist: '牛奶咖啡',              cover: 'https://y.qq.com/music/photo_new/T002R500x500M000003K4mFV3B9UfM_1.jpg?max_age=2592000', src: 'https://api.qijieya.cn/meting/?server=tencent&type=url&id=7109362' },
         { name: 'Miss You', artist: 'Oliver Tree & Robin Schulz', cover: 'https://y.qq.com/music/photo_new/T002R500x500M000003N37OX0ByL7H_2.jpg?max_age=2592000&err_retry=1', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=1969788180' },
         { name: 'Life Goes On', artist: 'Oliver Tree',        cover: 'https://y.qq.com/music/photo_new/T002R500x500M000000UAKjE2m6ksi_1.jpg?max_age=2592000', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=1848206679' }
     ];

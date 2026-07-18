@@ -33,9 +33,9 @@
     }
 
     document.addEventListener('pointerdown', e => {
-        // 鼠标左键 / 任意触屏都通过;跳过 pen(笔)和右键 / 中键
-        if (e.pointerType === 'pen') return;
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        // 仅桌面端鼠标左键触发;跳过触屏(pen/移动端)和右键 / 中键
+        if (e.pointerType !== 'mouse') return;
+        if (e.button !== 0) return;
         spawn(e.clientX, e.clientY);
     }, { passive: true, capture: false });
 })();
