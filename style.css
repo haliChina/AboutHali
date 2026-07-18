@@ -234,12 +234,16 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .np-song{text-align:center}
 .np-title{font-size:1.08rem;font-weight:700;color:#fff}
 .np-artist{font-size:.85rem;color:var(--text-dim);margin-top:3px}
-.np-controls{display:flex;align-items:center;justify-content:center;gap:18px}
-.np-controls .island-mini-btn{width:44px;height:44px;background:linear-gradient(120deg,var(--accent),var(--accent-2))}
-.np-controls .island-mini-btn svg{width:18px;height:18px}
-.np-controls .island-mini-btn--ghost{width:36px;height:36px;background:rgba(255,255,255,.08)}
-.np-controls .island-mini-btn--ghost:hover{background:rgba(255,255,255,.18)}
-.np-controls .island-mini-btn--ghost svg{width:16px;height:16px}
+/* 控制按钮：参考进度条 width:100% 居中策略，去掉外框/圆圈，仅保留 SVG */
+.np-controls{display:flex;align-items:center;justify-content:center;gap:28px;width:100%}
+.np-controls .island-mini-btn,
+.np-controls .island-mini-btn--ghost{width:auto;height:auto;background:transparent;border:none;border-radius:0;box-shadow:none;padding:0}
+.np-controls .island-mini-btn:hover,
+.np-controls .island-mini-btn--ghost:hover{background:transparent;transform:scale(1.15)}
+.np-controls .island-mini-btn svg,
+.np-controls .island-mini-btn--ghost svg{width:26px;height:26px;fill:#fff;color:#fff}
+.np-controls .island-mini-btn--ghost svg{fill:var(--text-dim);color:var(--text-dim);width:22px;height:22px}
+.np-controls .island-mini-btn--ghost:hover svg{fill:#fff;color:#fff}
 .np-scrub-row{display:flex;align-items:center;gap:10px;width:100%}
 .np-cur,.np-dur{font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;min-width:32px}
 .np-dur{text-align:right}
@@ -381,7 +385,16 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .mc-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .mc-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#fff}
 .mc-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mc-ctrls{display:flex;align-items:center;gap:10px}
+.mc-ctrls{display:flex;align-items:center;justify-content:center;gap:18px;flex:1 1 auto}
+/* Island 卡片控制按钮：同样去掉外框/圆圈，仅保留 SVG，居中 */
+.mc-ctrls .island-mini-btn,
+.mc-ctrls .island-mini-btn--ghost{width:auto;height:auto;background:transparent;border:none;border-radius:0;box-shadow:none;padding:0}
+.mc-ctrls .island-mini-btn:hover,
+.mc-ctrls .island-mini-btn--ghost:hover{background:transparent;transform:scale(1.15)}
+.mc-ctrls .island-mini-btn svg,
+.mc-ctrls .island-mini-btn--ghost svg{width:22px;height:22px;fill:#fff;color:#fff}
+.mc-ctrls .island-mini-btn--ghost svg{fill:var(--text-dim);color:var(--text-dim);width:18px;height:18px}
+.mc-ctrls .island-mini-btn--ghost:hover svg{fill:#fff;color:#fff}
 .mc-cur,.mc-dur{font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;min-width:30px;font-family:var(--font-mono)}
 .mc-dur{text-align:right}
 
