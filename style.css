@@ -361,6 +361,9 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 body.audio-playing .island-eq i:nth-child(2){animation:eqBarB .93s ease-in-out infinite}
 body.audio-playing .island-eq i:nth-child(3){animation:eqBarC .81s ease-in-out infinite}
 body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out infinite}
+/* 5-bar EQ (satellite pill mode) */
+.island-eq-5 i:nth-child(5){height:66%}
+body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out .12s infinite}
 @keyframes eqBarA{0%,100%{height:34%}34%{height:92%}68%{height:48%}}
 @keyframes eqBarB{0%,100%{height:70%}28%{height:38%}74%{height:100%}}
 @keyframes eqBarC{0%,100%{height:26%}45%{height:82%}78%{height:36%}}
@@ -550,6 +553,94 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     transition:width .001ms var(--spring),height .001ms var(--spring),
                border-radius .001ms var(--spring),box-shadow .001ms var(--ease)!important}
 
+/* ===== Satellite Island (1c 石墨分体) =====
+   主岛忙碌时音乐分裂到右侧小岛; 点小岛原地展开播放卡。
+   data-sat 属性驱动: hidden / pill / open */
+.island-sat{
+    position:relative;pointer-events:none;cursor:pointer;overflow:hidden;
+    flex-shrink:0;box-sizing:border-box;
+    width:0px;height:40px;border-radius:20px;
+    background-color:rgba(12,12,16,.86);
+    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+    border:1px solid rgba(255,255,255,.06);
+    opacity:0;transform:scale(.6) translateX(-46px);
+    transition:width .55s cubic-bezier(.34,1.2,.4,1),
+               height .55s cubic-bezier(.34,1.2,.4,1),
+               border-radius .55s cubic-bezier(.34,1.2,.4,1),
+               opacity .35s ease,
+               transform .55s cubic-bezier(.34,1.2,.4,1);
+    contain:layout paint}
+
+/* pill 模式: 小药丸 (cover + 5-bar EQ) */
+.island-sat[data-sat="pill"]{
+    width:90px;height:40px;border-radius:20px;
+    opacity:1;transform:none;pointer-events:auto;
+    margin-left:8px}
+
+/* icon 模式: 仅封面图标 (主岛显示重要内容时) */
+.island-sat[data-sat="icon"]{
+    width:40px;height:40px;border-radius:20px;
+    opacity:1;transform:none;pointer-events:auto;
+    margin-left:8px}
+.island-sat[data-sat="icon"] .sat-pill{justify-content:center;padding:0}
+.island-sat[data-sat="icon"] .sat-pill .island-eq{display:none}
+
+/* open 模式: 展开为完整播放卡 */
+.island-sat[data-sat="open"]{
+    width:560px;height:146px;border-radius:32px;
+    opacity:1;transform:none;pointer-events:auto;
+    margin-left:8px}
+
+/* hidden 模式: 0 宽度, 不可见 */
+.island-sat[data-sat="hidden"]{
+    width:0px;height:40px;border-radius:20px;
+    opacity:0;transform:scale(.6) translateX(-46px);
+    pointer-events:none}
+
+/* 卫星岛内层 (复用 .island-layer 基础样式, 额外控制可见性) */
+.island-sat .island-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:0;pointer-events:none;transform:scale(.9);
+    transition:opacity .3s ease,transform .4s cubic-bezier(.34,1.2,.4,1)}
+.island-sat .island-layer.active-sat-content{
+    opacity:1;pointer-events:auto;transform:scale(1);
+    transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s}
+
+/* 卫星岛元素禁用 view-transition-name, 避免与主岛同名冲突 */
+.island-sat .ib-cover,.island-sat .mc-cover{view-transition-name:none}
+.island-sat .island-eq{view-transition-name:none}
+
+/* pill 模式内容 */
+.island-sat .sat-pill{justify-content:flex-start;gap:8px;padding:0 6px 0 6px;box-sizing:border-box}
+.island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;justify-content:center}
+.island-sat[data-sat="pill"] .sat-pill{display:flex}
+.island-sat[data-sat="open"] .sat-pill{display:none}
+
+/* card 模式内容 (复用 music-card 样式) */
+.island-sat .sat-card{justify-content:flex-start;gap:14px;padding:0 20px}
+.island-sat .sat-card .mc-cover{width:52px;height:52px;border-radius:13px}
+.island-sat .sat-card .mc-main .island-eq{position:absolute;right:0;top:0;margin:0}
+.island-sat[data-sat="pill"] .sat-card{display:none}
+.island-sat[data-sat="open"] .sat-card{display:flex}
+
+/* 主岛在卫星岛 open 时折叠 */
+.island-content.sat-collapsed{
+    width:0px!important;opacity:0!important;transform:scale(.6)!important;
+    pointer-events:none!important;border-width:0!important}
+
+/* 卫星岛入场动画 */
+@keyframes satIn{0%{opacity:0;transform:scale(.6) translateX(-46px)}60%{opacity:1;transform:scale(1.05) translateX(0)}100%{opacity:1;transform:scale(1) translateX(0)}}
+.island-sat[data-sat="pill"],.island-sat[data-sat="icon"]{animation:satIn .55s cubic-bezier(.34,1.2,.4,1)}
+
+/* 封面入场动画 */
+@keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
+
+/* idle 品牌点脉冲 */
+@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
+/* 内容切换动画 */
+@keyframes swapA{0%{opacity:0;transform:scale(.9);filter:blur(4px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes swapB{0%{opacity:0;transform:scale(.9);filter:blur(4px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+
 /* ===== 岛入场动画(intro 结束后首次出现) ===== */
 @keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 .island-entrance{animation:islandEntrance .75s var(--spring);transform-origin:center top}
@@ -627,6 +718,8 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,560px)}
     .island-content.island-state-music-bar[data-state="music-bar"]{width:min(86vw,212px)}
     .island-content.island-state-autoplay[data-state="autoplay"]{width:min(90vw,300px)}
+    .island-sat[data-sat="open"]{width:min(94vw,560px)}
+    .island-sat[data-sat="pill"]{width:min(22vw,90px)}
     .nav-buttons{gap:4px}
     .island-nav-btn{padding:6px 10px;font-size:.86rem}
     .home-inner{align-items:center;text-align:center}

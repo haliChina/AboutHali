@@ -2,6 +2,7 @@
     'use strict';
 
     const island      = document.querySelector('.island-content');
+    const satIsland   = document.querySelector('.island-sat');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -19,9 +20,10 @@
     const audio    = document.getElementById('np-audio');
     const toggles  = Array.from(document.querySelectorAll('.np-toggle,.mc-toggle'));
     const npScrub  = document.querySelector('.np-scrub');
-    const mcScrub  = document.querySelector('.mc-scrub');
+    const mcScrubs = Array.from(document.querySelectorAll('.mc-scrub'));
     const npCur = document.querySelector('.np-cur'), npDur = document.querySelector('.np-dur');
-    const mcCur = document.querySelector('.mc-cur'), mcDur = document.querySelector('.mc-dur');
+    const mcCurs = Array.from(document.querySelectorAll('.mc-cur'));
+    const mcDurs = Array.from(document.querySelectorAll('.mc-dur'));
     const plEl  = document.getElementById('np-playlist');
 
     function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
@@ -120,7 +122,7 @@
 
     let audioUnlockArmed = false;
     function isIslandControl(target) {
-        return target.closest('.island-content, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
+        return target.closest('.island-content, .island-sat, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
     }
     function armAudioUnlock() {
         if (audioUnlockArmed || !audio) return;
@@ -183,10 +185,75 @@
     function getCurrentState() {
         return island.getAttribute('data-state') || 'default';
     }
+
+    // ===== Satellite Island (1c 石墨分体) =====
+    let satOpen = false;
+    let satCollapseTimer = null;
+
+    function getSatMode() {
+        if (!musicActive) return 'hidden';
+        if (satOpen) return 'open';
+        const cur = getCurrentState();
+        // Main island is "busy" when showing non-music content
+        if (cur === 'default' || cur === 'music-bar' || cur === 'music-card') return 'hidden';
+        // Nav and modal states → satellite shows as icon (cover only)
+        const iconStates = ['nav', 'confirm', 'email', 'autoplay'];
+        if (iconStates.indexOf(cur) >= 0) return 'icon';
+        // Transient states (toast) → satellite shows as pill (cover + EQ)
+        return 'pill';
+    }
+
+    function updateSatellite() {
+        if (!satIsland) return;
+        const mode = getSatMode();
+        satIsland.setAttribute('data-sat', mode);
+
+        // Toggle active layer in satellite
+        const satPill = satIsland.querySelector('.sat-pill');
+        const satCard = satIsland.querySelector('.sat-card');
+        if (mode === 'open') {
+            if (satPill) satPill.classList.remove('active-sat-content');
+            if (satCard) satCard.classList.add('active-sat-content');
+        } else {
+            if (satCard) satCard.classList.remove('active-sat-content');
+            if (satPill) satPill.classList.add('active-sat-content');
+        }
+
+        // Collapse/restore main island
+        if (mode === 'open') {
+            island.classList.add('sat-collapsed');
+        } else {
+            island.classList.remove('sat-collapsed');
+        }
+    }
+
+    function openSatellite() {
+        if (!musicActive || satOpen) return;
+        satOpen = true;
+        // Collapse main island to idle
+        if (getCurrentState() !== 'default') {
+            setState('default', { force: true });
+        }
+        updateSatellite();
+    }
+
+    function closeSatellite() {
+        if (!satOpen) return;
+        satOpen = false;
+        updateSatellite();
+        // Restore main island
+        setState(musicActive ? 'music-bar' : 'default');
+    }
+
     // ===== 与 Gemini switchIsland 1:1 一致的切换 =====
     function setState(target, opts) {
         opts = opts || {};
         const current = getCurrentState();
+        // If switching to music-card, close any open satellite
+        if (target === 'music-card' && satOpen) {
+            satOpen = false;
+            updateSatellite();
+        }
         if (current === target && !opts.force) return;
 
         // 检测是否启用 View Transitions 形变(music-bar <-> music-card 时由浏览器接管 width/height 过渡)
@@ -243,6 +310,9 @@
             indicatorRealignTimer = setTimeout(repositionIndicator, ISLAND_TRANSITION_MS + 20);
         }
 
+        // 1c 分体: 更新卫星岛可见性
+        updateSatellite();
+
         // 空闲 idle 计时器（仅在 default 且无活动时触发）
         clearTimeout(idleTimer);
         if (target === 'default' && !musicActive && !hovering && !userScrolling) {
@@ -258,7 +328,11 @@
     }
     function pointInIsland() {
         const r = island.getBoundingClientRect();
-        return mouse.x >= r.left && mouse.x <= r.right && mouse.y >= r.top && mouse.y <= r.bottom;
+        const inMain = mouse.x >= r.left && mouse.x <= r.right && mouse.y >= r.top && mouse.y <= r.bottom;
+        if (!satIsland) return inMain;
+        const sr = satIsland.getBoundingClientRect();
+        const inSat = mouse.x >= sr.left && mouse.x <= sr.right && mouse.y >= sr.top && mouse.y <= sr.bottom;
+        return inMain || inSat;
     }
     function scheduleCollapse(delay) {
         clearTimeout(collapseTimer);
@@ -283,7 +357,7 @@
         toastMsg.textContent = msg;
         setState('toast', { kind: kind });
         toastTimer = setTimeout(() => {
-            const next = hovering ? (musicActive ? 'music-card' : 'nav') : (musicActive ? 'music-bar' : 'default');
+            const next = hovering ? 'nav' : (musicActive ? 'music-bar' : 'default');
             setState(next);
         }, 1300);
     }
@@ -415,17 +489,17 @@
         if (cTxt !== lastNpCurTxt) {
             lastNpCurTxt = cTxt;
             if (npCur) npCur.textContent = cTxt;
-            if (mcCur) mcCur.textContent = cTxt;
+            mcCurs.forEach(el => el.textContent = cTxt);
         }
         if (dTxt !== lastNpDurTxt) {
             lastNpDurTxt = dTxt;
             if (npDur) npDur.textContent = dTxt;
-            if (mcDur) mcDur.textContent = dTxt;
+            mcDurs.forEach(el => el.textContent = dTxt);
         }
         if (!scrubbing) {
             const v = pct * 10;
             if (npScrub) { npScrub.value = v; fillScrub(npScrub, pct); }
-            if (mcScrub) { mcScrub.value = v; fillScrub(mcScrub, pct); }
+            mcScrubs.forEach(sc => { sc.value = v; fillScrub(sc, pct); });
         }
     }
     function togglePlay() {
@@ -437,14 +511,13 @@
     document.querySelectorAll('.np-prev,.mc-prev').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx - 1, true); }));
     document.querySelectorAll('.np-next,.mc-next').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx + 1, true); }));
 
-    [npScrub, mcScrub].forEach(sc => {
-        if (!sc) return;
+    [npScrub].concat(mcScrubs).filter(Boolean).forEach(sc => {
         sc.addEventListener('input', () => {
             scrubbing = true;
             const pct = sc.value / 10;
             fillScrub(sc, pct);
             if (npScrub && npScrub !== sc) { npScrub.value = sc.value; fillScrub(npScrub, pct); }
-            if (mcScrub && mcScrub !== sc) { mcScrub.value = sc.value; fillScrub(mcScrub, pct); }
+            mcScrubs.forEach(other => { if (other !== sc) { other.value = sc.value; fillScrub(other, pct); } });
         });
         const commit = () => { if (audio && audio.duration) audio.currentTime = (sc.value / 1000) * audio.duration; scrubbing = false; };
         sc.addEventListener('change', commit);
@@ -476,11 +549,14 @@
             // 如果当前是 default 状态，切换到 music-bar 显示正在播放
             if (getCurrentState() === 'default') setState('music-bar');
             else island.classList.remove('idle');
+            updateSatellite();
             if (first && !hovering) showToast('success', 'QQ音乐 · 播放中', '♪');
         });
         audio.addEventListener('pause', () => {
             document.body.classList.remove('audio-playing');
+            if (satOpen) closeSatellite();
             if (getCurrentState() === 'music-bar') setState('default');
+            updateSatellite();
         });
         audio.addEventListener('ended', () => loadSong(curIdx + 1, true));
         audio.addEventListener('loadedmetadata', updateProgress);
@@ -603,9 +679,9 @@
     document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
     function hoverExpand() {
-        if (isLocked()) return;
-        if (musicActive) setState('music-card');
-        else setState('nav');
+        if (isLocked() || satOpen) return;
+        // 1c 分体: hover 时始终展示 nav, 音乐播放时卫星岛自动出现
+        setState('nav');
         updateScrollProgress(window.scrollY || document.documentElement.scrollTop || 0);
     }
     island.addEventListener('mouseenter', () => { hovering = true; clearTimeout(collapseTimer); hoverExpand(); });
@@ -626,12 +702,40 @@
 
     island.addEventListener('click', e => {
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub')) return;
+        if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
         if (cur === 'default' || cur === 'music-bar') {
             if (musicActive && e.target.closest('.island-music-bar')) setState('music-card');
             else setState('nav');
         }
     });
+
+    // ===== Satellite Island 事件 =====
+    if (satIsland) {
+        satIsland.addEventListener('click', e => {
+            if (e.target.closest('.island-mini-btn,.mc-scrub')) return;
+            if (musicActive && !satOpen) {
+                e.stopPropagation();
+                openSatellite();
+            }
+        });
+        satIsland.addEventListener('mouseenter', () => {
+            hovering = true;
+            clearTimeout(collapseTimer);
+            clearTimeout(satCollapseTimer);
+        });
+        satIsland.addEventListener('mouseleave', () => {
+            hovering = false;
+            if (satOpen) {
+                clearTimeout(satCollapseTimer);
+                satCollapseTimer = setTimeout(() => {
+                    if (!hovering && satOpen) closeSatellite();
+                }, 700);
+            } else if (!userScrolling && !scrubbing) {
+                scheduleCollapse();
+            }
+        });
+    }
 
     let scrollRaf = 0;
     function flushScroll() {
@@ -643,6 +747,7 @@
     function onScroll() {
         if (!scrollRaf) scrollRaf = requestAnimationFrame(flushScroll);
         userScrolling = true;
+        if (satOpen) closeSatellite(); // 滚动时关闭卫星岛
         const cur = getCurrentState();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; showToast('error', '已取消'); island.classList.remove('idle'); }
         else if (cur === 'email') { setState('default'); island.classList.remove('idle'); }
@@ -662,8 +767,9 @@
     }, { passive: true });
 
     document.addEventListener('click', e => {
-        if (island.contains(e.target) || e.target.closest('.social-btn')) return;
+        if (island.contains(e.target) || (satIsland && satIsland.contains(e.target)) || e.target.closest('.social-btn')) return;
         const cur = getCurrentState();
+        if (satOpen) closeSatellite();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; }
         if (cur !== 'default' && cur !== 'music-bar' && cur !== 'toast') setState('default');
     });
