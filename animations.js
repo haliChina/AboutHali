@@ -91,7 +91,9 @@
         const s = PLAYLIST[curIdx];
         if (audio) {
             // 切歌前先暂停并清理旧 src，避免浏览器在重定向链路上持锁导致下一次 play() 静默 reject
+            loadingSong = true;
             try { audio.pause(); } catch(_) {}
+            loadingSong = false;
             audio.removeAttribute('src');
             try { audio.load(); } catch(_) {}
             audio.src = s.src;
@@ -152,6 +154,7 @@
     // 这样即使 100ms 内连点 5 次切换也不会卡，每步都会被浏览器合并到同一渲染帧。
 
     let musicActive = false;
+    let loadingSong = false; // loadSong 内部 audio.pause() 时抑制 pause 事件, 避免切歌闪烁
     let pendingHref = null;
     let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null;
     const CONFIRM_AUTO_MS = 8000;
@@ -553,6 +556,8 @@
             if (first && !hovering) showToast('success', 'QQ音乐 · 播放中', '♪');
         });
         audio.addEventListener('pause', () => {
+            if (loadingSong || audio.ended) return; // 切歌/自然结束不处理
+            musicActive = false;
             document.body.classList.remove('audio-playing');
             if (satOpen) closeSatellite();
             if (getCurrentState() === 'music-bar') setState('default');
