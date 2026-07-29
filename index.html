@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=57">
+    <link rel="stylesheet" href="style.css?v=65">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
@@ -82,7 +82,7 @@
 
             <!-- collapsed music live-activity bar -->
             <div class="island-layer island-music-bar">
-                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="28" height="28">
+                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="24" height="24">
                 <div class="island-eq"><i></i><i></i><i></i><i></i></div>
             </div>
 
@@ -106,11 +106,15 @@
                     <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="52" height="52">
                     <div class="mc-info">
                         <div class="mc-title">All The Things She Said</div>
-                        <div class="mc-artist">t.A.T.u. · QQ音乐</div>
+                        <div class="mc-artist">t.A.T.u.</div>
                     </div>
                     <div class="island-eq"><i></i><i></i><i></i><i></i></div>
                 </div>
-                <input type="range" class="mc-scrub" min="0" max="1000" value="0" aria-label="进度">
+                <div class="mc-scrub-wrap" aria-label="进度" role="slider">
+                    <div class="mc-scrub-track">
+                        <div class="mc-scrub-fill"></div>
+                    </div>
+                </div>
                 <div class="mc-time">
                     <span class="mc-cur">0:00</span>
                     <span class="mc-dur">0:00</span>
@@ -133,10 +137,7 @@
             <div class="island-layer island-confirm">
                 <div class="confirm-swap">
                     <div class="island-confirm-info">
-                        <div class="island-confirm-icon">
-                            <img class="confirm-favicon" alt="">
-                            <svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
-                        </div>
+                        <div class="island-confirm-icon"><span class="confirm-glyph">↗</span></div>
                         <div class="island-confirm-meta">
                             <div class="island-confirm-title"><span class="confirm-site">外部链接</span></div>
                             <div class="island-confirm-host"></div>
@@ -203,11 +204,15 @@
                         <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="52" height="52">
                         <div class="sat-card-info">
                             <span class="mc-title">All The Things She Said</span>
-                            <span class="mc-artist">t.A.T.u. · QQ音乐</span>
+                            <span class="mc-artist">t.A.T.u.</span>
                         </div>
                         <div class="island-eq sat-card-eq"><i></i><i></i><i></i><i></i></div>
                     </div>
-                    <input type="range" class="mc-scrub sat-card-scrub" min="0" max="1000" value="0" aria-label="进度">
+                    <div class="mc-scrub-wrap sat-card-scrub-wrap" aria-label="进度" role="slider">
+                        <div class="mc-scrub-track sat-card-scrub-track">
+                            <div class="mc-scrub-fill sat-card-scrub-fill"></div>
+                        </div>
+                    </div>
                     <div class="sat-card-time">
                         <span class="mc-cur">0:00</span>
                         <span class="mc-dur">0:00</span>
@@ -241,25 +246,25 @@
             <div class="social">
                 <div class="section-label">我的账户 · Account</div>
                 <div class="social-grid">
-                    <a href="https://space.bilibili.com/1300732833" class="social-btn social-btn-svg" style="--brand:#fb7299" title="Bilibili">
+                    <a href="https://space.bilibili.com/1300732833" class="social-btn social-btn-svg" style="--brand:#fb7299" title="Bilibili" data-glyph="B" data-color="#fb7299">
                         <img src="icons/contact/bilibilizhanghao.svg" alt="Bilibili" decoding="async" width="44" height="44">
                     </a>
-                    <a href="https://qm.qq.com/q/SCmKcHTXma" class="social-btn social-btn-svg" style="--brand:#12b7f5" title="QQ">
+                    <a href="https://qm.qq.com/q/SCmKcHTXma" class="social-btn social-btn-svg" style="--brand:#12b7f5" title="QQ" data-glyph="Q" data-color="#12b7f5">
                         <img src="icons/contact/QQzhanghao.svg" alt="QQ" decoding="async" width="44" height="44">
                     </a>
-                    <a href="https://discordapp.com/users/b_bbb_b" class="social-btn social-btn-svg" style="--brand:#5865f2" title="Discord">
+                    <a href="https://discordapp.com/users/b_bbb_b" class="social-btn social-btn-svg" style="--brand:#5865f2" title="Discord" data-glyph="D" data-color="#5865f2">
                         <img src="icons/contact/Discordzhanghao.svg" alt="Discord" decoding="async" width="44" height="44">
                     </a>
-                    <a href="https://c6.y.qq.com/base/fcgi-bin/u?__=NnFiRZw27wAJ" class="social-btn social-btn-svg" style="--brand:#31c27c" title="QQ音乐">
+                    <a href="https://c6.y.qq.com/base/fcgi-bin/u?__=NnFiRZw27wAJ" class="social-btn social-btn-svg" style="--brand:#31c27c" title="QQ音乐" data-glyph="M" data-color="#31c27c">
                         <img src="icons/contact/QQyinyuezhanghao.svg" alt="QQ音乐" decoding="async" width="44" height="44">
                     </a>
-                    <a href="https://github.com/haliChina" class="social-btn social-btn-svg" style="--brand:#ffffff" title="GitHub">
+                    <a href="https://github.com/haliChina" class="social-btn social-btn-svg" style="--brand:#ffffff" title="GitHub" data-glyph="G" data-color="#ffffff">
                         <img src="icons/contact/Githubzhanghao.svg" alt="GitHub" decoding="async" width="44" height="44">
                     </a>
-                    <a href="https://x.com/HaliForX" class="social-btn social-btn-svg" style="--brand:#ffffff" title="X">
+                    <a href="https://x.com/HaliForX" class="social-btn social-btn-svg" style="--brand:#ffffff" title="X" data-glyph="X" data-color="#ffffff">
                         <img src="icons/contact/Xzhanghao.svg" alt="X" decoding="async" width="44" height="44">
                     </a>
-                    <a href="" class="social-btn social-btn-svg" id="email-link" style="--brand:#ea4335" title="邮箱">
+                    <a href="" class="social-btn social-btn-svg" id="email-link" style="--brand:#ea4335" title="邮箱" data-glyph="@" data-color="#ea4335">
                         <img src="icons/contact/youxiangdenglu.svg" alt="Email" decoding="async" width="44" height="44">
                     </a>
                 </div>
@@ -444,7 +449,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
     <script src="shader.js?v=4" defer></script>
-    <script src="animations.js?v=19" defer></script>
+    <script src="animations.js?v=22" defer></script>
     <script src="ripple.js?v=2" defer></script>
     <script src="fps.js?v=1" defer></script>
     

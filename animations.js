@@ -8,7 +8,7 @@
     const confirmSite        = document.querySelector('.confirm-site');
     const confirmHost        = document.querySelector('.island-confirm-host');
     const confirmIconBox     = document.querySelector('.island-confirm-icon');
-    const confirmFavicon     = document.querySelector('.confirm-favicon');
+    const confirmGlyph       = document.querySelector('.confirm-glyph');
     const confirmCountdownBar= document.querySelector('.island-confirm-countdown-bar');
     const btnConfirm  = document.querySelector('.island-btn-confirm');
     const btnCancel   = document.querySelector('.island-btn-cancel');
@@ -20,7 +20,8 @@
     const audio    = document.getElementById('np-audio');
     const toggles  = Array.from(document.querySelectorAll('.np-toggle,.mc-toggle'));
     const npScrub  = document.querySelector('.np-scrub');
-    const mcScrubs = Array.from(document.querySelectorAll('.mc-scrub'));
+    const mcScrubs = Array.from(document.querySelectorAll('.mc-scrub-fill'));
+    const mcScrubWraps = Array.from(document.querySelectorAll('.mc-scrub-wrap'));
     const npCur = document.querySelector('.np-cur'), npDur = document.querySelector('.np-dur');
     const mcCurs = Array.from(document.querySelectorAll('.mc-cur'));
     const mcDurs = Array.from(document.querySelectorAll('.mc-dur'));
@@ -124,7 +125,7 @@
 
     let audioUnlockArmed = false;
     function isIslandControl(target) {
-        return target.closest('.island-content, .island-sat, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
+        return target.closest('.island-content, .island-sat, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub-wrap, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
     }
     function armAudioUnlock() {
         if (audioUnlockArmed || !audio) return;
@@ -385,13 +386,21 @@
 
     function showToast(kind, msg, icon) {
         clearTimeout(toastTimer);
-        toastIcon.textContent = icon || (kind === 'error' ? '×' : '✓');
+        // 1:1 demo mkToastIcon: SVG checkmark / X inside 18px circle
+        if (icon) {
+            toastIcon.innerHTML = icon;
+        } else if (kind === 'error') {
+            toastIcon.innerHTML = '<svg viewBox="0 0 12 12" style="width:10px;height:10px;display:block"><line x1="3.2" y1="3.2" x2="8.8" y2="8.8" stroke="#fff" stroke-width="1.7" stroke-linecap="square"/><line x1="8.8" y1="3.2" x2="3.2" y2="8.8" stroke="#fff" stroke-width="1.7" stroke-linecap="square"/></svg>';
+        } else {
+            toastIcon.innerHTML = '<svg viewBox="0 0 12 12" style="width:10px;height:10px;display:block"><path d="M2.4 6.4 L5 9 L9.8 3.2" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="square" stroke-linejoin="miter"/></svg>';
+        }
         toastMsg.textContent = msg;
         setState('toast', { kind: kind });
+        // 1:1 demo: toast 1500ms auto-dismiss
         toastTimer = setTimeout(() => {
             const next = hovering ? 'nav' : (musicActive ? 'music-bar' : 'default');
             setState(next);
-        }, 1300);
+        }, 1500);
     }
 
     // ===== C: greet 打招呼 (1:1 demo: greet 2.3s auto-dismiss) =====
@@ -531,23 +540,15 @@
     }
 
     let cfKey = 0;
-    function askConfirm(title, href, iconSrc, iconInvert) {
+    function askConfirm(title, href, glyph, color) {
         clearConfirmTimer();
         pendingHref = href;
         clearTimeout(collapseTimer);
         if (confirmSite) confirmSite.textContent = title;
         if (confirmHost) confirmHost.textContent = prettyHost(href);
-        if (confirmIconBox && confirmFavicon) {
-            confirmFavicon.onerror = () => confirmIconBox.classList.remove('has-favicon');
-            if (iconSrc) {
-                confirmFavicon.src = iconSrc;
-                confirmFavicon.style.filter = iconInvert === false
-                    ? 'drop-shadow(0 1px 2px rgba(0,0,0,.35))'
-                    : '';
-                confirmIconBox.classList.add('has-favicon');
-            } else {
-                confirmIconBox.classList.remove('has-favicon');
-            }
+        if (confirmIconBox) {
+            confirmIconBox.style.color = color || '#ff8fb6';
+            if (confirmGlyph) confirmGlyph.textContent = glyph || '↗';
         }
         // re-trigger swap animation on wrapper (1:1 demo: swapSt alternates swapA/swapB)
         cfKey++;
@@ -558,12 +559,14 @@
             cfSwapEl.style.animation = 'swap' + (cfKey % 2 ? 'A' : 'B') + ' .45s cubic-bezier(.34,1.2,.4,1)';
         }
         setState('confirm');
+        // 1:1 demo: cfDown 8s linear forwards via CSS animation (scaleX 1->0)
+        // Restart animation by toggling display + forcing reflow
         if (confirmCountdownBar) {
-            confirmCountdownBar.style.transition = 'none';
-            confirmCountdownBar.style.width = '100%';
+            confirmCountdownBar.style.animation = 'none';
+            confirmCountdownBar.style.transform = 'scaleX(1)';
             void confirmCountdownBar.offsetWidth;
-            confirmCountdownBar.style.transition = 'width ' + (CONFIRM_AUTO_MS / 1000) + 's linear';
-            confirmCountdownBar.style.width = '0%';
+            confirmCountdownBar.style.animation = '';
+            confirmCountdownBar.style.transform = '';
         }
         confirmTimer = setTimeout(() => {
             confirmTimer = null;
@@ -589,10 +592,9 @@
             if (link.id === 'email-link' || !href) { e.preventDefault(); setState('email'); return; }
             if (!href.startsWith('#')) {
                 e.preventDefault();
-                const img = link.querySelector('img');
-                const iconSrc = img ? img.getAttribute('src') : null;
-                const iconInvert = !link.classList.contains('social-btn-svg') && !link.classList.contains('social-btn-img');
-                askConfirm(link.getAttribute('title') || '外部链接', href, iconSrc, iconInvert);
+                const glyph = link.getAttribute('data-glyph') || '↗';
+                const color = link.getAttribute('data-color') || '#ff8fb6';
+                askConfirm(link.getAttribute('title') || '外部链接', href, glyph, color);
             }
         });
     });
@@ -614,6 +616,13 @@
         lastScrubPct.set(el, rounded);
         el.style.background = 'linear-gradient(90deg,var(--accent-3) ' + rounded + '%,rgba(255,255,255,.16) ' + rounded + '%)';
     }
+    function fillScrubDiv(el, pct) {
+        if (!el) return;
+        const rounded = Math.round(pct * 10) / 10;
+        if (lastScrubPct.get(el) === rounded) return;
+        lastScrubPct.set(el, rounded);
+        el.style.width = rounded + '%';
+    }
     let lastNpCurTxt = '', lastNpDurTxt = '';
     function updateProgress() {
         if (!audio) return;
@@ -633,7 +642,7 @@
         if (!scrubbing) {
             const v = pct * 10;
             if (npScrub) { npScrub.value = v; fillScrub(npScrub, pct); }
-            mcScrubs.forEach(sc => { sc.value = v; fillScrub(sc, pct); });
+            mcScrubs.forEach(sc => { fillScrubDiv(sc, pct); });
         }
     }
     function togglePlay() {
@@ -645,17 +654,40 @@
     document.querySelectorAll('.np-prev,.mc-prev').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx - 1, true); }));
     document.querySelectorAll('.np-next,.mc-next').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx + 1, true); }));
 
-    [npScrub].concat(mcScrubs).filter(Boolean).forEach(sc => {
-        sc.addEventListener('input', () => {
+    // np-scrub is still an input range
+    if (npScrub) {
+        npScrub.addEventListener('input', () => {
             scrubbing = true;
-            const pct = sc.value / 10;
-            fillScrub(sc, pct);
-            if (npScrub && npScrub !== sc) { npScrub.value = sc.value; fillScrub(npScrub, pct); }
-            mcScrubs.forEach(other => { if (other !== sc) { other.value = sc.value; fillScrub(other, pct); } });
+            const pct = npScrub.value / 10;
+            fillScrub(npScrub, pct);
+            mcScrubs.forEach(sc => { fillScrubDiv(sc, pct); });
         });
-        const commit = () => { if (audio && audio.duration) audio.currentTime = (sc.value / 1000) * audio.duration; scrubbing = false; };
-        sc.addEventListener('change', commit);
-        sc.addEventListener('pointerup', commit);
+        const commitNp = () => { if (audio && audio.duration) audio.currentTime = (npScrub.value / 1000) * audio.duration; scrubbing = false; };
+        npScrub.addEventListener('change', commitNp);
+        npScrub.addEventListener('pointerup', commitNp);
+    }
+    // mc-scrub-wrap: div-based seek bar (1:1 demo: onClick seek)
+    mcScrubWraps.forEach(wrap => {
+        const seekFromEvent = (e) => {
+            const r = wrap.getBoundingClientRect();
+            const p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+            if (audio && audio.duration) audio.currentTime = p * audio.duration;
+            mcScrubs.forEach(sc => { fillScrubDiv(sc, p * 100); });
+        };
+        let dragActive = false;
+        wrap.addEventListener('pointerdown', e => {
+            e.stopPropagation();
+            scrubbing = true;
+            dragActive = true;
+            seekFromEvent(e);
+        });
+        window.addEventListener('pointermove', e => {
+            if (!dragActive) return;
+            seekFromEvent(e);
+        });
+        window.addEventListener('pointerup', () => {
+            if (dragActive) { dragActive = false; scrubbing = false; }
+        });
     });
 
     const btnSongs = document.getElementById('np-btn-songs');
@@ -839,7 +871,7 @@
     document.addEventListener('touchstart', armIdle, { passive: true });
 
     island.addEventListener('click', e => {
-        if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub')) return;
+        if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub-wrap')) return;
         if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
         // I: 两段式 — preview 点击展开 nav, nav 点击收起
@@ -856,7 +888,7 @@
     // ===== Satellite Island 事件 =====
     if (satIsland) {
         satIsland.addEventListener('click', e => {
-            if (e.target.closest('.island-mini-btn,.mc-scrub')) return;
+            if (e.target.closest('.island-mini-btn,.mc-scrub-wrap')) return;
             if (musicActive && !satOpen) {
                 e.stopPropagation();
                 openSatellite();
