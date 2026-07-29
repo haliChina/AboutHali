@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=54">
+    <link rel="stylesheet" href="style.css?v=57">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
@@ -51,9 +51,33 @@
         <div class="island-content island-state-default" id="island" data-state="default">
             <div class="island-specular"></div>
 
-            <!-- collapsed / default -->
+            <!-- collapsed / default (A: idle 双阶段循环) -->
             <div class="island-layer island-default active-content">
-                <span class="island-idle-brand">userhali.com</span>
+                <div class="island-idle-wrap">
+                    <span class="island-idle-brand">userhali.com</span>
+                    <span class="island-idle-time"></span>
+                </div>
+            </div>
+
+            <!-- B: preview 悬停预览 -->
+            <div class="island-layer island-preview">
+                <span class="preview-section">首页</span>
+                <span class="preview-dots"><i></i><i></i><i></i><i></i></span>
+                <span class="preview-pct">0%</span>
+            </div>
+
+            <!-- C: greet 打招呼 -->
+            <div class="island-layer island-greet">
+                <span class="greet-jp">はじめまして</span>
+                <span class="greet-cn">· 欢迎来访</span>
+            </div>
+
+            <!-- D: hint 区块提示 -->
+            <div class="island-layer island-hint">
+                <div class="hint-swap">
+                    <span class="hint-label">正在看</span>
+                    <span class="hint-section">首页</span>
+                </div>
             </div>
 
             <!-- collapsed music live-activity bar -->
@@ -62,78 +86,73 @@
                 <div class="island-eq"><i></i><i></i><i></i><i></i></div>
             </div>
 
-            <!-- expanded navigation -->
+            <!-- F: nav 单行 (1:1 demo: buttons + divider + ring + pct) -->
             <nav class="island-layer island-nav">
-                <div class="nav-buttons pill-nav" id="pillNav">
-                    <div class="pill-indicator" id="indicator"></div>
-                    <a href="#home" class="island-nav-btn nav-item active" data-index="0">首页</a>
-                    <a href="#github" class="island-nav-btn nav-item" data-index="1">GitHub</a>
-                    <a href="#netease" class="island-nav-btn nav-item" data-index="2">QQ音乐</a>
-                    <a href="#project" class="island-nav-btn nav-item" data-index="3">Projects</a>
-                </div>
-                <div class="scroll-progress">
-                    <div class="scroll-progress-meta">
-                        <span class="sp-section">首页</span>
-                        <span class="sp-pct">0%</span>
-                    </div>
-                    <div class="scroll-progress-container">
-                        <div class="scroll-progress-bar"><span class="sp-head"></span></div>
-                    </div>
-                </div>
+                <a href="#home" class="island-nav-btn nav-item active" data-index="0">首页</a>
+                <a href="#github" class="island-nav-btn nav-item" data-index="1">GitHub</a>
+                <a href="#netease" class="island-nav-btn nav-item" data-index="2">QQ音乐</a>
+                <a href="#project" class="island-nav-btn nav-item" data-index="3">Projects</a>
+                <div class="nav-divider"></div>
+                <svg class="nav-progress-ring" viewBox="0 0 22 22" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2.4"/>
+                    <circle cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)" id="nav-ring-fill"/>
+                </svg>
+                <span class="nav-ring-pct">0%</span>
             </nav>
 
-            <!-- expanded now-playing card -->
+            <!-- G: music-card 列布局 (1:1 demo mcard: top row cover+info+EQ, then scrub, time, ctrls) -->
             <div class="island-layer island-music-card">
-                <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="96" height="96">
-                <div class="mc-main">
-                    <div class="island-eq"><i></i><i></i><i></i><i></i></div>
-                    <div class="mc-title">All The Things She Said</div>
-                    <div class="mc-artist">t.A.T.u. · QQ音乐</div>
-                    <input type="range" class="mc-scrub" min="0" max="1000" value="0" aria-label="进度">
-                    <div class="mc-bottom">
-                        <span class="mc-cur">0:00</span>
-                        <div class="mc-ctrls">
-                            <button class="mc-prev island-mini-btn island-mini-btn--ghost" aria-label="上一首">
-                                <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg>
-                            </button>
-                            <button class="mc-toggle island-mini-btn" aria-label="播放/暂停">
-                                <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-                            </button>
-                            <button class="mc-next island-mini-btn island-mini-btn--ghost" aria-label="下一首">
-                                <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg>
-                            </button>
-                        </div>
-                        <span class="mc-dur">0:00</span>
+                <div class="mc-top-row">
+                    <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="52" height="52">
+                    <div class="mc-info">
+                        <div class="mc-title">All The Things She Said</div>
+                        <div class="mc-artist">t.A.T.u. · QQ音乐</div>
                     </div>
+                    <div class="island-eq"><i></i><i></i><i></i><i></i></div>
+                </div>
+                <input type="range" class="mc-scrub" min="0" max="1000" value="0" aria-label="进度">
+                <div class="mc-time">
+                    <span class="mc-cur">0:00</span>
+                    <span class="mc-dur">0:00</span>
+                </div>
+                <div class="mc-ctrls">
+                    <button class="mc-prev island-mini-btn island-mini-btn--ghost" aria-label="上一首">
+                        <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg>
+                    </button>
+                    <button class="mc-toggle island-mini-btn" aria-label="播放/暂停">
+                        <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                    </button>
+                    <button class="mc-next island-mini-btn island-mini-btn--ghost" aria-label="下一首">
+                        <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg>
+                    </button>
                 </div>
             </div>
 
             <!-- confirm external link -->
             <div class="island-layer island-confirm">
-                <div class="island-confirm-info">
-                    <div class="island-confirm-icon">
-                        <img class="confirm-favicon" alt="">
-                        <svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
+                <div class="confirm-swap">
+                    <div class="island-confirm-info">
+                        <div class="island-confirm-icon">
+                            <img class="confirm-favicon" alt="">
+                            <svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
+                        </div>
+                        <div class="island-confirm-meta">
+                            <div class="island-confirm-title"><span class="confirm-site">外部链接</span></div>
+                            <div class="island-confirm-host"></div>
+                        </div>
                     </div>
-                    <div class="island-confirm-meta">
-                        <div class="island-confirm-title"><span class="confirm-site">外部链接</span></div>
-                        <div class="island-confirm-host"></div>
+                    <div class="island-confirm-countdown"><span class="island-confirm-countdown-bar"></span></div>
+                    <div class="island-confirm-actions">
+                        <button class="island-btn island-btn-cancel">取消</button>
+                        <button class="island-btn island-btn-confirm">前往</button>
                     </div>
-                </div>
-                <div class="island-confirm-countdown"><span class="island-confirm-countdown-bar"></span></div>
-                <div class="island-confirm-actions">
-                    <button class="island-btn island-btn-cancel">取消</button>
-                    <button class="island-btn island-btn-confirm">
-                        <span>前往</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                    </button>
                 </div>
             </div>
 
             <!-- email -->
             <div class="island-layer island-email">
-                <div class="island-email-title">联系邮箱</div>
+                <div class="island-email-title">联系邮箱 · MAIL</div>
                 <div class="island-email-list">
                     <div class="island-email-item">
                         <span class="island-email-addr">admin@userhali.com</span>
@@ -152,7 +171,7 @@
                 <span class="island-toast-msg"></span>
             </div>
 
-            <!-- autoplay prompt -->
+            <!-- I: autoplay prompt (1:1 demo: head + foot with 稍后/开启, no checkbox) -->
             <div class="island-layer island-autoplay">
                 <div class="autoplay-head">
                     <span class="autoplay-icon">
@@ -164,15 +183,8 @@
                     </div>
                 </div>
                 <div class="autoplay-foot">
-                    <label class="autoplay-check">
-                        <input type="checkbox" class="autoplay-checkbox" id="autoplay-no-ask">
-                        <span class="autoplay-check-box"></span>
-                        <span>不再提示</span>
-                    </label>
-                    <div class="autoplay-actions">
-                        <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
-                        <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
-                    </div>
+                    <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
+                    <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
                 </div>
             </div>
         </div>

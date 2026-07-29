@@ -156,33 +156,66 @@
     let musicActive = false;
     let loadingSong = false; // loadSong 内部 audio.pause() 时抑制 pause 事件, 避免切歌闪烁
     let pendingHref = null;
-    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null;
+    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null;
     const CONFIRM_AUTO_MS = 8000;
-    const ISLAND_TRANSITION_MS = 600; // 与 .island-content 的 width/height 过渡时长一致
+    const ISLAND_TRANSITION_MS = 550; // 1:1 demo: .55s cubic-bezier(.34,1.2,.4,1)
     let hovering = false, userScrolling = false, scrubbing = false;
     const mouse = { x: -1, y: -1 };
 
-    // ===== 状态布局映射表（与 Gemini switchIsland 一致） =====
-    const STATE_LAYOUTS = {
-        'default':     { width: '236px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'music-bar':   { width: '212px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'nav':         { width: '520px', height: '88px',  radius: '28px', bg: 'rgba(12,12,16,.86)' },
-        'music-card':  { width: '560px', height: '146px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'confirm':     { width: '440px', height: '156px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'email':       { width: '384px', height: '124px', radius: '30px', bg: 'rgba(12,12,16,.86)' },
-        'toast':       { width: '236px', height: '50px',  radius: '25px', bg: 'rgba(12,12,16,.86)' },
-        'autoplay':    { width: '300px', height: '104px', radius: '24px', bg: 'rgba(12,12,16,1)' }
+    // ===== 移动端检测 (1:1 demo: m 变体) =====
+    const MOBILE_MEDIA = window.matchMedia('(max-width: 768px)');
+    function isMobile() { return MOBILE_MEDIA.matches; }
+
+    // ===== 状态布局映射表 (1:1 demo LY.c 桌面 + LY.m 移动) =====
+    // bg 统一 #0c0c12, 无 backdrop-filter (1:1 demo TH.c/TH.m)
+    const LAYOUTS_DESKTOP = {
+        'default':     { width: '122px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'idleT':       { width: '196px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'preview':     { width: '224px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'music-bar':   { width: '192px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'nav':         { width: '408px', height: '56px',  radius: '28px', bg: '#0c0c12' },
+        'music-card':  { width: '392px', height: '156px', radius: '32px', bg: '#0c0c12' },
+        'confirm':     { width: '344px', height: '130px', radius: '28px', bg: '#0c0c12' },
+        'email':       { width: '312px', height: '132px', radius: '28px', bg: '#0c0c12' },
+        'toast':       { width: '228px', height: '42px',  radius: '21px', bg: '#0c0c12' },
+        'autoplay':    { width: '312px', height: '106px', radius: '26px', bg: '#0c0c12' },
+        'greet':       { width: '244px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'hint':        { width: '228px', height: '36px',  radius: '18px', bg: '#0c0c12' }
     };
-    // ===== 状态内容映射表（与 Gemini stateContents 一致） =====
+    const LAYOUTS_MOBILE = {
+        'default':     { width: '112px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'idleT':       { width: '184px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'preview':     { width: '212px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'music-bar':   { width: '176px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'nav':         { width: '320px', height: '52px',  radius: '26px', bg: '#0c0c12' },
+        'music-card':  { width: '352px', height: '148px', radius: '30px', bg: '#0c0c12' },
+        'confirm':     { width: '330px', height: '128px', radius: '26px', bg: '#0c0c12' },
+        'email':       { width: '300px', height: '126px', radius: '26px', bg: '#0c0c12' },
+        'toast':       { width: '212px', height: '40px',  radius: '20px', bg: '#0c0c12' },
+        'autoplay':    { width: '300px', height: '104px', radius: '24px', bg: '#0c0c12' },
+        'greet':       { width: '228px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'hint':        { width: '214px', height: '34px',  radius: '17px', bg: '#0c0c12' }
+    };
+    function getLayouts() { return isMobile() ? LAYOUTS_MOBILE : LAYOUTS_DESKTOP; }
+    function getLayout(stateKey) {
+        const layouts = getLayouts();
+        // idle 双阶段: phase 1 用 idleT 布局 (1:1 demo dk='idleT')
+        if (stateKey === 'default' && idlePhase) return layouts['idleT'] || layouts['default'];
+        return layouts[stateKey] || layouts['default'];
+    }
+    // ===== 状态内容映射表（与 Gemini stateContents 一致 + demo 1c 新增） =====
     const STATE_CONTENTS = {
         'default':    island.querySelector('.island-default'),
+        'preview':    island.querySelector('.island-preview'),
         'music-bar':  island.querySelector('.island-music-bar'),
         'nav':        island.querySelector('.island-nav'),
         'music-card': island.querySelector('.island-music-card'),
         'confirm':    island.querySelector('.island-confirm'),
         'email':      island.querySelector('.island-email'),
         'toast':      island.querySelector('.island-toast'),
-        'autoplay':   island.querySelector('.island-autoplay')
+        'autoplay':   island.querySelector('.island-autoplay'),
+        'greet':      island.querySelector('.island-greet'),
+        'hint':       island.querySelector('.island-hint')
     };
 
     function getCurrentState() {
@@ -268,8 +301,8 @@
             // Step 1: 隐藏旧内容（fade-out 0.2s）
             if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
-            // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
-            const layout = STATE_LAYOUTS[target];
+            // Step 2: 改变外壳物理属性（1:1 demo: .55s 弹性回弹, bg 统一 #0c0c12）
+            const layout = getLayout(target);
             if (layout) {
                 island.style.width      = layout.width;
                 island.style.height     = layout.height;
@@ -278,6 +311,8 @@
             }
             // 同步清理残留的 vs-* class（兼容老 CSS）
             island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
+            // 清理所有 island-state-* class，避免状态切换后累积冲突
+            island.classList.remove('island-state-default','island-state-preview','island-state-music-bar','island-state-nav','island-state-music-card','island-state-confirm','island-state-email','island-state-toast','island-state-autoplay','island-state-greet','island-state-hint');
             // 新机制：data-state 驱动子级动画延迟
             island.setAttribute('data-state', target);
             island.classList.add('island-state-' + target);
@@ -307,12 +342,6 @@
             applyChanges();
         }
 
-        // 指示器在外壳过渡结束后再定位(过渡中 getBoundingClientRect 会读到裁剪过的错误尺寸)
-        if (target === 'nav' || target === 'music-card' || target === 'music-bar') {
-            clearTimeout(indicatorRealignTimer);
-            indicatorRealignTimer = setTimeout(repositionIndicator, ISLAND_TRANSITION_MS + 20);
-        }
-
         // 1c 分体: 更新卫星岛可见性
         updateSatellite();
 
@@ -327,7 +356,7 @@
 
     function isLocked() {
         const s = getCurrentState();
-        return s === 'confirm' || s === 'email' || s === 'toast' || s === 'autoplay';
+        return s === 'confirm' || s === 'email' || s === 'toast' || s === 'autoplay' || s === 'greet' || s === 'hint';
     }
     function pointInIsland() {
         const r = island.getBoundingClientRect();
@@ -343,7 +372,7 @@
             if (!hovering && !userScrolling && !scrubbing && !isLocked()) {
                 setState(musicActive ? 'music-bar' : 'default');
             }
-        }, delay || 900);
+        }, delay || 700);
     }
 
     function armIdle() {
@@ -363,6 +392,99 @@
             const next = hovering ? 'nav' : (musicActive ? 'music-bar' : 'default');
             setState(next);
         }, 1300);
+    }
+
+    // ===== C: greet 打招呼 (1:1 demo: greet 2.3s auto-dismiss) =====
+    let greetTimer = null;
+    function showGreet() {
+        clearTimeout(greetTimer);
+        setState('greet', { force: true });
+        greetTimer = setTimeout(() => {
+            if (getCurrentState() === 'greet') {
+                setState(hovering ? 'preview' : (musicActive ? 'music-bar' : 'default'));
+            }
+        }, 2300);
+    }
+
+    // ===== D: hint 区块提示 (1:1 demo: hint 1.7s auto-dismiss, swapA/B animation) =====
+    let hintTimer = null;
+    let hintKey = 0;
+    function showHint(sectionName) {
+        clearTimeout(hintTimer);
+        const hintSec = document.querySelector('.hint-section');
+        if (hintSec) hintSec.textContent = sectionName;
+        // re-trigger swap animation on wrapper (1:1 demo: swapSt alternates swapA/swapB)
+        hintKey++;
+        const hintSwapEl = document.querySelector('.hint-swap');
+        if (hintSwapEl) {
+            hintSwapEl.style.animation = 'none';
+            void hintSwapEl.offsetHeight;
+            hintSwapEl.style.animation = 'swap' + (hintKey % 2 ? 'A' : 'B') + ' .45s cubic-bezier(.34,1.2,.4,1)';
+        }
+        setState('hint', { force: true });
+        hintTimer = setTimeout(() => {
+            if (getCurrentState() === 'hint') {
+                setState(hovering ? 'preview' : (musicActive ? 'music-bar' : 'default'));
+            }
+        }, 1700);
+    }
+
+    // ===== A: idle 双阶段循环 (1:1 demo: 4.2s interval) =====
+    let idlePhaseTimer = null;
+    let idlePhase = 0; // 0=brand, 1=time
+    function fmtClock() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+    function dateStr() {
+        const d = new Date();
+        return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    }
+    function updateIdleTime() {
+        const el = document.querySelector('.island-idle-time');
+        if (el) el.textContent = fmtClock() + ' · ' + dateStr();
+    }
+    function startIdlePhaseCycle() {
+        clearInterval(idlePhaseTimer);
+        updateIdleTime();
+        idlePhaseTimer = setInterval(() => {
+            if (getCurrentState() !== 'default') return;
+            idlePhase = idlePhase ? 0 : 1;
+            island.classList.toggle('idle-phase-time', !!idlePhase);
+            if (idlePhase) updateIdleTime();
+            // 1:1 demo: idle 双阶段宽度不同 (brand 122px / time 196px), 切换时同步外壳宽度
+            const layout = getLayout('default');
+            if (layout) {
+                island.style.width = layout.width;
+                island.style.height = layout.height;
+                island.style.borderRadius = layout.radius;
+            }
+        }, 4200);
+    }
+
+    // ===== F: 导航进度环更新 =====
+    const navRingFill = document.getElementById('nav-ring-fill');
+    const navRingPct = document.querySelector('.nav-ring-pct');
+    const RING_CIRCUMFERENCE = 2 * Math.PI * 8.5; // ≈ 53.4
+    function updateNavRing(pct) {
+        if (!navRingFill) return;
+        const offset = RING_CIRCUMFERENCE * (1 - pct / 100);
+        navRingFill.style.strokeDashoffset = offset;
+        if (navRingPct) navRingPct.textContent = Math.round(pct) + '%';
+    }
+
+    // ===== G: 导航点指示器更新 =====
+    const previewDots = document.querySelectorAll('.preview-dots i');
+    function updatePreviewDots(idx) {
+        previewDots.forEach((dot, i) => dot.classList.toggle('active', i === idx));
+    }
+    function updatePreviewContent() {
+        const idx = lastSpIdx >= 0 ? lastSpIdx : 0;
+        const secEl = document.querySelector('.preview-section');
+        const pctEl = document.querySelector('.preview-pct');
+        if (secEl) secEl.textContent = SECTION_NAMES[idx];
+        if (pctEl) pctEl.textContent = lastSpPctTxt || '0%';
+        updatePreviewDots(idx);
     }
 
     // ===== 自动播放提示（小型 Toast：开启/稍后 + 不再提示） =====
@@ -408,6 +530,7 @@
         } catch (_) { return href || ''; }
     }
 
+    let cfKey = 0;
     function askConfirm(title, href, iconSrc, iconInvert) {
         clearConfirmTimer();
         pendingHref = href;
@@ -425,6 +548,14 @@
             } else {
                 confirmIconBox.classList.remove('has-favicon');
             }
+        }
+        // re-trigger swap animation on wrapper (1:1 demo: swapSt alternates swapA/swapB)
+        cfKey++;
+        const cfSwapEl = document.querySelector('.confirm-swap');
+        if (cfSwapEl) {
+            cfSwapEl.style.animation = 'none';
+            void cfSwapEl.offsetHeight;
+            cfSwapEl.style.animation = 'swap' + (cfKey % 2 ? 'A' : 'B') + ' .45s cubic-bezier(.34,1.2,.4,1)';
         }
         setState('confirm');
         if (confirmCountdownBar) {
@@ -570,26 +701,7 @@
 
     const sections = ['#home', '#github', '#netease', '#project'].map(id => document.querySelector(id));
     const SECTION_NAMES = ['首页', 'GitHub', 'QQ音乐', 'Projects'];
-    const pillNav = document.getElementById('pillNav');
-    const indicator = document.getElementById('indicator');
     let navJump = false;
-
-    function moveIndicatorTo(btn) {
-        if (!pillNav || !indicator || !btn) return;
-        const navRect = pillNav.getBoundingClientRect();
-        const itemRect = btn.getBoundingClientRect();
-        indicator.style.left = (itemRect.left - navRect.left) + 'px';
-        indicator.style.width = itemRect.width + 'px';
-        indicator.classList.add('ready');
-    }
-    function repositionIndicator() {
-        const act = pillNav && pillNav.querySelector('.island-nav-btn.active');
-        if (!act || !indicator) return;
-        indicator.style.transition = 'none';
-        moveIndicatorTo(act);
-        void indicator.offsetHeight;
-        indicator.style.transition = '';
-    }
 
     navBtns.forEach(btn => {
         btn.addEventListener('click', e => {
@@ -602,7 +714,6 @@
                     navJump = true;
                     navBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    moveIndicatorTo(btn);
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     setTimeout(() => { navJump = false; }, 800);
                 }
@@ -622,6 +733,7 @@
             if (sectionOffsets[i] - 120 <= y) idx = i;
         }
         if (idx !== lastSpIdx) {
+            const prevIdx = lastSpIdx;
             lastSpIdx = idx;
             for (let i = 0; i < navBtns.length; i++) {
                 const b = navBtns[i];
@@ -629,21 +741,38 @@
                 const wasActive = b.classList.contains('active');
                 if (wasActive !== should) {
                     b.classList.toggle('active', should);
-                    if (should) moveIndicatorTo(b);
                 }
             }
             if (spSection) spSection.textContent = SECTION_NAMES[idx];
+            // D: 区块切换时触发 hint (首次加载 prevIdx=-1 时不触发)
+            if (prevIdx >= 0 && !hovering && !isLocked()) {
+                showHint(SECTION_NAMES[idx]);
+            }
+            // G: 更新 preview 导航点
+            updatePreviewDots(idx);
         }
     }
 
-    requestAnimationFrame(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); repositionIndicator(); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); }));
     if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); repositionIndicator(); }));
+        document.fonts.ready.then(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); }));
     }
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => { recomputeLayoutMetrics(); repositionIndicator(); }, 120);
+        resizeTimer = setTimeout(() => {
+            recomputeLayoutMetrics();
+            // 1:1 demo: 移动端/桌面端布局切换时重新应用当前状态布局
+            const cur = getCurrentState();
+            const layout = getLayout(cur);
+            if (layout && !island.classList.contains('sat-collapsed')) {
+                island.style.width = layout.width;
+                island.style.height = layout.height;
+                island.style.borderRadius = layout.radius;
+            }
+            // 卫星岛也需要同步
+            updateSatellite();
+        }, 120);
     }, { passive: true });
     function updateScrollProgress(y) {
         const pct = scrollMax > 0 ? (y / scrollMax) * 100 : 0;
@@ -685,8 +814,12 @@
 
     function hoverExpand() {
         if (isLocked() || satOpen) return;
-        // 1c 分体: hover 时始终展示 nav, 音乐播放时卫星岛自动出现
-        setState('nav');
+        // B+I: 1c 分体两段式 — hover 先展开 preview, 点击才展开 nav
+        const cur = getCurrentState();
+        if (cur === 'default' || cur === 'music-bar') {
+            updatePreviewContent();
+            setState('preview');
+        }
         updateScrollProgress(window.scrollY || document.documentElement.scrollTop || 0);
     }
     island.addEventListener('mouseenter', () => { hovering = true; clearTimeout(collapseTimer); hoverExpand(); });
@@ -709,9 +842,14 @@
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub')) return;
         if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
-        if (cur === 'default' || cur === 'music-bar') {
-            if (musicActive && e.target.closest('.island-music-bar')) setState('music-card');
-            else setState('nav');
+        // I: 两段式 — preview 点击展开 nav, nav 点击收起
+        if (cur === 'default' || cur === 'preview') {
+            if (musicActive && cur === 'music-bar') setState('music-card');
+            else { setState('nav'); updateScrollProgress(window.scrollY || 0); }
+        } else if (cur === 'music-bar') {
+            setState('music-card');
+        } else if (cur === 'nav') {
+            setState(musicActive ? 'music-bar' : 'default');
         }
     });
 
@@ -756,7 +894,13 @@
         const cur = getCurrentState();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; showToast('error', '已取消'); island.classList.remove('idle'); }
         else if (cur === 'email') { setState('default'); island.classList.remove('idle'); }
-        else if (cur === 'default' || cur === 'music-bar' || cur === 'music-card') { setState('nav'); island.classList.remove('idle'); }
+        else if (cur === 'greet' || cur === 'hint') { /* 滚动不打断 greet/hint */ }
+        else if (cur === 'default' || cur === 'music-bar' || cur === 'music-card' || cur === 'preview') {
+            // B: 滚动时展开 preview (而非 nav), 显示当前区块+进度
+            updatePreviewContent();
+            setState('preview');
+            island.classList.remove('idle');
+        }
         clearTimeout(scrollEndTimer);
         scrollEndTimer = setTimeout(() => {
             userScrolling = false;

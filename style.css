@@ -297,25 +297,24 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .footer{text-align:center;padding:40px 20px;color:var(--text-faint);font-size:.85rem;letter-spacing:.5px;position:relative}
 .footer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
 
-.dynamic-island{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;width:100vw;pointer-events:none}
-/* ===== 1:1 抄袭 Gemini3.5 灵动岛架构 =====
+.dynamic-island{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
+/* ===== 1:1 demo 灵动岛架构 (1c 石墨分体) =====
    外壳（流形变）+ 内层（淡入淡出）双层独立动画
    状态切换由 JS 同步 3 步完成：remove active → 改 inline style → add active */
 
 .island-content{
     position:relative;pointer-events:auto;cursor:pointer;overflow:hidden;
-    width:236px;height:40px;border-radius:22px;
-    background-color:rgba(12,12,16,.86);
-    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
-    border:1px solid rgba(255,255,255,.06);
+    width:122px;height:36px;border-radius:18px;
+    background-color:#0c0c12;
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 12px 32px rgba(0,0,0,.55);
     display:flex;align-items:center;justify-content:center;
-    /* 仅在状态切换时短暂启用 will-change，避免长期占 GPU 合成层 */
-    transition:width 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               height 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               border-radius 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               background-color 0.4s ease,
-               opacity 0.35s ease,
-               transform 0.55s cubic-bezier(0.175,0.885,0.32,1.15);
+    /* 1:1 demo: .55s cubic-bezier(.34,1.2,.4,1) */
+    transition:width .55s cubic-bezier(.34,1.2,.4,1),
+               height .55s cubic-bezier(.34,1.2,.4,1),
+               border-radius .55s cubic-bezier(.34,1.2,.4,1),
+               opacity .35s ease,
+               transform .55s cubic-bezier(.34,1.2,.4,1);
     touch-action:manipulation;
     contain:layout paint}
 /* island 默认可见，revealIsland 仅是触发 idle 计时器（不再做动画覆盖） */
@@ -324,21 +323,53 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.07) 50%,transparent 65%);
     transform:translateX(-120%);opacity:0;transition:opacity .4s}
 
-/* 内层：默认隐藏，缩放偏移 */
+/* 内层：默认隐藏，缩放偏移 (1:1 demo layerStyle: scale .84 + blur 5px) */
 .island-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
-    opacity:0;pointer-events:none;transform:scale(0.9) translateY(4px);
-    transition:opacity 0.2s ease,transform 0.35s cubic-bezier(0.25,1,0.5,1)}
+    opacity:0;pointer-events:none;transform:scale(.84);filter:blur(5px);
+    transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease}
 
-/* 内层：激活态（与 Gemini active-content 1:1 一致） */
+/* 内层：激活态 (1:1 demo: opacity .3s .12s delay, transform .5s .08s delay, filter .3s .12s delay) */
 .island-layer.active-content{
-    opacity:1;pointer-events:auto;transform:scale(1) translateY(0);
-    transition:opacity 0.4s ease 0.15s,transform 0.4s cubic-bezier(0.25,1,0.5,1) 0.1s}
+    opacity:1;pointer-events:auto;transform:scale(1);filter:blur(0);
+    transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s}
 
 .island-default{position:relative}
-.island-idle-brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;opacity:1;pointer-events:none;
-    font-size:.82rem;font-weight:600;letter-spacing:.5px;transition:opacity .55s var(--ease);
-    background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.island-idle-wrap{position:relative;width:100%;height:100%;overflow:hidden}
+.island-idle-brand,.island-idle-time{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;pointer-events:none;
+    transition:opacity .45s ease,transform .55s cubic-bezier(.34,1.2,.4,1),filter .45s ease}
+.island-idle-brand{
+    font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.9);
+    opacity:1;filter:blur(0);transform:scale(1)}
+.island-idle-time{
+    font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.9);
+    opacity:0;filter:blur(4px);transform:scale(.85)}
+.island-content.idle-phase-time .island-idle-brand{opacity:0;filter:blur(4px);transform:scale(.85)}
+.island-content.idle-phase-time .island-idle-time{opacity:1;filter:blur(0);transform:scale(1)}
+.island-idle-brand::before,.island-idle-time::before{
+    content:'';width:5px;height:5px;border-radius:50%;background:#ff8fb6;
+    box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block;flex-shrink:0}
+@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
 .island-content.island-state-default.idle .island-idle-brand{opacity:1}
+
+/* B: preview 悬停预览 (1:1 demo: section + dots + pct, padding 0 15px, space-between) */
+.island-preview{padding:0 15px;justify-content:space-between;gap:0}
+.preview-section{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap}
+.preview-dots{display:flex;gap:5px;align-items:center}
+.preview-dots i{width:4px;height:4px;border-radius:50%;display:block;background:rgba(255,255,255,.28);transition:background .3s}
+.preview-dots i.active{background:#ff8fb6;box-shadow:0 0 6px rgba(255,143,182,.8)}
+.preview-pct{font-family:var(--font-mono);font-size:10.5px;color:rgba(255,255,255,.5);white-space:nowrap}
+
+/* C: greet 打招呼 (1:1 demo: gap 8px, nowrap) */
+.island-greet{gap:8px}
+.greet-jp{font-size:12.5px;font-weight:600;color:#ff8fb6;white-space:nowrap}
+.greet-cn{font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap}
+
+/* D: hint 区块提示 (1:1 demo: hintSwap wrapper with swapA/B animation) */
+.island-hint{}
+.hint-swap{display:flex;align-items:center;gap:6px;animation:swapA .45s cubic-bezier(.34,1.2,.4,1)}
+.hint-label{font-size:12px;color:rgba(255,255,255,.55);white-space:nowrap}
+.hint-section{font-size:12.5px;font-weight:700;color:#ff8fb6;white-space:nowrap}
 
 .island-mini-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
     border:none;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;width:28px;height:28px;padding:0;
@@ -371,173 +402,150 @@ body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out
 @keyframes eqBarC{0%,100%{height:26%}45%{height:82%}78%{height:36%}}
 @keyframes eqBarD{0%,100%{height:56%}38%{height:30%}72%{height:88%}}
 
-.island-music-bar{justify-content:flex-start;gap:10px;padding:0 14px 0 10px}
-.ib-cover{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.5);
+/* E: music-bar (1:1 demo mbar: 192x36, padding 0 10px, cover 24x24 r7) */
+.island-music-bar{justify-content:space-between;gap:10px;padding:0 10px}
+.ib-cover{width:24px;height:24px;border-radius:7px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.5);
     transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
 .ib-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
-.ib-title,.ib-progress{display:none}
 .island-music-bar .island-eq{margin-left:auto;order:3;view-transition-name:music-eq}
 
-.island-music-card{justify-content:flex-start;gap:18px;padding:0 24px}
-.mc-cover{width:96px;height:96px;border-radius:17px;object-fit:cover;flex-shrink:0;box-shadow:0 8px 22px rgba(0,0,0,.55);
+/* G: music-card 列布局 (1:1 demo mcard: 392x156, padding 16px 18px 13px, column) */
+.island-music-card{flex-direction:column;justify-content:flex-start;gap:0;padding:16px 18px 13px}
+/* 顶行: cover + info + EQ (1:1 demo row1: gap 12px, align center) */
+.island-music-card .mc-top-row{display:flex;align-items:center;gap:12px;min-width:0}
+.island-music-card .mc-cover{
+    width:52px;height:52px;border-radius:13px;object-fit:cover;flex-shrink:0;
+    box-shadow:0 6px 16px rgba(0,0,0,.5);
     transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
-.mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
-.mc-main{position:relative;flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:7px}
-.mc-main .island-eq{position:absolute;right:0;top:0;margin:0;view-transition-name:music-eq}
-.mc-title{font-size:1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:24px}
-.mc-artist{font-size:.78rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mc-scrub{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;margin:2px 0}
-.mc-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
-.mc-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#fff}
-.mc-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mc-ctrls{display:flex;align-items:center;justify-content:center;gap:18px;flex:1 1 auto}
-/* Island 卡片控制按钮：同样去掉外框/圆圈，仅保留 SVG，居中 */
-.mc-ctrls .island-mini-btn,
-.mc-ctrls .island-mini-btn--ghost{width:auto;height:auto;background:transparent;border:none;border-radius:0;box-shadow:none;padding:0}
-.mc-ctrls .island-mini-btn:hover,
-.mc-ctrls .island-mini-btn--ghost:hover{background:transparent;transform:scale(1.15)}
-.mc-ctrls .island-mini-btn svg,
-.mc-ctrls .island-mini-btn--ghost svg{width:22px;height:22px;fill:#fff;color:#fff}
-.mc-ctrls .island-mini-btn--ghost svg{fill:var(--text-dim);color:var(--text-dim);width:18px;height:18px}
-.mc-ctrls .island-mini-btn--ghost:hover svg{fill:#fff;color:#fff}
-.mc-cur,.mc-dur{font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;min-width:30px;font-family:var(--font-mono)}
-.mc-dur{text-align:right}
+.island-music-card .mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
+.island-music-card .mc-info{
+    flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.island-music-card .mc-info .mc-title{
+    font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.island-music-card .mc-info .mc-artist{
+    font-size:11.5px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* EQ: 16px height, 3px bars (1:1 demo eqBig) */
+.island-music-card .mc-top-row .island-eq{
+    height:16px;flex-shrink:0;view-transition-name:music-eq}
+.island-music-card .mc-top-row .island-eq i{width:3px}
+/* 进度条: margin-top 12px, 4px (1:1 demo seek) */
+.island-music-card .mc-scrub{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:999px;
+    background:rgba(255,255,255,.16);cursor:pointer;margin:12px 0 0}
+.island-music-card .mc-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#ff8fb6;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.island-music-card .mc-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#ff8fb6}
+/* 时间标签: mono 9.5px, space-between (1:1 demo) */
+.island-music-card .mc-time{
+    display:flex;justify-content:space-between;margin-top:5px}
+.island-music-card .mc-cur,.island-music-card .mc-dur{
+    font-size:9.5px;color:rgba(255,255,255,.4);font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.island-music-card .mc-dur{text-align:right}
+/* 控制按钮: 居中, gap:32px, margin-top:7px (1:1 demo) */
+.island-music-card .mc-ctrls{
+    display:flex;align-items:center;justify-content:center;gap:32px;margin-top:7px;width:100%}
+.island-music-card .mc-ctrls .island-mini-btn,
+.island-music-card .mc-ctrls .island-mini-btn--ghost{width:auto;height:auto;background:transparent;border:none;border-radius:0;box-shadow:none;padding:4px}
+.island-music-card .mc-ctrls .island-mini-btn:hover,
+.island-music-card .mc-ctrls .island-mini-btn--ghost:hover{background:transparent;transform:scale(1.15)}
+.island-music-card .mc-ctrls .island-mini-btn svg,
+.island-music-card .mc-ctrls .island-mini-btn--ghost svg{width:17px;height:17px;fill:rgba(255,255,255,.65)}
+.island-music-card .mc-ctrls .island-mini-btn--ghost svg{fill:rgba(255,255,255,.65);width:17px;height:17px}
+.island-music-card .mc-ctrls .island-mini-btn--ghost:hover svg{fill:#fff}
+.island-music-card .mc-ctrls .mc-toggle svg{width:20px;height:20px;fill:#fff}
 
-.island-nav{flex-direction:column;justify-content:center;gap:2px;padding:10px 18px 4px}
-.pill-nav{position:relative;display:flex;align-items:center;gap:4px;padding:3px;margin-top:2px;background:rgba(255,255,255,.10);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);
-    border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
-.pill-indicator{position:absolute;top:5px;bottom:5px;background:linear-gradient(120deg,var(--accent),var(--accent-3));
-    border-radius:999px;box-shadow:0 4px 14px -3px rgba(255,107,157,.35);pointer-events:none;z-index:0;
-    transition:left .42s var(--island-spring),width .42s var(--island-spring),opacity .28s var(--ease);opacity:0}
-.pill-indicator.ready{opacity:1}
-.island-nav-btn{color:var(--text-dim);font-size:.93rem;font-weight:600;border-radius:999px;padding:7px 16px;text-decoration:none;
-    position:relative;z-index:1;white-space:nowrap;transition:color .25s var(--ease),transform .35s var(--spring);
-    opacity:0;transform:translateY(8px)}
+/* F: nav 单行布局 (1:1 demo: 408x56, padding 0 14px, gap 3px, 单行: buttons + divider + ring + pct) */
+.island-nav{flex-direction:row;align-items:center;justify-content:center;gap:3px;padding:0 14px}
+.nav-divider{width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 9px 0 auto;flex-shrink:0}
+.nav-progress-ring{width:20px;height:20px;flex-shrink:0}
+.nav-progress-ring circle{transition:stroke-dashoffset .15s ease-out}
+.nav-ring-pct{font-family:var(--font-mono);font-size:10.5px;color:rgba(255,255,255,.5);margin-left:6px;white-space:nowrap;flex-shrink:0}
+.island-nav-btn{color:rgba(255,255,255,.5);font-size:13px;font-weight:600;border-radius:999px;padding:6px 13px;text-decoration:none;
+    position:relative;z-index:1;white-space:nowrap;transition:color .3s,background .3s;
+    cursor:pointer;background:transparent}
 .island-content.island-state-nav .island-nav-btn{opacity:1;transform:none}
-.island-content.island-state-nav .island-nav-btn:nth-child(2){transition-delay:.10s}
-.island-content.island-state-nav .island-nav-btn:nth-child(3){transition-delay:.16s}
-.island-content.island-state-nav .island-nav-btn:nth-child(4){transition-delay:.22s}
-.island-content.island-state-nav .island-nav-btn:nth-child(5){transition-delay:.28s}
 .island-nav-btn:hover{color:#fff}
-.island-nav-btn.active{color:#fff}
-.scroll-progress{width:100%;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(4px);transition:opacity .3s ease .2s,transform .3s ease .2s}
-.island-content.island-state-nav .scroll-progress{opacity:1;transform:none}
-.scroll-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:600;letter-spacing:.4px}
-.sp-section{color:var(--text-dim)}
-.sp-pct{color:#fff;font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
-.scroll-progress-container{position:relative;width:100%;height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}
-.scroll-progress-bar{position:relative;height:100%;width:0%;border-radius:999px;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3),var(--accent));background-size:200% 100%;
-    transition:width .15s ease-out;animation:spFlow 3s linear infinite}
-@keyframes spFlow{to{background-position:-200% 0}}
-.scroll-progress-bar::after{content:'';position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);animation:spShimmer 3.2s ease-in-out infinite}
-@keyframes spShimmer{0%{transform:translateX(-100%)}55%,100%{transform:translateX(260%)}}
-.sp-head{position:absolute;right:0;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--accent-2),0 0 4px #fff;transform:translateY(-50%);opacity:.9}
+.island-nav-btn.active{color:#fff;background:rgba(255,255,255,.14)}
 
-.island-confirm{justify-content:flex-start;align-items:stretch;padding:14px 18px 14px;flex-direction:column;gap:11px;height:156px;overflow:hidden}
+/* H: confirm (1:1 demo: 344x130, r28, cfSwap wrapper with swapA/B animation) */
+.island-confirm{overflow:hidden}
+.confirm-swap{width:100%;height:100%;display:flex;flex-direction:column;padding:14px 16px;box-sizing:border-box;gap:10px;animation:swapA .45s cubic-bezier(.34,1.2,.4,1)}
 
-.island-confirm-info{display:flex;align-items:center;gap:14px;width:100%;min-width:0}
-.island-confirm-icon{flex:0 0 auto;position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-    border-radius:14px;background:rgba(255,143,182,.12);border:1px solid rgba(255,143,182,.28);
-    box-shadow:0 6px 18px -6px rgba(255,143,182,.45),inset 0 1px 0 rgba(255,255,255,.10);
+.island-confirm-info{display:flex;align-items:center;gap:12px;width:100%;min-width:0}
+.island-confirm-icon{flex:0 0 auto;position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
     overflow:hidden}
 .island-confirm-icon::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
     background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 55%)}
-.island-confirm-icon img.confirm-favicon{width:30px;height:30px;object-fit:contain;display:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
-.island-confirm-icon .confirm-fallback{width:22px;height:22px;color:var(--accent-2);display:block}
+.island-confirm-icon img.confirm-favicon{width:26px;height:26px;object-fit:contain;display:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.island-confirm-icon .confirm-fallback{width:20px;height:20px;color:var(--accent-2);display:block}
 .island-confirm-icon.has-favicon img.confirm-favicon{display:block}
 .island-confirm-icon.has-favicon .confirm-fallback{display:none}
 
 .island-confirm-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
-.island-confirm-title{font-size:1.04rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.confirm-site{background:linear-gradient(120deg,#fff 0%,#ffd8e7 55%,#ff8fb6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
-.island-confirm-host{font-size:.74rem;color:var(--text-dim);font-family:var(--font-mono);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.island-confirm-title{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.confirm-site{color:#fff;font-weight:700}
+.island-confirm-host{font-size:10px;color:rgba(255,255,255,.45);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.island-confirm-countdown{position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.island-confirm-countdown{position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
 .island-confirm-countdown-bar{position:absolute;left:0;top:0;height:100%;width:100%;border-radius:999px;transform-origin:left center;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));box-shadow:0 0 8px rgba(255,143,182,.45)}
+    background:linear-gradient(90deg,var(--accent),var(--accent-2))}
 
-.island-confirm-actions{flex:0 0 auto;display:flex;gap:10px;width:100%;margin-top:auto}
-.island-btn{display:flex;align-items:center;justify-content:center;min-width:0;height:42px;padding:0 18px;border-radius:14px;border:none;font-size:.93rem;font-weight:600;cursor:pointer;gap:6px;
-    transition:transform .25s var(--spring),background .25s var(--ease),box-shadow .25s var(--ease),filter .25s var(--ease),border-color .25s var(--ease)}
-.island-btn-cancel{flex:0 0 34%;background:rgba(255,255,255,.06);color:var(--text);border:1px solid rgba(255,255,255,.14)}
-.island-btn-cancel:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24);transform:translateY(-1px);color:#fff}
+.island-confirm-actions{flex:0 0 auto;display:flex;gap:8px;width:100%;margin-top:auto}
+.island-btn{display:flex;align-items:center;justify-content:center;min-width:0;height:36px;padding:0;border-radius:12px;border:none;font-size:12.5px;font-weight:600;cursor:pointer;
+    transition:transform .25s var(--spring),background .25s var(--ease),border-color .25s var(--ease)}
+.island-btn-cancel{flex:0 0 34%;background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.14)}
+.island-btn-cancel:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
 .island-btn-cancel:active{transform:translateY(0);filter:brightness(.92)}
-.island-btn-confirm{flex:1 1 auto;color:#1a0610;background:linear-gradient(120deg,var(--accent),var(--accent-3));
-    box-shadow:0 8px 20px -6px rgba(255,107,157,.55),inset 0 1px 0 rgba(255,255,255,.28)}
-.island-btn-confirm:hover{transform:translateY(-2px);box-shadow:0 14px 30px -8px rgba(255,107,157,.7),inset 0 1px 0 rgba(255,255,255,.32);filter:brightness(1.04)}
+.island-btn-confirm{flex:1 1 auto;color:#ffb3cd;background:rgba(255,143,182,.16);
+    border:1px solid rgba(255,143,182,.4);font-weight:700}
+.island-btn-confirm:hover{background:rgba(255,143,182,.28);transform:translateY(-2px)}
 .island-btn-confirm:active{transform:translateY(0);filter:brightness(.95)}
-.island-btn-confirm svg{width:16px;height:16px;flex-shrink:0;transition:transform .25s var(--spring)}
-.island-btn-confirm:hover svg{transform:translateX(4px)}
 
-.island-email{flex-direction:column;gap:8px;padding:14px 20px}
-.island-email-title{font-size:.85rem;color:var(--text-dim);align-self:flex-start;letter-spacing:1px}
+/* I: email (1:1 demo: 312x132, padding 12px 18px, gap 8px, justify center) */
+.island-email{flex-direction:column;justify-content:center;gap:8px;padding:12px 18px}
+.island-email-title{font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.4);font-family:var(--font-mono);align-self:flex-start}
 .island-email-list{display:flex;flex-direction:column;gap:8px;width:100%}
-.island-email-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
-.island-email-addr{font-size:.92rem;color:#fff}
-.island-email-copy{padding:4px 14px;border-radius:12px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;color:#fff;background:rgba(255,255,255,.12);transition:transform .25s var(--spring),background .25s var(--ease)}
-.island-email-copy:hover{background:linear-gradient(120deg,var(--accent),var(--accent-3));transform:translateY(-2px)}
+.island-email-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%}
+.island-email-addr{font-size:12.5px;color:#fff}
+.island-email-copy{padding:4px 13px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);transition:background .25s}
+.island-email-copy:hover{background:rgba(255,255,255,.22)}
 
-.island-toast{gap:8px;font-size:.95rem;font-weight:500;letter-spacing:.3px;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;font-synthesis:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
-.island-toast-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.8rem;color:#fff}
-.island-content.toast-success .island-toast{color:#4cd964}
-.island-content.toast-success .island-toast-icon{background:#4cd964}
-.island-content.toast-error .island-toast{color:#ff6b6b}
-.island-content.toast-error .island-toast-icon{background:#ff453a}
+/* I: toast (1:1 demo: 228x42, padding 0 14px, gap 8px, icon 18px, msg 12.5px, text always #fff) */
+.island-toast{gap:8px;padding:0 14px;font-size:12.5px;font-weight:600;letter-spacing:.3px;color:#fff;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;font-synthesis:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+.island-toast-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:.7rem;color:#fff;flex-shrink:0}
+.island-content.toast-success .island-toast-icon{background:#32d74b}
+.island-content.toast-error .island-toast-icon{background:#ff5f57}
 .island-content.island-state-toast .island-toast{animation:toastPop .5s var(--spring)}
 @keyframes toastPop{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
 
-/* ===== autoplay prompt — compact 2-row toast ===== */
+/* I: autoplay (1:1 demo: 312x106, padding 12px 16px, gap 11px, justify center) */
 .island-autoplay{
     display:flex;flex-direction:column;justify-content:center;
-    padding:11px 14px 10px;text-align:left;color:#fff;
-    gap:7px}
+    padding:12px 16px;text-align:left;color:#fff;
+    gap:11px}
 
 /* 第 1 行：图标 + 标题副标题（信息层） */
 .autoplay-head{display:flex;align-items:center;gap:10px}
 .autoplay-icon{display:inline-flex;align-items:center;justify-content:center;
-    width:28px;height:28px;border-radius:50%;flex-shrink:0;
-    background:linear-gradient(135deg,var(--accent),var(--accent-3));
-    box-shadow:0 2px 6px rgba(255,107,157,.28),inset 0 1px 0 rgba(255,255,255,.28)}
-.autoplay-icon svg{width:13px;height:13px;fill:#1a0610}
-/* play 三角几何中心偏右，视觉上向左微调以获得光学居中 */
-.autoplay-icon .ic-play{transform:translateX(-.7px)}
+    width:28px;height:28px;border-radius:50%;flex-shrink:0;box-sizing:border-box;
+    background:rgba(255,143,182,.18);border:1px solid rgba(255,143,182,.4)}
+.autoplay-icon svg{width:12px;height:12px;fill:#ffb3cd;transform:translateX(.5px)}
 
 .autoplay-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
-.autoplay-title{font-size:.88rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
-.autoplay-sub{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.3;letter-spacing:.2px}
+.autoplay-title{font-size:12.5px;font-weight:700;color:#fff;line-height:1.2}
+.autoplay-sub{font-size:10px;color:rgba(255,255,255,.45);line-height:1.3}
 
-/* 第 2 行：不再提示 + 稍后/开启 */
-.autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+/* 第 2 行：稍后/开启 (1:1 demo: justify-end, gap 6px) */
+.autoplay-foot{display:flex;align-items:center;justify-content:flex-end;gap:6px}
 
-.autoplay-check{display:flex;align-items:center;gap:6px;font-size:.7rem;color:rgba(255,255,255,.6);
-    cursor:pointer;user-select:none;letter-spacing:.2px}
-.autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.autoplay-check-box{display:inline-block;width:13px;height:13px;min-width:13px;flex-shrink:0;
-    border:1.3px solid rgba(255,255,255,.32);border-radius:3px;background:rgba(255,255,255,.03);cursor:pointer;
-    position:relative;transition:border-color .18s var(--ease),background .18s var(--ease)}
-.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
-.autoplay-checkbox:checked + .autoplay-check-box{
-    background:linear-gradient(135deg,var(--accent),var(--accent-3));border-color:transparent;
-    box-shadow:0 2px 5px rgba(255,107,157,.32)}
-.autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
-    left:3px;top:.5px;width:3px;height:6.5px;border:solid #1a0610;border-width:0 1.8px 1.8px 0;
-    transform:rotate(45deg);animation:apCheck .22s var(--spring)}
-@keyframes apCheck{0%{transform:rotate(45deg) scale(0)}60%{transform:rotate(45deg) scale(1.15)}100%{transform:rotate(45deg) scale(1)}}
-
-.autoplay-actions{display:flex;gap:6px}
-.autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:5px 12px;border-radius:12px;
-    font-size:.72rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
-    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease);
+.autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:5px 13px;border-radius:999px;
+    font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;line-height:1.2;
+    transition:background .25s;
     touch-action:manipulation}
-.autoplay-later{background:rgba(255,255,255,.10);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.08)}
-.autoplay-later:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.18)}
-.autoplay-later:active{transform:scale(.94)}
-.autoplay-enable{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#1a0610;
-    box-shadow:0 2px 8px rgba(255,107,157,.32)}
-.autoplay-enable:hover{filter:brightness(1.07);box-shadow:0 3px 12px rgba(255,107,157,.42)}
-.autoplay-enable:active{transform:scale(.94)}
+.autoplay-later{background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.1)}
+.autoplay-later:hover{background:rgba(255,255,255,.16)}
+.autoplay-enable{background:rgba(255,143,182,.16);color:#ffb3cd;border:1px solid rgba(255,143,182,.4);padding:5px 15px;font-weight:700}
+.autoplay-enable:hover{background:rgba(255,143,182,.28)}
 
 .island-content.island-state-autoplay .island-autoplay{animation:toastPop .5s var(--spring)}
 
@@ -558,15 +566,16 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 /* ===== Satellite Island (1c 石墨分体) — 1:1 demo satSt/satLayer/satL1 =====
    主岛忙碌时音乐分裂到右侧小岛; 点小岛原地展开播放卡。
    data-sat 属性驱动: hidden / icon / pill / open
+   容器 gap:8px 提供间距; 卫星岛 marginLeft:0(可见非open) / -8px(hidden/open)
    hidden 分两种变形: 播放中(merge 回主岛) vs 未播放(简单缩小) */
 .island-sat{
     position:relative;pointer-events:none;cursor:pointer;overflow:hidden;
     flex-shrink:0;box-sizing:border-box;
-    width:0px;height:40px;border-radius:20px;
+    width:0px;height:36px;border-radius:18px;
     background-color:#0c0c12;
     border:1px solid rgba(255,255,255,.1);
     box-shadow:0 12px 32px rgba(0,0,0,.55);
-    opacity:0;transform:scale(.6);
+    opacity:0;transform:scale(.6);margin-left:-8px;
     transition:width .55s cubic-bezier(.34,1.2,.4,1),
                height .55s cubic-bezier(.34,1.2,.4,1),
                border-radius .55s cubic-bezier(.34,1.2,.4,1),
@@ -579,31 +588,31 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 body.audio-playing .island-sat[data-sat="hidden"]{
     transform:translateX(-46px) scale(.35)}
 
-/* pill 模式: 小药丸 (cover + 5-bar EQ) */
+/* pill 模式: 小药丸 (cover + 5-bar EQ) — 1:1 demo satGeo c: pill=86, h=36 */
 .island-sat[data-sat="pill"]{
-    width:90px;height:40px;border-radius:20px;
-    opacity:1;transform:none;pointer-events:auto;
-    margin-left:8px}
-
-/* icon 模式: 仅封面图标 (主岛显示重要内容时) */
-.island-sat[data-sat="icon"]{
-    width:40px;height:40px;border-radius:20px;
-    opacity:1;transform:none;pointer-events:auto;
-    margin-left:8px}
-.island-sat[data-sat="icon"] .sat-pill{justify-content:center;padding:0}
-.island-sat[data-sat="icon"] .sat-pill .island-eq{display:none}
-
-/* open 模式: 展开为完整播放卡 (margin-left:0 让卫星岛占据主岛位置) */
-.island-sat[data-sat="open"]{
-    width:560px;height:146px;border-radius:32px;
+    width:86px;height:36px;border-radius:18px;
     opacity:1;transform:none;pointer-events:auto;
     margin-left:0}
 
+/* icon 模式: 仅封面图标 (主岛显示重要内容时) — 1:1 demo: w=h=36 */
+.island-sat[data-sat="icon"]{
+    width:36px;height:36px;border-radius:18px;
+    opacity:1;transform:none;pointer-events:auto;
+    margin-left:0}
+.island-sat[data-sat="icon"] .sat-pill{justify-content:center;padding:0}
+.island-sat[data-sat="icon"] .sat-pill .island-eq{display:none}
+
+/* open 模式: 展开为完整播放卡 — 1:1 demo satGeo c: card=[392,156,32], marginLeft:-8px */
+.island-sat[data-sat="open"]{
+    width:392px;height:156px;border-radius:32px;
+    opacity:1;transform:none;pointer-events:auto;
+    margin-left:-8px}
+
 /* hidden 模式: 0 宽度, 不可见 (未播放时简单缩小) */
 .island-sat[data-sat="hidden"]{
-    width:0px;height:40px;border-radius:20px;
+    width:0px;height:36px;border-radius:18px;
     opacity:0;transform:scale(.6);
-    pointer-events:none}
+    pointer-events:none;margin-left:-8px}
 
 /* 卫星岛内层: on 慢且有延迟 + blur, off 快 (1:1 demo satLayer) */
 .island-sat .island-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
@@ -617,11 +626,11 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .ib-cover,.island-sat .mc-cover{view-transition-name:none}
 .island-sat .island-eq{view-transition-name:none}
 
-/* 卫星岛封面: 圆形 (50%), 无阴影 (1:1 demo coverSat) */
-.island-sat .ib-cover{border-radius:50%;box-shadow:none}
+/* 卫星岛封面: 圆形 28x28 (1:1 demo coverSat), 无阴影 */
+.island-sat .ib-cover{width:28px;height:28px;border-radius:50%;box-shadow:none}
 
-/* pill 模式内容: pad=(h-2-cover)/2=5px 确保左间距==上下有效间距 (1:1 demo satL1) */
-.island-sat .sat-pill{justify-content:flex-start;gap:8px;padding:0 5px;box-sizing:border-box;
+/* pill 模式内容: pad=(h-2-cover)/2=3px 确保左间距==上下有效间距 (1:1 demo satL1) */
+.island-sat .sat-pill{justify-content:flex-start;gap:8px;padding:0 3px;box-sizing:border-box;
     transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill.active-sat-content{
     transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
@@ -668,13 +677,18 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 
 /* 进度条: margin-top:12px, 4px, 999px radius (1:1 demo seek) */
 .island-sat .sat-card-scrub{
-    margin:12px 0 0;border-radius:999px}
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:999px;
+    background:rgba(255,255,255,.16);cursor:pointer;margin:12px 0 0}
+.island-sat .sat-card-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#ff8fb6;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.island-sat .sat-card-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#ff8fb6}
+/* 卫星岛封面 cover-swap 动画 (与主岛一致) */
+.island-sat .sat-card .mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
 
 /* 时间标签: mono, 9.5px, space-between (1:1 demo) */
 .island-sat .sat-card-time{
     display:flex;justify-content:space-between;
     font-family:var(--font-mono);font-size:9.5px;
-    color:rgba(255,255,255,.4);margin-top:2px}
+    color:rgba(255,255,255,.4);margin-top:5px}
 .island-sat .sat-card-time .mc-cur,
 .island-sat .sat-card-time .mc-dur{
     font-size:9.5px;color:rgba(255,255,255,.4);
@@ -712,8 +726,8 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 @keyframes swapB{0%{opacity:0;transform:scale(.9);filter:blur(4px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
 
 /* ===== 岛入场动画(intro 结束后首次出现) ===== */
-@keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
-.island-entrance{animation:islandEntrance .75s var(--spring);transform-origin:center top}
+@keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+.island-entrance{animation:islandEntrance .7s cubic-bezier(.34,1.2,.4,1);transform-origin:center top}
 
 /* ===== 鼠标点击水波纹(ripple.js) =====
    - 径向渐变环带:波峰高光(白)+波谷(粉渐隐),有体积感不是细线
@@ -767,9 +781,6 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 #fpsCounter[data-level="bad"]{color:#f87171}
 
 @media (max-width:1024px){
-    .island-content.island-state-nav[data-state="nav"]{width:min(94vw,460px)}
-    .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,500px)}
-    .island-content.island-state-confirm[data-state="confirm"]{width:min(94vw,400px)}
     .card{max-width:680px}
     .projects-wrap{max-width:880px}
     .projects-grid{grid-template-columns:repeat(2,1fr)}
@@ -777,21 +788,74 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 }
 @media (max-width:768px){
     .page{padding:110px 16px 70px}
+    .dynamic-island{top:14px}
     .card-body{padding:22px 18px}
     .netease-body{gap:22px}
     .gh-profile{justify-content:center;text-align:center}
     .netease-player{flex-direction:column;align-items:center;text-align:center;max-width:100%;gap:14px}
     .np-cover-wrap{width:110px;height:110px}
-    .island-content.island-state-nav[data-state="nav"]{width:min(94vw,496px)}
-    .island-content.island-state-confirm[data-state="confirm"]{width:min(94vw,420px);height:auto;min-height:172px}
-    .island-content.island-state-email[data-state="email"]{width:min(94vw,384px)}
-    .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,560px)}
-    .island-content.island-state-music-bar[data-state="music-bar"]{width:min(86vw,212px)}
-    .island-content.island-state-autoplay[data-state="autoplay"]{width:min(90vw,300px)}
-    .island-sat[data-sat="open"]{width:min(94vw,560px)}
-    .island-sat[data-sat="pill"]{width:min(22vw,90px)}
-    .nav-buttons{gap:4px}
-    .island-nav-btn{padding:6px 10px;font-size:.86rem}
+    /* ===== 灵动岛移动端内容样式 (1:1 demo LY.m, 尺寸由 JS LAYOUTS_MOBILE 接管) ===== */
+    /* A: idle — font 10.5px, letter-spacing .4px */
+    .island-idle-brand,.island-idle-time{font-size:10.5px;letter-spacing:.4px}
+    /* B: preview — section 12px, pct 10px, padding 0 13px */
+    .island-preview{padding:0 13px}
+    .preview-section{font-size:12px}
+    .preview-pct{font-size:10px}
+    /* C: greet — 12px */
+    .greet-jp,.greet-cn{font-size:12px}
+    /* D: hint — label 11.5px, section 12px */
+    .hint-label{font-size:11.5px}
+    .hint-section{font-size:12px}
+    /* E: music-bar — padding 0 9px */
+    .island-music-bar{padding:0 9px}
+    /* F: nav — padding 0 10px, gap 2px, btn 5px 10px / 12px, divider 16px / margin 0 7px, ring 18px, pct 10px */
+    .island-nav{gap:2px;padding:0 10px}
+    .island-nav-btn{padding:5px 10px;font-size:12px}
+    .nav-divider{height:16px;margin:0 7px 0 auto}
+    .nav-progress-ring{width:18px;height:18px}
+    .nav-ring-pct{font-size:10px;margin-left:5px}
+    /* G: music-card — padding 14px 16px 12px, title 14px, artist 11px, scrub mt 11px, ctrls gap 28px / mt 6px */
+    .island-music-card{padding:14px 16px 12px}
+    .island-music-card .mc-info .mc-title{font-size:14px}
+    .island-music-card .mc-info .mc-artist{font-size:11px}
+    .island-music-card .mc-scrub{margin:11px 0 0}
+    .island-music-card .mc-ctrls{gap:28px;margin-top:6px}
+    /* H: confirm — info gap 11px, title 13.5px, host 9.5px, btn h 34px / 12px */
+    .confirm-swap{padding:14px 16px}
+    .island-confirm-info{gap:11px}
+    .island-confirm-title{font-size:13.5px}
+    .island-confirm-host{font-size:9.5px}
+    .island-btn{height:34px;font-size:12px}
+    /* Email — padding 12px 16px, title 9px, addr 12px, copy 10.5px */
+    .island-email{padding:12px 16px}
+    .island-email-title{font-size:9px}
+    .island-email-addr{font-size:12px}
+    .island-email-copy{padding:4px 12px;font-size:10.5px}
+    /* Toast — padding 0 13px, msg 12px */
+    .island-toast{padding:0 13px;font-size:12px}
+    /* I: autoplay — padding 11px 14px, gap 10px, icon 26px / svg 11px, title 12px, sub 9.5px, btn 10.5px */
+    .island-autoplay{padding:11px 14px;gap:10px}
+    .autoplay-icon{width:26px;height:26px}
+    .autoplay-icon svg{width:11px;height:11px}
+    .autoplay-title{font-size:12px}
+    .autoplay-sub{font-size:9.5px}
+    .autoplay-later{padding:5px 12px;font-size:10.5px}
+    .autoplay-enable{padding:5px 14px;font-size:10.5px}
+
+    /* ===== 卫星岛移动端 (1:1 demo satGeo m: h=34, pill=80, card=[352,148,30], coverSat=26) ===== */
+    .island-sat{height:34px;border-radius:17px}
+    .island-sat[data-sat="hidden"]{height:34px;border-radius:17px}
+    .island-sat[data-sat="pill"]{width:80px;height:34px;border-radius:17px}
+    .island-sat[data-sat="icon"]{width:34px;height:34px;border-radius:17px}
+    .island-sat[data-sat="open"]{width:352px;height:148px;border-radius:30px}
+    .island-sat .ib-cover{width:26px;height:26px}
+    .island-sat .sat-pill{padding:0 3px}
+    .island-sat .sat-card-inner{padding:14px 16px 12px}
+    .island-sat .sat-card .mc-title{font-size:14px}
+    .island-sat .sat-card .mc-artist{font-size:11px}
+    .island-sat .sat-card-scrub{margin:11px 0 0}
+    .island-sat .sat-card-ctrls{gap:28px;margin-top:6px}
+
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
     .social-grid{justify-content:center}
@@ -820,7 +884,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* ===== 移动端性能优化 ===== */
 @media (max-width:768px){
     /* 1. 关闭 backdrop-filter：背后是动态 canvas，每帧重模糊是移动端最大瓶颈 */
-    .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:rgba(12,12,16,1)}
+    .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:#0c0c12}
     /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
     .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
     /* 3. 关闭卡片 backdrop-filter：背后动态 canvas 每帧重模糊，移动端瓶颈；改用更不透明的背景兜底 */
