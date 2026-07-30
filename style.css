@@ -803,6 +803,8 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 @media (max-width:768px){
     .page{padding:110px 16px 70px}
     .dynamic-island{top:14px}
+    /* FPS 移到底部左角, 避免与灵动岛争抢顶部空间 */
+    #fpsCounter{top:auto;bottom:8px;left:8px;font-size:10px;padding:3px 7px}
     .card-body{padding:22px 18px}
     .netease-body{gap:22px}
     .gh-profile{justify-content:center;text-align:center}
@@ -828,12 +830,12 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .nav-divider{height:16px;margin:0 7px 0 auto}
     .nav-progress-ring{width:18px;height:18px}
     .nav-ring-pct{font-size:10px;margin-left:5px}
-    /* G: music-card — padding 14px 16px 12px, title 14px, artist 11px, scrub mt 11px, ctrls gap 28px / mt 6px */
-    .island-music-card{padding:14px 16px 12px}
+    /* G: music-card — padding 12px 16px 10px, title 14px, artist 11px, scrub mt 9px, ctrls gap 26px / mt 4px */
+    .island-music-card{padding:12px 16px 10px}
     .island-music-card .mc-info .mc-title{font-size:14px}
     .island-music-card .mc-info .mc-artist{font-size:11px}
-    .island-music-card .mc-scrub-wrap{margin-top:11px}
-    .island-music-card .mc-ctrls{gap:28px;margin-top:6px}
+    .island-music-card .mc-scrub-wrap{margin-top:9px}
+    .island-music-card .mc-ctrls{gap:26px;margin-top:4px}
     /* H: confirm — info gap 11px, title 13.5px, host 9.5px, btn h 34px / 12px */
     .confirm-swap{padding:14px 16px}
     .island-confirm-info{gap:11px}
@@ -865,7 +867,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .island-sat[data-sat="hidden"]{height:34px;border-radius:17px}
     .island-sat[data-sat="pill"]{width:80px;height:34px;border-radius:17px}
     .island-sat[data-sat="icon"]{width:34px;height:34px;border-radius:17px}
-    .island-sat[data-sat="open"]{width:352px;height:148px;border-radius:30px}
+    .island-sat[data-sat="open"]{width:352px;height:138px;border-radius:30px}
     .island-sat .ib-cover{width:23px;height:23px}
     .island-sat .sat-pill{padding:0 3px}
     .island-sat .sat-card-inner{padding:14px 16px 12px}

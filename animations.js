@@ -183,7 +183,7 @@
         'preview':     { width: '212px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'music-bar':   { width: '176px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'nav':         { width: '320px', height: '52px',  radius: '26px', bg: '#0c0c12' },
-        'music-card':  { width: '352px', height: '148px', radius: '30px', bg: '#0c0c12' },
+        'music-card':  { width: '352px', height: '138px', radius: '30px', bg: '#0c0c12' },
         'confirm':     { width: '330px', height: '128px', radius: '26px', bg: '#0c0c12' },
         'email':       { width: '300px', height: '126px', radius: '26px', bg: '#0c0c12' },
         'toast':       { width: '212px', height: '40px',  radius: '20px', bg: '#0c0c12' },
@@ -367,11 +367,14 @@
         const inSat = mouse.x >= sr.left && mouse.x <= sr.right && mouse.y >= sr.top && mouse.y <= sr.bottom;
         return inMain || inSat;
     }
+    function isAtTop() { return (window.scrollY || document.documentElement.scrollTop || 0) <= 5; }
     function scheduleCollapse(delay) {
         clearTimeout(collapseTimer);
         collapseTimer = setTimeout(() => {
             if (!hovering && !userScrolling && !scrubbing && !isLocked()) {
-                setState(musicActive ? 'music-bar' : 'default');
+                // 仅在页面顶部才恢复 music-bar, 否则回 preview 显示区块+进度
+                if (musicActive && isAtTop()) setState('music-bar');
+                else setState(musicActive ? 'preview' : 'default');
             }
         }, delay || 700);
     }
@@ -384,11 +387,10 @@
             if (cur === 'default' && !musicActive && !hovering && !userScrolling) {
                 island.classList.add('idle');
             }
-            // 安全网: 音乐活跃但主岛不在音乐状态且无用户交互 → 回 music-bar
-            // 注意: 不排除 'default', 因为音乐播放时 default 状态应回 music-bar
+            // 安全网: 音乐活跃但主岛不在音乐状态且无用户交互 → 仅在顶部回 music-bar, 否则回 preview
             if (musicActive && !hovering && !userScrolling && !scrubbing && !isLocked()
                 && cur !== 'music-bar' && cur !== 'music-card') {
-                setState('music-bar');
+                setState(isAtTop() ? 'music-bar' : 'preview');
             }
         }, 3000);
     }
@@ -407,7 +409,7 @@
         setState('toast', { kind: kind });
         // 1:1 demo: toast 1500ms auto-dismiss
         toastTimer = setTimeout(() => {
-            const next = hovering ? 'nav' : (musicActive ? 'music-bar' : 'default');
+            const next = hovering ? 'nav' : (musicActive ? (isAtTop() ? 'music-bar' : 'preview') : 'default');
             setState(next);
         }, 1500);
     }
@@ -419,7 +421,8 @@
         setState('greet', { force: true });
         greetTimer = setTimeout(() => {
             if (getCurrentState() === 'greet') {
-                setState(hovering ? 'preview' : (musicActive ? 'music-bar' : 'default'));
+                if (hovering) setState('preview');
+                else setState(musicActive ? (isAtTop() ? 'music-bar' : 'preview') : 'default');
             }
         }, 2300);
     }
@@ -442,7 +445,8 @@
         setState('hint', { force: true });
         hintTimer = setTimeout(() => {
             if (getCurrentState() === 'hint') {
-                setState(hovering ? 'preview' : (musicActive ? 'music-bar' : 'default'));
+                if (hovering) setState('preview');
+                else setState(musicActive ? (isAtTop() ? 'music-bar' : 'preview') : 'default');
             }
         }, 1700);
     }
@@ -519,8 +523,9 @@
         setState('autoplay');
     }
     function dismissAutoplayPrompt() {
-        // 直接退出 autoplay 态：若音乐已开始播放就回 music-bar，否则回 default
-        setState(musicActive ? 'music-bar' : 'default');
+        // 直接退出 autoplay 态: 仅在顶部回 music-bar, 否则回 preview/default
+        if (musicActive) setState(isAtTop() ? 'music-bar' : 'preview');
+        else setState('default');
     }
     function acceptAutoplay() {
         const noAsk = !!(document.getElementById('autoplay-no-ask') && document.getElementById('autoplay-no-ask').checked);
@@ -726,8 +731,8 @@
             const first = !musicActive;
             musicActive = true;
             document.body.classList.add('audio-playing');
-            // 如果当前是 default 状态，切换到 music-bar 显示正在播放
-            if (getCurrentState() === 'default') setState('music-bar');
+            // 如果当前是 default 状态, 仅在页面顶部切换到 music-bar, 否则切到 preview
+            if (getCurrentState() === 'default') setState(isAtTop() ? 'music-bar' : 'preview');
             else island.classList.remove('idle');
             updateSatellite();
             // 首次播放时显示「播放中」toast, 但不打断 confirm/email 等锁定状态
@@ -770,7 +775,12 @@
     let sectionOffsets = [];
     let scrollMax = 0, lastSpIdx = -1, lastSpPctTxt = '', lastSpBarPctTxt = '';
     function recomputeLayoutMetrics() {
-        sectionOffsets = sections.map(s => s ? s.offsetTop : 0);
+        // 用 getBoundingClientRect + scrollY 替代 offsetTop, 解决嵌套布局下偏移不准导致区块检测错误
+        sectionOffsets = sections.map(s => {
+            if (!s) return 0;
+            const r = s.getBoundingClientRect();
+            return r.top + (window.scrollY || document.documentElement.scrollTop || 0);
+        });
         scrollMax = document.documentElement.scrollHeight - window.innerHeight;
     }
     function updateScrollSpy(y) {
@@ -792,7 +802,8 @@
             }
             if (spSection) spSection.textContent = SECTION_NAMES[idx];
             // D: 区块切换时触发 hint (首次加载 prevIdx=-1 时不触发)
-            if (prevIdx >= 0 && !hovering && !isLocked()) {
+            // 触屏设备上 hovering 不可靠 (mouseenter 可能在触摸滚动时误触发), 用 isTouchDevice 绕过
+            if (prevIdx >= 0 && !isLocked() && (isTouchDevice || !hovering)) {
                 showHint(SECTION_NAMES[idx]);
             }
             // G: 更新 preview 导航点
@@ -894,18 +905,19 @@
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub-wrap')) return;
         if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
-        // 两段式: default/preview 点击展开, music-bar/card 互切, nav 收起
+        // 点击逻辑: default/preview/music-bar → nav, nav → 收回, music-card → music-bar
         if (cur === 'default') {
-            if (musicActive) setState('music-bar');
-            else { setState('nav'); updateScrollProgress(window.scrollY || 0); }
+            setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'preview') {
             setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'music-bar') {
-            setState('music-card');
+            setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'music-card') {
             setState('music-bar');
         } else if (cur === 'nav') {
-            setState(musicActive ? 'music-bar' : 'default');
+            // 收起 nav: 仅在顶部回 music-bar, 否则回 preview
+            if (musicActive) setState(isAtTop() ? 'music-bar' : 'preview');
+            else setState('default');
         }
     });
 
