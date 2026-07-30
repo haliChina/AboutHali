@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=67">
+    <link rel="stylesheet" href="style.css?v=70">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
@@ -172,7 +172,7 @@
                 <span class="island-toast-msg"></span>
             </div>
 
-            <!-- I: autoplay prompt (1:1 demo: head + foot with 稍后/开启, no checkbox) -->
+            <!-- I: autoplay prompt (head + foot with 不再提示/稍后/开启) -->
             <div class="island-layer island-autoplay">
                 <div class="autoplay-head">
                     <span class="autoplay-icon">
@@ -184,8 +184,14 @@
                     </div>
                 </div>
                 <div class="autoplay-foot">
-                    <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
-                    <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
+                    <label class="autoplay-noask">
+                        <input type="checkbox" id="autoplay-no-ask">
+                        <label for="autoplay-no-ask">不再提示</label>
+                    </label>
+                    <div class="autoplay-btns">
+                        <button class="autoplay-btn autoplay-later" id="autoplay-later">稍后</button>
+                        <button class="autoplay-btn autoplay-enable" id="autoplay-enable">开启</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -448,8 +454,8 @@
 
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
-    <script src="shader.js?v=4" defer></script>
-    <script src="animations.js?v=22" defer></script>
+    <script src="shader.js?v=6" defer></script>
+    <script src="animations.js?v=26" defer></script>
     <script src="ripple.js?v=2" defer></script>
     <script src="fps.js?v=1" defer></script>
     

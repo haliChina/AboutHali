@@ -327,12 +327,18 @@
         if (useVT) {
             // vt-morphing: 临时关掉 .island-content 的 width/height 过渡,让 VT API 接管形变
             island.classList.add('vt-morphing');
-            const vt = document.startViewTransition(applyChanges);
-            // finished 优先,失败时用 ready兜底,避免 vt-morphing 残留
-            (vt.finished || vt.ready || Promise.resolve()).then(
-                () => island.classList.remove('vt-morphing'),
-                () => island.classList.remove('vt-morphing')
-            );
+            try {
+                const vt = document.startViewTransition(applyChanges);
+                // finished 优先,失败时用 ready兜底,避免 vt-morphing 残留
+                (vt.finished || vt.ready || Promise.resolve()).then(
+                    () => island.classList.remove('vt-morphing'),
+                    () => island.classList.remove('vt-morphing')
+                );
+            } catch (e) {
+                // VT 已在进行中或不支持, 回退到直接 applyChanges
+                applyChanges();
+                island.classList.remove('vt-morphing');
+            }
         } else {
             applyChanges();
         }
@@ -374,7 +380,16 @@
         island.classList.remove('idle');
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => {
-            if (getCurrentState() === 'default' && !musicActive && !hovering && !userScrolling) island.classList.add('idle');
+            const cur = getCurrentState();
+            if (cur === 'default' && !musicActive && !hovering && !userScrolling) {
+                island.classList.add('idle');
+            }
+            // 安全网: 音乐活跃但主岛不在音乐状态且无用户交互 → 回 music-bar
+            // 注意: 不排除 'default', 因为音乐播放时 default 状态应回 music-bar
+            if (musicActive && !hovering && !userScrolling && !scrubbing && !isLocked()
+                && cur !== 'music-bar' && cur !== 'music-card') {
+                setState('music-bar');
+            }
         }, 3000);
     }
 
@@ -537,7 +552,12 @@
     function askConfirm(title, href, glyph, color) {
         clearConfirmTimer();
         pendingHref = href;
+        // 清理所有可能干扰 confirm 状态的定时器
         clearTimeout(collapseTimer);
+        clearTimeout(scrollEndTimer);
+        clearTimeout(toastTimer);
+        clearTimeout(idleTimer);
+        userScrolling = false;
         if (confirmSite) confirmSite.textContent = title;
         if (confirmHost) confirmHost.textContent = prettyHost(href);
         if (confirmIconBox) {
@@ -710,7 +730,8 @@
             if (getCurrentState() === 'default') setState('music-bar');
             else island.classList.remove('idle');
             updateSatellite();
-            if (first && !hovering) showToast('success', 'QQ音乐 · 播放中', '♪');
+            // 首次播放时显示「播放中」toast, 但不打断 confirm/email 等锁定状态
+            if (first && !hovering && !isLocked()) showToast('success', 'QQ音乐 · 播放中', '♪');
         });
         audio.addEventListener('pause', () => {
             if (loadingSong || audio.ended) return; // 切歌/自然结束不处理
@@ -873,12 +894,16 @@
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub-wrap')) return;
         if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
-        // I: 两段式 — preview 点击展开 nav, nav 点击收起
-        if (cur === 'default' || cur === 'preview') {
-            if (musicActive && cur === 'music-bar') setState('music-card');
+        // 两段式: default/preview 点击展开, music-bar/card 互切, nav 收起
+        if (cur === 'default') {
+            if (musicActive) setState('music-bar');
             else { setState('nav'); updateScrollProgress(window.scrollY || 0); }
+        } else if (cur === 'preview') {
+            setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'music-bar') {
             setState('music-card');
+        } else if (cur === 'music-card') {
+            setState('music-bar');
         } else if (cur === 'nav') {
             setState(musicActive ? 'music-bar' : 'default');
         }
@@ -923,9 +948,10 @@
         userScrolling = true;
         if (satOpen) closeSatellite(); // 滚动时关闭卫星岛
         const cur = getCurrentState();
-        if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; showToast('error', '已取消'); island.classList.remove('idle'); }
-        else if (cur === 'email') { setState('default'); island.classList.remove('idle'); }
+        // confirm 状态不被滚动打断 (由 8s 超时或用户操作取消), 避免布局偏移导致误取消
+        if (cur === 'email') { setState(musicActive ? 'music-bar' : 'default'); island.classList.remove('idle'); }
         else if (cur === 'greet' || cur === 'hint') { /* 滚动不打断 greet/hint */ }
+        else if (cur === 'confirm') { /* confirm 不被滚动打断 */ }
         else if (cur === 'default' || cur === 'music-bar' || cur === 'music-card' || cur === 'preview') {
             // B: 滚动时展开 preview (而非 nav), 显示当前区块+进度
             updatePreviewContent();
@@ -951,7 +977,8 @@
         const cur = getCurrentState();
         if (satOpen) closeSatellite();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; }
-        if (cur !== 'default' && cur !== 'music-bar' && cur !== 'toast') setState('default');
+        if (cur !== 'default' && cur !== 'music-bar' && cur !== 'toast')
+            setState(musicActive ? 'music-bar' : 'default');
     });
 
     let islandRevealed = false;
@@ -966,6 +993,8 @@
         });
         // island 默认已可见（CSS 移除 opacity:0），只需启动 idle 计时器
         armIdle();
+        // 启动 idle 双阶段循环 (brand ↔ time)
+        startIdlePhaseCycle();
     }
     function runIntro() {
         const intro = document.getElementById('intro');

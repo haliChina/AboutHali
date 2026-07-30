@@ -15,18 +15,11 @@
     // Reduce filter blur on mobile — full blur(2px) is a major GPU cost
     if (isMobile) canvas.style.filter = 'blur(1px) brightness(.85) saturate(.95)';
 
-    const glOpts = {
-        antialias: false,
-        depth: false,
-        alpha: false,
-        stencil: false,
-        premultipliedAlpha: false,
-        preserveDrawingBuffer: false,
-        desynchronized: true,        // 解耦渲染线程
-        powerPreference: 'high-performance',  // 优先高性能 GPU
-        failIfMajorPerformanceCaveat: false
-    };
-    const gl = canvas.getContext('webgl', glOpts) || canvas.getContext('experimental-webgl', glOpts);
+    // 简化 WebGL 上下文创建: 不传 alpha:false 等选项, 避免部分浏览器/驱动兼容性问题导致樱花不渲染
+    let gl = canvas.getContext('webgl', { antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' })
+           || canvas.getContext('experimental-webgl', { antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' })
+           || canvas.getContext('webgl')
+           || canvas.getContext('experimental-webgl');
     if (!gl) { canvas.style.display = 'none'; return; }
 
     const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
