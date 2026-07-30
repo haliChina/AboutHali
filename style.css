@@ -248,8 +248,8 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .np-cur,.np-dur{font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;min-width:32px}
 .np-dur{text-align:right}
 .np-scrub{-webkit-appearance:none;appearance:none;flex:1 1 auto;height:5px;border-radius:5px;background:rgba(255,255,255,.16);cursor:pointer}
-.np-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
-.np-scrub::-moz-range-thumb{width:14px;height:14px;border:none;border-radius:50%;background:#fff}
+.np-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#ff8fb6;box-shadow:0 2px 8px rgba(255,143,182,.6)}
+.np-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#ff8fb6}
 .np-playlist{width:100%;display:flex;flex-direction:column;gap:3px;margin-top:2px}
 .np-song-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;cursor:pointer;font-size:.82rem;color:var(--text-dim);transition:background .25s var(--ease),color .25s var(--ease)}
 .np-song-item:hover{background:rgba(255,255,255,.06);color:#fff}
@@ -442,7 +442,7 @@ body.audio-playing .mc-btn-main .ic-pause{display:block}
     opacity:1;pointer-events:auto;transform:scale(1) translateY(0);
     transition:opacity 0.4s ease 0.15s,transform 0.4s cubic-bezier(0.25,1,0.5,1) 0.1s}
 
-.island-idle-legacy-delete{position:relative}
+
 .island-idle-brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;opacity:1;pointer-events:none;
     font-size:.82rem;font-weight:600;letter-spacing:.5px;transition:opacity .55s var(--ease);
     background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -696,7 +696,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
    - 半透明毛玻璃背景,固定位置,点击穿透
    - 颜色随性能等级变化:绿(>=50)/黄(30-49)/红(<30) */
 #fpsCounter{
-    position:fixed;top:10px;left:10px;z-index:999999;
+    position:fixed;top:10px;left:10px;z-index:9998;
     font-family:var(--font-mono);font-size:11px;font-weight:600;
     color:#fff;background:rgba(0,0,0,.45);
     padding:4px 9px;border-radius:6px;
