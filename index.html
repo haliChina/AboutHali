@@ -51,60 +51,84 @@
         <div class="island-content island-state-default" id="island" data-state="default">
             <div class="island-specular"></div>
 
-            <!-- collapsed / default -->
-            <div class="island-layer island-default active-content">
-                <span class="island-idle-brand">userhali.com</span>
+            <!-- idle: 品牌名 ↔ 时钟日期 双相位 -->
+            <div class="island-layer island-idle active-content">
+                <div class="island-idle-inner">
+                    <span class="island-idle-dot"></span>
+                    <span class="island-idle-brand">userhali.com</span>
+                    <span class="island-idle-time"></span>
+                </div>
             </div>
 
-            <!-- collapsed music live-activity bar -->
-            <div class="island-layer island-music-bar">
-                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="28" height="28">
+            <!-- preview: hover 半展开 -->
+            <div class="island-layer island-preview">
+                <span class="island-preview-section">首页</span>
+                <div class="island-preview-dots">
+                    <span class="dot" data-i="0"></span>
+                    <span class="dot" data-i="1"></span>
+                    <span class="dot" data-i="2"></span>
+                    <span class="dot" data-i="3"></span>
+                </div>
+                <span class="island-preview-pct">0%</span>
+            </div>
+
+            <!-- greet: はじめまして · 欢迎来访 -->
+            <div class="island-layer island-greet">
+                <span class="island-greet-jp">はじめまして</span>
+                <span class="island-greet-sep">·</span>
+                <span class="island-greet-zh">欢迎来访</span>
+            </div>
+
+            <!-- hint: 正在看 · [section] -->
+            <div class="island-layer island-hint">
+                <span class="island-hint-label">正在看</span>
+                <span class="island-hint-section">首页</span>
+            </div>
+
+            <!-- mbar: 音乐小条 -->
+            <div class="island-layer island-mbar">
+                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=224y224" alt="" decoding="async" loading="lazy" width="26" height="26">
                 <div class="island-eq"><i></i><i></i><i></i><i></i></div>
             </div>
 
-            <!-- expanded navigation -->
+            <!-- nav: 单排导航 + 右侧进度环 -->
             <nav class="island-layer island-nav">
-                <div class="nav-buttons pill-nav" id="pillNav">
-                    <div class="pill-indicator" id="indicator"></div>
-                    <a href="#home" class="island-nav-btn nav-item active" data-index="0">首页</a>
-                    <a href="#github" class="island-nav-btn nav-item" data-index="1">GitHub</a>
-                    <a href="#netease" class="island-nav-btn nav-item" data-index="2">QQ音乐</a>
-                    <a href="#project" class="island-nav-btn nav-item" data-index="3">Projects</a>
-                </div>
-                <div class="scroll-progress">
-                    <div class="scroll-progress-meta">
-                        <span class="sp-section">首页</span>
-                        <span class="sp-pct">0%</span>
-                    </div>
-                    <div class="scroll-progress-container">
-                        <div class="scroll-progress-bar"><span class="sp-head"></span></div>
-                    </div>
-                </div>
+                <a href="#home" class="island-nav-btn active" data-index="0">首页</a>
+                <a href="#github" class="island-nav-btn" data-index="1">GitHub</a>
+                <a href="#netease" class="island-nav-btn" data-index="2">QQ音乐</a>
+                <a href="#project" class="island-nav-btn" data-index="3">Projects</a>
+                <span class="nav-divider"></span>
+                <svg class="nav-progress-ring" viewBox="0 0 22 22">
+                    <circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,143,182,.18)" stroke-width="2.4"/>
+                    <circle class="nav-progress-arc" cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)"/>
+                </svg>
+                <span class="nav-pct">0%</span>
             </nav>
 
-            <!-- expanded now-playing card -->
-            <div class="island-layer island-music-card">
-                <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="96" height="96">
-                <div class="mc-main">
-                    <div class="island-eq"><i></i><i></i><i></i><i></i></div>
-                    <div class="mc-title">All The Things She Said</div>
-                    <div class="mc-artist">t.A.T.u. · QQ音乐</div>
-                    <input type="range" class="mc-scrub" min="0" max="1000" value="0" aria-label="进度">
-                    <div class="mc-bottom">
-                        <span class="mc-cur">0:00</span>
-                        <div class="mc-ctrls">
-                            <button class="mc-prev island-mini-btn island-mini-btn--ghost" aria-label="上一首">
-                                <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg>
-                            </button>
-                            <button class="mc-toggle island-mini-btn" aria-label="播放/暂停">
-                                <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-                            </button>
-                            <button class="mc-next island-mini-btn island-mini-btn--ghost" aria-label="下一首">
-                                <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg>
-                            </button>
+            <!-- mcard: 音乐大卡 -->
+            <div class="island-layer island-mcard">
+                <div class="mcard-inner">
+                    <div class="mcard-top">
+                        <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=224y224" alt="" decoding="async" loading="lazy" width="56" height="56">
+                        <div class="mcard-meta">
+                            <span class="mc-title">All The Things She Said</span>
+                            <span class="mc-artist">t.A.T.u.</span>
                         </div>
-                        <span class="mc-dur">0:00</span>
+                        <div class="island-eq mcard-eq"><i></i><i></i><i></i><i></i></div>
+                    </div>
+                    <div class="mcard-progress">
+                        <div class="mcard-bar-wrap">
+                            <div class="mcard-bar"><span class="mcard-fill"></span></div>
+                        </div>
+                        <div class="mcard-time"><span class="mc-cur">0:00</span><span class="mc-dur">0:00</span></div>
+                    </div>
+                    <div class="mcard-ctrls">
+                        <button class="mc-prev mc-btn-ghost" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M7 6h2v12H7z"/><path d="M20 6v12l-9-6z"/></svg></button>
+                        <button class="mc-toggle mc-btn-main" aria-label="播放/暂停">
+                            <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <svg class="ic-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                        </button>
+                        <button class="mc-next mc-btn-ghost" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2z"/><path d="M4 6l9 6-9 6z"/></svg></button>
                     </div>
                 </div>
             </div>
@@ -175,7 +199,13 @@
                     </div>
                 </div>
             </div>
+        
+        <!-- 分岛：主岛忙碌时音乐分裂到此 -->
+        <div class="island-satellite sat-hidden">
+            <img class="sat-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" decoding="async" loading="lazy" width="28" height="28">
+            <div class="island-eq"><i></i><i></i><i></i><i></i><i></i></div>
         </div>
+    </div>
     </div>
 
     <!-- ===== Home ===== -->

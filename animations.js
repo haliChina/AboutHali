@@ -1,949 +1,592 @@
 (function () {
     'use strict';
 
-    const island      = document.querySelector('.island-content');
-    const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
-    const progressBar = document.querySelector('.scroll-progress-bar');
-    const confirmSite        = document.querySelector('.confirm-site');
-    const confirmHost        = document.querySelector('.island-confirm-host');
-    const confirmIconBox     = document.querySelector('.island-confirm-icon');
-    const confirmFavicon     = document.querySelector('.confirm-favicon');
-    const confirmCountdownBar= document.querySelector('.island-confirm-countdown-bar');
-    const btnConfirm  = document.querySelector('.island-btn-confirm');
-    const btnCancel   = document.querySelector('.island-btn-cancel');
-    const toastIcon   = document.querySelector('.island-toast-icon');
-    const toastMsg    = document.querySelector('.island-toast-msg');
-    const spPct       = document.querySelector('.sp-pct');
-    const spSection   = document.querySelector('.sp-section');
-
+    // ===== Elements =====
+    const island   = document.querySelector('.island-content');
+    const sat      = document.querySelector('.island-satellite');
     const audio    = document.getElementById('np-audio');
-    const toggles  = Array.from(document.querySelectorAll('.np-toggle,.mc-toggle'));
-    const npScrub  = document.querySelector('.np-scrub');
-    const mcScrub  = document.querySelector('.mc-scrub');
-    const npCur = document.querySelector('.np-cur'), npDur = document.querySelector('.np-dur');
-    const mcCur = document.querySelector('.mc-cur'), mcDur = document.querySelector('.mc-dur');
-    const plEl  = document.getElementById('np-playlist');
+    const toastIcon = island && island.querySelector('.island-toast-icon');
+    const toastMsg  = island && island.querySelector('.island-toast-msg');
+    const confirmSite = island && island.querySelector('.confirm-site');
+    const confirmHost = island && island.querySelector('.island-confirm-host');
+    const confirmIconBox = island && island.querySelector('.island-confirm-icon');
+    const confirmFavicon = island && island.querySelector('.confirm-favicon');
+    const confirmBar = island && island.querySelector('.island-confirm-countdown-bar');
+    const btnConfirm = island && island.querySelector('.island-btn-confirm');
+    const btnCancel  = island && island.querySelector('.island-btn-cancel');
 
-    function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
-    function easeOutCubic(t) { return 1 - Math.pow(1 - clamp01(t), 3); }
-    function easeInOutCubic(t) { t = clamp01(t); return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-    function getCookie(name) {
-        const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-        return m ? decodeURIComponent(m[1]) : null;
-    }
-    function setCookie(name, value, maxAgeSeconds) {
-        document.cookie = name + '=' + encodeURIComponent(value) + '; max-age=' + maxAgeSeconds + '; path=/; SameSite=Lax';
-    }
-    function setText(sel, txt) { document.querySelectorAll(sel).forEach(e => { e.textContent = txt; }); }
-    function setSrc(sel, src) { document.querySelectorAll(sel).forEach(e => { e.src = src; }); }
-    function setCoverAnimated(sel, src) {
-        document.querySelectorAll(sel).forEach(img => {
-            if (img.getAttribute('src') === src) return;
-            let done = false;
-            const swap = () => {
-                if (done) return;
-                done = true;
-                img.removeEventListener('transitionend', swap);
-                img.src = src;
-                img.classList.remove('cover-swap');
-            };
-            img.addEventListener('transitionend', swap);
-            setTimeout(swap, 360);
-            img.classList.add('cover-swap');
-        });
-    }
+    // ===== 1c 尺寸表（与 dc.html LY.c 完全一致）=====
+    const LAYOUTS = {
+        idle:     { w:'122px', h:'36px', r:'18px' },
+        preview:  { w:'224px', h:'36px', r:'18px' },
+        nav:      { w:'464px', h:'56px', r:'28px' },
+        mbar:     { w:'192px', h:'36px', r:'18px' },
+        mcard:    { w:'392px', h:'156px', r:'32px' },
+        confirm:  { w:'344px', h:'130px', r:'28px' },
+        email:    { w:'312px', h:'132px', r:'28px' },
+        toast:    { w:'228px', h:'42px',  r:'21px' },
+        autoplay: { w:'312px', h:'106px', r:'26px' },
+        greet:    { w:'244px', h:'36px',  r:'18px' },
+        hint:     { w:'228px', h:'36px',  r:'18px' }
+    };
+
+    // 各状态对应 .island-<state> 层的 class name
+    const LAYERS = {
+        idle:    '.island-idle',
+        preview: '.island-preview',
+        nav:     '.island-nav',
+        mbar:    '.island-mbar',
+        mcard:   '.island-mcard',
+        confirm: '.island-confirm',
+        email:   '.island-email',
+        toast:   '.island-toast',
+        autoplay:'.island-autoplay',
+        greet:   '.island-greet',
+        hint:    '.island-hint'
+    };
+
+    const SECTIONS = ['首页', 'GitHub', 'QQ音乐', 'Projects'];
+    const PLAYLIST = [
+        { name:'All The Things She Said', artist:'t.A.T.u.',             cover:'https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=224y224', src:'https://api.qijieya.cn/meting/?server=netease&type=url&id=27810034' },
+        { name:'渡口',                    artist:'蔡琴',                   cover:'https://p4.music.126.net/4pltwvzYfOy1PSWM6X5_hQ==/109951167871247765.jpg?param=224y224', src:'https://api.qijieya.cn/meting/?server=netease&type=url&id=211277' },
+        { name:'Miss You',               artist:'Oliver Tree & Robin Schulz', cover:'https://y.qq.com/music/photo_new/T002R500x500M000003N37OX0ByL7H_2.jpg?max_age=2592000', src:'https://api.qijieya.cn/meting/?server=netease&type=url&id=1969788180' },
+        { name:'Life Goes On',           artist:'Oliver Tree',            cover:'https://y.qq.com/music/photo_new/T002R500x500M000000UAKjE2m6ksi_1.jpg?max_age=2592000', src:'https://api.qijieya.cn/meting/?server=netease&type=url&id=1848206679' }
+    ];
+
+    // ===== 运行时状态 =====
+    let curState   = 'idle';
+    let navIdx     = 0;
+    let idlePhase  = 0;   // 0=品牌名  1=时钟+日期
+    let musicOn    = false;
+    let satOpen    = false;
+    let hovering   = false;
+    let scrolling  = false;
+    let scrubbing  = false;
+    let pendingHref = null;
+    let cfKey      = 0;   // confirm 换场 key（同 dc.html）
+    let curSong    = 0;
+    const T = {};
+
+    function clr(k)    { if (T[k]) { clearTimeout(T[k]); clearInterval(T[k]); T[k]=null; } }
+    function after(k,ms,fn){ clr(k); T[k]=setTimeout(fn,ms); }
+
     function fmt(t) {
         if (!t || isNaN(t) || !isFinite(t)) return '0:00';
-        const m = Math.floor(t / 60), s = Math.floor(t % 60);
-        return m + ':' + String(s).padStart(2, '0');
+        const m=Math.floor(t/60), s=Math.floor(t%60);
+        return m+':'+String(s).padStart(2,'0');
     }
+    function clock() { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+    function dateStr() { const d=new Date(); return (d.getMonth()+1)+'月'+d.getDate()+'日'; }
+    function getCookie(n){ const m=document.cookie.match('(?:^|; )'+n+'=([^;]*)'); return m?decodeURIComponent(m[1]):null; }
+    function setCookie(n,v,age){ document.cookie=n+'='+encodeURIComponent(v)+'; max-age='+age+'; path=/; SameSite=Lax'; }
 
-    const PLAYLIST = [
-        { name: 'All The Things She Said', artist: 't.A.T.u.', cover: 'https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=224y224', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=27810034' },
-        { name: '渡口',     artist: '蔡琴',                  cover: 'https://p4.music.126.net/4pltwvzYfOy1PSWM6X5_hQ==/109951167871247765.jpg?param=224y224', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=211277' },
-        { name: 'Miss You', artist: 'Oliver Tree & Robin Schulz', cover: 'https://y.qq.com/music/photo_new/T002R500x500M000003N37OX0ByL7H_2.jpg?max_age=2592000&err_retry=1', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=1969788180' },
-        { name: 'Life Goes On', artist: 'Oliver Tree',        cover: 'https://y.qq.com/music/photo_new/T002R500x500M000000UAKjE2m6ksi_1.jpg?max_age=2592000', src: 'https://api.qijieya.cn/meting/?server=netease&type=url&id=1848206679' }
-    ];
-    let curIdx = 0;
+    // ===== 核心切换（精准对标 dc.html isl() box + layerStyle）=====
+    function go(target, opts) {
+        opts = opts||{};
+        if (curState===target && !opts.force) return;
+        const L = LAYOUTS[target];
+        if (!L) return;
 
-    function renderPlaylist() {
-        if (!plEl) return;
-        plEl.innerHTML = '';
-        PLAYLIST.forEach((s, i) => {
-            const d = document.createElement('div');
-            d.className = 'np-song-item';
-            d.innerHTML = '<span class="idx"></span><span class="nm"></span><span class="ar"></span>';
-            d.querySelector('.idx').textContent = i + 1;
-            d.querySelector('.nm').textContent = s.name;
-            d.querySelector('.ar').textContent = s.artist;
-            d.addEventListener('click', () => loadSong(i, true));
-            plEl.appendChild(d);
-        });
-    }
-    function markActive() {
-        if (!plEl) return;
-        Array.from(plEl.children).forEach((el, i) => el.classList.toggle('active', i === curIdx));
-    }
-    function loadSong(i, autoplay) {
-        curIdx = ((i % PLAYLIST.length) + PLAYLIST.length) % PLAYLIST.length;
-        const s = PLAYLIST[curIdx];
-        if (audio) {
-            // 切歌前先暂停并清理旧 src，避免浏览器在重定向链路上持锁导致下一次 play() 静默 reject
-            try { audio.pause(); } catch(_) {}
-            audio.removeAttribute('src');
-            try { audio.load(); } catch(_) {}
-            audio.src = s.src;
-            audio.load();
-        }
-        setText('.np-title', s.name); setText('.np-artist', s.artist);
-        setText('.mc-title', s.name); setText('.mc-artist', s.artist);
-        setSrc('.np-cover', s.cover); setCoverAnimated('.mc-cover', s.cover); setCoverAnimated('.ib-cover', s.cover);
-        markActive();
-        updateProgress();
-        if (autoplay && audio) {
-            // 显式等待 canplay 再 play，跨域 302 重定向链路下 play() 会 reject
-            const onReady = () => {
-                audio.removeEventListener('canplay', onReady);
-                audio.removeEventListener('loadedmetadata', onReady);
-                audio.play().catch(err => console.warn('[Audio] play() rejected:', err && err.name, s.src));
-            };
-            audio.addEventListener('canplay', onReady);
-            audio.addEventListener('loadedmetadata', onReady);
-            // 兜底：5s 后若仍未触发，主动尝试一次
-            setTimeout(() => {
-                audio.removeEventListener('canplay', onReady);
-                audio.removeEventListener('loadedmetadata', onReady);
-                if (audio.paused) audio.play().catch(() => {});
-            }, 5000);
-        }
-    }
+        // 移除旧层 active-content
+        const old = island && island.querySelector('.island-layer.active-content');
+        if (old) old.classList.remove('active-content');
 
-    let audioUnlockArmed = false;
-    function isIslandControl(target) {
-        return target.closest('.island-content, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
-    }
-    function armAudioUnlock() {
-        if (audioUnlockArmed || !audio) return;
-        audioUnlockArmed = true;
-        const evs = ['pointerdown', 'click', 'keydown', 'touchstart', 'wheel'];
-        const unlock = (e) => {
-            if (audio.paused && !musicActive && !isIslandControl(e.target)) loadSong(0, true);
-        };
-        const opts = { capture: true, passive: true };
-        evs.forEach(ev => window.addEventListener(ev, unlock, opts));
-        audio.addEventListener('play',
-            () => evs.forEach(ev => window.removeEventListener(ev, unlock, opts)),
-            { once: true });
-    }
-    function beginMusic() {
-        if (!audio || !audio.paused) return;
-        loadSong(0, true);
-        armAudioUnlock();
-    }
-
-    // ===== Dynamic Island: 1:1 抄袭 Gemini3.5 的 switchIsland 实现 =====
-    // 核心三步同步（同帧内完成）：
-    //   Step 1. 移除旧内容 .active-content（立即开始 fade-out 0.2s）
-    //   Step 2. 改外壳 inline style（width/height/radius/bgColor，0.6s 弹性回弹）
-    //   Step 3. 写入新 data-state + 添加新内容 .active-content（0.4s + 0.15s 延迟 fade-in）
-    // 关键点：状态由 data-state 单值持有，inner layer 的 active-content 切换 100% 决定显示。
-    // 这样即使 100ms 内连点 5 次切换也不会卡，每步都会被浏览器合并到同一渲染帧。
-
-    let musicActive = false;
-    let pendingHref = null;
-    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null;
-    const CONFIRM_AUTO_MS = 8000;
-    const ISLAND_TRANSITION_MS = 600; // 与 .island-content 的 width/height 过渡时长一致
-    let hovering = false, userScrolling = false, scrubbing = false;
-    const mouse = { x: -1, y: -1 };
-
-    // ===== 状态布局映射表（与 Gemini switchIsland 一致） =====
-    const STATE_LAYOUTS = {
-        'default':     { width: '236px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'music-bar':   { width: '212px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'nav':         { width: '520px', height: '88px',  radius: '28px', bg: 'rgba(12,12,16,.86)' },
-        'music-card':  { width: '560px', height: '146px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'confirm':     { width: '440px', height: '156px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'email':       { width: '384px', height: '124px', radius: '30px', bg: 'rgba(12,12,16,.86)' },
-        'toast':       { width: '236px', height: '50px',  radius: '25px', bg: 'rgba(12,12,16,.86)' },
-        'autoplay':    { width: '300px', height: '104px', radius: '24px', bg: 'rgba(12,12,16,1)' }
-    };
-    // ===== 状态内容映射表（与 Gemini stateContents 一致） =====
-    const STATE_CONTENTS = {
-        'default':    island.querySelector('.island-default'),
-        'music-bar':  island.querySelector('.island-music-bar'),
-        'nav':        island.querySelector('.island-nav'),
-        'music-card': island.querySelector('.island-music-card'),
-        'confirm':    island.querySelector('.island-confirm'),
-        'email':      island.querySelector('.island-email'),
-        'toast':      island.querySelector('.island-toast'),
-        'autoplay':   island.querySelector('.island-autoplay')
-    };
-
-    function getCurrentState() {
-        return island.getAttribute('data-state') || 'default';
-    }
-    // ===== 与 Gemini switchIsland 1:1 一致的切换 =====
-    function setState(target, opts) {
-        opts = opts || {};
-        const current = getCurrentState();
-        if (current === target && !opts.force) return;
-
-        // 检测是否启用 View Transitions 形变(music-bar <-> music-card 时由浏览器接管 width/height 过渡)
-        const useVT = !!document.startViewTransition &&
-            ((current === 'music-bar' && target === 'music-card') ||
-             (current === 'music-card' && target === 'music-bar'));
-
-        const applyChanges = () => {
-            // Step 1: 隐藏旧内容（fade-out 0.2s）
-            if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
-
-            // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
-            const layout = STATE_LAYOUTS[target];
-            if (layout) {
-                island.style.width      = layout.width;
-                island.style.height     = layout.height;
-                island.style.borderRadius = layout.radius;
-                island.style.backgroundColor = layout.bg;
-            }
-            // 同步清理残留的 vs-* class（兼容老 CSS）
-            island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
-            // 新机制：data-state 驱动子级动画延迟
+        // 外壳弹性形变（与 dc.html transition 完全一致）
+        if (island) {
+            island.style.width        = L.w;
+            island.style.height       = L.h;
+            island.style.borderRadius = L.r;
             island.setAttribute('data-state', target);
-            island.classList.add('island-state-' + target);
-
-            // toast 主题色
-            if (target === 'toast') {
-                island.classList.remove('toast-success', 'toast-error');
-                island.classList.add(opts.kind === 'error' ? 'toast-error' : 'toast-success');
-            } else {
-                island.classList.remove('toast-success', 'toast-error');
-            }
-
-            // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）
-            if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
-        };
-
-        if (useVT) {
-            // vt-morphing: 临时关掉 .island-content 的 width/height 过渡,让 VT API 接管形变
-            island.classList.add('vt-morphing');
-            const vt = document.startViewTransition(applyChanges);
-            // finished 优先,失败时用 ready兜底,避免 vt-morphing 残留
-            (vt.finished || vt.ready || Promise.resolve()).then(
-                () => island.classList.remove('vt-morphing'),
-                () => island.classList.remove('vt-morphing')
-            );
-        } else {
-            applyChanges();
+            island.classList.remove('toast-success','toast-error');
+            if (target==='toast') island.classList.add(opts.kind==='error'?'toast-error':'toast-success');
         }
 
-        // 指示器在外壳过渡结束后再定位(过渡中 getBoundingClientRect 会读到裁剪过的错误尺寸)
-        if (target === 'nav' || target === 'music-card' || target === 'music-bar') {
-            clearTimeout(indicatorRealignTimer);
-            indicatorRealignTimer = setTimeout(repositionIndicator, ISLAND_TRANSITION_MS + 20);
+        // 新层 active-content（0.15s 延迟淡入，与 dc.html layerStyle 一致）
+        const sel = LAYERS[target];
+        if (sel && island) {
+            const el = island.querySelector(sel);
+            if (el) el.classList.add('active-content');
         }
 
-        // 空闲 idle 计时器（仅在 default 且无活动时触发）
-        clearTimeout(idleTimer);
-        if (target === 'default' && !musicActive && !hovering && !userScrolling) {
-            idleTimer = setTimeout(() => island.classList.add('idle'), 3000);
-        } else {
+        curState = target;
+        _updateSat();
+
+        // idle 时间相位计时
+        clr('idleTimer');
+        if (target==='idle' && !musicOn && !hovering && !scrolling) {
+            after('idleTimer',3000,()=>island&&island.classList.add('idle'));
+        } else if (island) {
             island.classList.remove('idle');
         }
     }
 
-    function isLocked() {
-        const s = getCurrentState();
-        return s === 'confirm' || s === 'email' || s === 'toast' || s === 'autoplay';
-    }
-    function pointInIsland() {
-        const r = island.getBoundingClientRect();
-        return mouse.x >= r.left && mouse.x <= r.right && mouse.y >= r.top && mouse.y <= r.bottom;
-    }
-    function scheduleCollapse(delay) {
-        clearTimeout(collapseTimer);
-        collapseTimer = setTimeout(() => {
-            if (!hovering && !userScrolling && !scrubbing && !isLocked()) {
-                setState(musicActive ? 'music-bar' : 'default');
-            }
-        }, delay || 900);
+    function base() { return musicOn ? 'mbar' : 'idle'; }
+    function isLocked() { return ['confirm','email','toast','autoplay'].indexOf(curState)>=0; }
+
+    // ===== 分岛（对标 dc.html satSt）=====
+    function _updateSat() {
+        if (!sat) return;
+        const busy = ['nav','confirm','email','autoplay'].indexOf(curState)>=0;
+        const vis  = musicOn && busy && !satOpen;
+        sat.classList.toggle('sat-hidden', !vis);
+        sat.classList.toggle('sat-icon', vis);
+        sat.style.width   = vis ? '86px' : '0px';
+        sat.style.opacity = vis ? '1' : '0';
+        // 封面同步
+        const sc = sat.querySelector('.sat-cover');
+        if (sc && PLAYLIST[curSong]) sc.src = PLAYLIST[curSong].cover;
     }
 
-    function armIdle() {
-        island.classList.remove('idle');
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-            if (getCurrentState() === 'default' && !musicActive && !hovering && !userScrolling) island.classList.add('idle');
-        }, 3000);
+    // ===== Toast（1.3s 自动关）=====
+    function toast(kind, msg) {
+        clr('toast');
+        if (toastIcon) toastIcon.textContent = kind==='error' ? '×' : '✓';
+        if (toastMsg)  toastMsg.textContent  = msg;
+        go('toast', {kind});
+        after('toast',1300,()=>go(hovering?(musicOn?'mcard':'nav'):base()));
     }
 
-    function showToast(kind, msg, icon) {
-        clearTimeout(toastTimer);
-        toastIcon.textContent = icon || (kind === 'error' ? '×' : '✓');
-        toastMsg.textContent = msg;
-        setState('toast', { kind: kind });
-        toastTimer = setTimeout(() => {
-            const next = hovering ? (musicActive ? 'music-card' : 'nav') : (musicActive ? 'music-bar' : 'default');
-            setState(next);
-        }, 1300);
+    // ===== Greet（2.3s 自动关）=====
+    function greet() {
+        go('greet');
+        after('greet',2300,()=>{ if(curState==='greet') go(base()); });
     }
 
-    // ===== 自动播放提示（小型 Toast：开启/稍后 + 不再提示） =====
-    const AUTOPLAY_COOKIE = 'autoplayPref';
-    // 值：'ask' (默认，未表态) | 'enabled' (用户允许自动播放) | 'off' (用户拒绝并选择不再提示)
-    function getAutoplayPref() {
-        const v = getCookie(AUTOPLAY_COOKIE);
-        return v === 'enabled' || v === 'off' ? v : 'ask';
-    }
-    function setAutoplayPref(v) { setCookie(AUTOPLAY_COOKIE, v, 31536000); } // 1 年
-    function showAutoplayPrompt() {
-        const cb = document.getElementById('autoplay-no-ask');
-        if (cb) cb.checked = false;
-        setState('autoplay');
-    }
-    function dismissAutoplayPrompt() {
-        // 直接退出 autoplay 态：若音乐已开始播放就回 music-bar，否则回 default
-        setState(musicActive ? 'music-bar' : 'default');
-    }
-    function acceptAutoplay() {
-        const noAsk = !!(document.getElementById('autoplay-no-ask') && document.getElementById('autoplay-no-ask').checked);
-        if (noAsk) setAutoplayPref('enabled');
-        dismissAutoplayPrompt();
-        beginMusic();
-    }
-    function declineAutoplay() {
-        const noAsk = !!(document.getElementById('autoplay-no-ask') && document.getElementById('autoplay-no-ask').checked);
-        if (noAsk) setAutoplayPref('off');
-        dismissAutoplayPrompt();
-    }
-    const _btnEnable = document.getElementById('autoplay-enable');
-    const _btnLater  = document.getElementById('autoplay-later');
-    if (_btnEnable) _btnEnable.addEventListener('click', e => { e.stopPropagation(); acceptAutoplay(); });
-    if (_btnLater)  _btnLater.addEventListener('click',  e => { e.stopPropagation(); declineAutoplay(); });
-
-    function clearConfirmTimer() { clearTimeout(confirmTimer); confirmTimer = null; }
-
-    function prettyHost(href) {
-        try {
-            const u = new URL(href);
-            const path = u.pathname.replace(/\/$/, '');
-            return u.hostname + path;
-        } catch (_) { return href || ''; }
+    // ===== Hint（1.7s 自动关）=====
+    function hint() {
+        navIdx = (navIdx+1)%4;
+        const el = island && island.querySelector('.island-hint-section');
+        if (el) el.textContent = SECTIONS[navIdx];
+        _syncNavDots();
+        go('hint');
+        after('hint',1700,()=>{ if(curState==='hint') go(base()); });
     }
 
-    function askConfirm(title, href, iconSrc, iconInvert) {
-        clearConfirmTimer();
-        pendingHref = href;
-        clearTimeout(collapseTimer);
-        if (confirmSite) confirmSite.textContent = title;
-        if (confirmHost) confirmHost.textContent = prettyHost(href);
-        if (confirmIconBox && confirmFavicon) {
-            confirmFavicon.onerror = () => confirmIconBox.classList.remove('has-favicon');
-            if (iconSrc) {
-                confirmFavicon.src = iconSrc;
-                confirmFavicon.style.filter = iconInvert === false
-                    ? 'drop-shadow(0 1px 2px rgba(0,0,0,.35))'
-                    : '';
-                confirmIconBox.classList.add('has-favicon');
-            } else {
-                confirmIconBox.classList.remove('has-favicon');
-            }
+    // ===== Confirm =====
+    function askConfirm(data) {
+        clr('confirm'); cfKey++;
+        pendingHref = data.href;
+        if (confirmSite) confirmSite.textContent = data.title||'外部链接';
+        if (confirmHost) {
+            try { const u=new URL(data.href); confirmHost.textContent=u.hostname+u.pathname.replace(/\/$/,''); }
+            catch(_) { confirmHost.textContent=data.href||''; }
         }
-        setState('confirm');
-        if (confirmCountdownBar) {
-            confirmCountdownBar.style.transition = 'none';
-            confirmCountdownBar.style.width = '100%';
-            void confirmCountdownBar.offsetWidth;
-            confirmCountdownBar.style.transition = 'width ' + (CONFIRM_AUTO_MS / 1000) + 's linear';
-            confirmCountdownBar.style.width = '0%';
+        if (confirmFavicon && confirmIconBox) {
+            if (data.iconSrc) { confirmFavicon.src=data.iconSrc; confirmIconBox.classList.add('has-favicon'); }
+            else { confirmIconBox.classList.remove('has-favicon'); }
         }
-        confirmTimer = setTimeout(() => {
-            confirmTimer = null;
-            pendingHref = null;
-            showToast('error', '已自动取消');
-        }, CONFIRM_AUTO_MS);
+        go('confirm');
+        // 倒计时进度条
+        if (confirmBar) {
+            confirmBar.style.transition='none'; confirmBar.style.width='100%';
+            void confirmBar.offsetWidth;
+            confirmBar.style.transition='width 8s linear'; confirmBar.style.width='0%';
+        }
+        after('confirm',8000,()=>{ if(curState==='confirm'){pendingHref=null;toast('error','已自动取消');} });
     }
-    if (btnConfirm) btnConfirm.addEventListener('click', () => {
-        clearConfirmTimer();
-        if (pendingHref) window.open(pendingHref, '_blank', 'noopener');
-        pendingHref = null;
-        showToast('success', '跳转成功');
-    });
-    if (btnCancel) btnCancel.addEventListener('click', () => {
-        clearConfirmTimer();
-        pendingHref = null;
-        showToast('error', '已取消');
-    });
 
-    document.querySelectorAll('.social-btn').forEach(link => {
-        link.addEventListener('click', e => {
-            const href = link.getAttribute('href');
-            if (link.id === 'email-link' || !href) { e.preventDefault(); setState('email'); return; }
-            if (!href.startsWith('#')) {
-                e.preventDefault();
-                const img = link.querySelector('img');
-                const iconSrc = img ? img.getAttribute('src') : null;
-                const iconInvert = !link.classList.contains('social-btn-svg') && !link.classList.contains('social-btn-img');
-                askConfirm(link.getAttribute('title') || '外部链接', href, iconSrc, iconInvert);
-            }
+    // ===== Idle 双相位（4.2s 交替，对标 dc.html idleCycle）=====
+    function _applyIdlePhase() {
+        const brand = island && island.querySelector('.island-idle-brand');
+        const time  = island && island.querySelector('.island-idle-time');
+        if (!brand||!time) return;
+        if (idlePhase===0) {
+            brand.style.opacity='1'; brand.style.transform='translateY(-50%)';
+            time.style.opacity='0';  time.style.transform='translateY(calc(-50% + 8px))';
+        } else {
+            brand.style.opacity='0'; brand.style.transform='translateY(calc(-50% - 8px))';
+            time.style.opacity='1';  time.style.transform='translateY(-50%)';
+            time.textContent = clock()+' · '+dateStr();
+        }
+    }
+    setInterval(()=>{ idlePhase=idlePhase?0:1; _applyIdlePhase(); }, 4200);
+    setInterval(()=>{ if(idlePhase===1){ const t=island&&island.querySelector('.island-idle-time'); if(t) t.textContent=clock()+' · '+dateStr(); } },10000);
+
+    // ===== preview 进度点同步 =====
+    function _syncNavDots() {
+        const prev = island && island.querySelector('.island-preview');
+        if (!prev) return;
+        const sec = prev.querySelector('.island-preview-section');
+        if (sec) sec.textContent = SECTIONS[navIdx];
+        prev.querySelectorAll('.dot').forEach((d,i)=>{
+            d.classList.toggle('active', i===navIdx);
         });
+        // nav 高亮也同步
+        island.querySelectorAll('.island-nav .island-nav-btn').forEach((b,i)=>{
+            b.classList.toggle('active', i===navIdx);
+        });
+    }
+
+    // ===== 进度环 =====
+    function _updateNavRing(pct) {
+        const ring = island && island.querySelector('.nav-progress-arc');
+        const pctEl = island && island.querySelector('.nav-pct');
+        if (pctEl) pctEl.textContent = Math.round(pct)+'%';
+        if (!ring) return;
+        const R=8.5, C=2*Math.PI*R;
+        const dash = (pct/100)*C;
+        ring.setAttribute('stroke-dasharray', dash.toFixed(2)+' '+C.toFixed(2));
+    }
+
+    // ===== 音乐控制 =====
+    function loadSong(i, autoplay) {
+        curSong = ((i%PLAYLIST.length)+PLAYLIST.length)%PLAYLIST.length;
+        const s = PLAYLIST[curSong];
+        if (audio) {
+            try{audio.pause();}catch(_){}
+            audio.removeAttribute('src'); try{audio.load();}catch(_){}
+            audio.src=s.src; audio.load();
+        }
+        document.querySelectorAll('.mc-title,.np-title').forEach(e=>e.textContent=s.name);
+        document.querySelectorAll('.mc-artist,.np-artist').forEach(e=>e.textContent=s.artist);
+        document.querySelectorAll('.mc-cover,.ib-cover,.sat-cover').forEach(img=>{ if(img.getAttribute('src')!==s.cover)img.src=s.cover; });
+        // 大卡封面动画
+        const mcCover = island && island.querySelector('.mc-cover');
+        if (mcCover) { mcCover.style.animation='none'; void mcCover.offsetWidth; mcCover.style.animation='coverIn .5s cubic-bezier(.34,1.2,.4,1)'; }
+        if (autoplay&&audio) {
+            const onReady=()=>{ audio.removeEventListener('canplay',onReady); audio.play().catch(()=>{}); };
+            audio.addEventListener('canplay',onReady);
+            setTimeout(()=>{ audio.removeEventListener('canplay',onReady); if(audio.paused)audio.play().catch(()=>{}); },5000);
+        }
+    }
+    function togglePlay() { if(!audio)return; if(audio.paused)audio.play().catch(()=>{}); else audio.pause(); }
+
+    // ===== 进度条 =====
+    let lastCurTxt='',lastDurTxt='';
+    const scrubEl = island && island.querySelector('.mcard-bar-wrap');
+    const fillEl  = island && island.querySelector('.mcard-fill');
+    function updateProgress() {
+        if (!audio) return;
+        const d=audio.duration||0, c=audio.currentTime||0;
+        const pct = d ? (c/d*100) : 0;
+        const cT=fmt(c), dT=fmt(d);
+        if (cT!==lastCurTxt){ lastCurTxt=cT; document.querySelectorAll('.mc-cur,.np-cur').forEach(e=>e.textContent=cT); }
+        if (dT!==lastDurTxt){ lastDurTxt=dT; document.querySelectorAll('.mc-dur,.np-dur').forEach(e=>e.textContent=dT); }
+        if (!scrubbing && fillEl) fillEl.style.width=pct.toFixed(2)+'%';
+    }
+    if (scrubEl) scrubEl.addEventListener('click', e=>{
+        if (!audio||!audio.duration) return;
+        const r=scrubEl.getBoundingClientRect();
+        const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+        audio.currentTime=p*audio.duration;
+        if(fillEl) fillEl.style.width=(p*100).toFixed(2)+'%';
     });
-    document.querySelectorAll('.island-email-copy').forEach(btn => {
-        btn.addEventListener('click', e => {
+
+    // ===== 事件绑定 =====
+    if (island) {
+        island.addEventListener('mouseenter',()=>{
+            hovering=true; clr('collapse');
+            if (!isLocked()) go(musicOn?'mcard':'nav');
+        });
+        island.addEventListener('mouseleave',()=>{
+            hovering=false;
+            if (!scrolling&&!scrubbing&&!isLocked())
+                after('collapse',900,()=>{ if(!hovering&&!scrolling&&!scrubbing&&!isLocked()) go(base()); });
+        });
+        island.addEventListener('click',e=>{
+            if (e.target.closest('.island-nav-btn,.island-btn,.island-email-copy,.mc-btn-ghost,.mc-btn-main,.mcard-bar-wrap')) return;
+            if (curState==='idle'||curState==='greet'||curState==='hint') go('nav');
+            else if (curState==='mbar') go('mcard');
+        });
+    }
+    if (sat) sat.addEventListener('click',e=>{ e.stopPropagation(); if(musicOn)go('mcard'); });
+
+    if (btnConfirm) btnConfirm.addEventListener('click',()=>{
+        clr('confirm'); if(pendingHref)window.open(pendingHref,'_blank','noopener');
+        pendingHref=null; toast('success','跳转成功');
+    });
+    if (btnCancel) btnCancel.addEventListener('click',()=>{
+        clr('confirm'); pendingHref=null; toast('error','已取消');
+    });
+
+    document.querySelectorAll('.island-email-copy').forEach(btn=>{
+        btn.addEventListener('click',e=>{
             e.stopPropagation();
-            const addr = btn.getAttribute('data-mail');
-            const done = () => showToast('success', '已复制邮箱至剪切板');
-            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(done).catch(done);
+            const addr=btn.getAttribute('data-mail');
+            const done=()=>toast('success','已复制邮箱至剪切板');
+            if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(done).catch(done);
             else done();
         });
     });
 
-    const lastScrubPct = new WeakMap();
-    function fillScrub(el, pct) {
-        if (!el) return;
-        const rounded = Math.round(pct * 10) / 10;
-        if (lastScrubPct.get(el) === rounded) return;
-        lastScrubPct.set(el, rounded);
-        el.style.background = 'linear-gradient(90deg,var(--accent-3) ' + rounded + '%,rgba(255,255,255,.16) ' + rounded + '%)';
-    }
-    let lastNpCurTxt = '', lastNpDurTxt = '';
-    function updateProgress() {
-        if (!audio) return;
-        const d = audio.duration || 0, c = audio.currentTime || 0;
-        const pct = d ? (c / d * 100) : 0;
-        const cTxt = fmt(c), dTxt = fmt(d);
-        if (cTxt !== lastNpCurTxt) {
-            lastNpCurTxt = cTxt;
-            if (npCur) npCur.textContent = cTxt;
-            if (mcCur) mcCur.textContent = cTxt;
-        }
-        if (dTxt !== lastNpDurTxt) {
-            lastNpDurTxt = dTxt;
-            if (npDur) npDur.textContent = dTxt;
-            if (mcDur) mcDur.textContent = dTxt;
-        }
-        if (!scrubbing) {
-            const v = pct * 10;
-            if (npScrub) { npScrub.value = v; fillScrub(npScrub, pct); }
-            if (mcScrub) { mcScrub.value = v; fillScrub(mcScrub, pct); }
-        }
-    }
-    function togglePlay() {
-        if (!audio) return;
-        if (audio.paused) audio.play().catch(() => {});
-        else audio.pause();
-    }
-    toggles.forEach(b => b.addEventListener('click', e => { e.stopPropagation(); togglePlay(); }));
-    document.querySelectorAll('.np-prev,.mc-prev').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx - 1, true); }));
-    document.querySelectorAll('.np-next,.mc-next').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx + 1, true); }));
+    document.querySelectorAll('.mc-toggle,.np-toggle').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();togglePlay();}));
+    document.querySelectorAll('.mc-prev,.np-prev').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();loadSong(curSong-1,true);}));
+    document.querySelectorAll('.mc-next,.np-next').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();loadSong(curSong+1,true);}));
 
-    [npScrub, mcScrub].forEach(sc => {
-        if (!sc) return;
-        sc.addEventListener('input', () => {
-            scrubbing = true;
-            const pct = sc.value / 10;
-            fillScrub(sc, pct);
-            if (npScrub && npScrub !== sc) { npScrub.value = sc.value; fillScrub(npScrub, pct); }
-            if (mcScrub && mcScrub !== sc) { mcScrub.value = sc.value; fillScrub(mcScrub, pct); }
-        });
-        const commit = () => { if (audio && audio.duration) audio.currentTime = (sc.value / 1000) * audio.duration; scrubbing = false; };
-        sc.addEventListener('change', commit);
-        sc.addEventListener('pointerup', commit);
-    });
+    const btnEnable=document.getElementById('autoplay-enable');
+    const btnLater =document.getElementById('autoplay-later');
+    if(btnEnable) btnEnable.addEventListener('click',e=>{e.stopPropagation();go(base());loadSong(0,true);});
+    if(btnLater)  btnLater.addEventListener('click',e=>{e.stopPropagation();go(base());});
 
-    const btnSongs = document.getElementById('np-btn-songs');
-    const btnFx    = document.getElementById('np-btn-fx');
-    const bgLayer  = document.querySelector('.bg');
-    if (btnSongs) btnSongs.addEventListener('click', e => {
-        e.stopPropagation();
-        btnSongs.classList.toggle('active');
-        if (plEl) plEl.classList.toggle('open');
-    });
-    if (btnFx) {
-        btnFx.classList.add('active');
-        btnFx.addEventListener('click', e => {
-            e.stopPropagation();
-            btnFx.classList.toggle('active');
-            if (bgLayer) bgLayer.style.display = btnFx.classList.contains('active') ? '' : 'none';
-        });
-    }
-
-    if (audio) {
-        audio.addEventListener('play', () => {
-            const first = !musicActive;
-            musicActive = true;
-            document.body.classList.add('audio-playing');
-            // 如果当前是 default 状态，切换到 music-bar 显示正在播放
-            if (getCurrentState() === 'default') setState('music-bar');
-            else island.classList.remove('idle');
-            if (first && !hovering) showToast('success', 'QQ音乐 · 播放中', '♪');
-        });
-        audio.addEventListener('pause', () => {
-            document.body.classList.remove('audio-playing');
-            if (getCurrentState() === 'music-bar') setState('default');
-        });
-        audio.addEventListener('ended', () => loadSong(curIdx + 1, true));
-        audio.addEventListener('loadedmetadata', updateProgress);
-        audio.addEventListener('timeupdate', updateProgress);
-    }
-
-    const sections = ['#home', '#github', '#netease', '#project'].map(id => document.querySelector(id));
-    const SECTION_NAMES = ['首页', 'GitHub', 'QQ音乐', 'Projects'];
-    const pillNav = document.getElementById('pillNav');
-    const indicator = document.getElementById('indicator');
-    let navJump = false;
-
-    function moveIndicatorTo(btn) {
-        if (!pillNav || !indicator || !btn) return;
-        const navRect = pillNav.getBoundingClientRect();
-        const itemRect = btn.getBoundingClientRect();
-        indicator.style.left = (itemRect.left - navRect.left) + 'px';
-        indicator.style.width = itemRect.width + 'px';
-        indicator.classList.add('ready');
-    }
-    function repositionIndicator() {
-        const act = pillNav && pillNav.querySelector('.island-nav-btn.active');
-        if (!act || !indicator) return;
-        indicator.style.transition = 'none';
-        moveIndicatorTo(act);
-        void indicator.offsetHeight;
-        indicator.style.transition = '';
-    }
-
-    navBtns.forEach(btn => {
-        btn.addEventListener('click', e => {
-            const target = btn.getAttribute('href');
-            if (target && target.startsWith('#')) {
+    document.querySelectorAll('.social-btn').forEach(link=>{
+        link.addEventListener('click',e=>{
+            const href=link.getAttribute('href');
+            if(link.id==='email-link'||!href){e.preventDefault();go('email');return;}
+            if(!href.startsWith('#')){
                 e.preventDefault();
-                e.stopPropagation();
-                const el = document.querySelector(target);
-                if (el) {
-                    navJump = true;
-                    navBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    moveIndicatorTo(btn);
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    setTimeout(() => { navJump = false; }, 800);
+                const img=link.querySelector('img');
+                askConfirm({title:link.getAttribute('title')||'外部链接',href,iconSrc:img?img.src:null});
+            }
+        });
+    });
+
+    if(audio){
+        audio.addEventListener('play',()=>{
+            const first=!musicOn; musicOn=true;
+            document.body.classList.add('audio-playing');
+            _updateSat();
+            if(curState==='idle') go('mbar');
+            if(!hovering&&first) toast('success','QQ音乐 · 播放中');
+        });
+        audio.addEventListener('pause',()=>{
+            musicOn=false;
+            document.body.classList.remove('audio-playing');
+            _updateSat();
+            if(curState==='mbar') go('idle');
+        });
+        audio.addEventListener('ended',()=>loadSong(curSong+1,true));
+        audio.addEventListener('timeupdate',updateProgress);
+        audio.addEventListener('loadedmetadata',updateProgress);
+    }
+
+    // ===== 滚动 & scrollspy =====
+    const sections = ['#home','#github','#netease','#project'].map(id=>document.querySelector(id));
+    const SECTION_NAMES = ['首页','GitHub','QQ音乐','Projects'];
+    const navBtns = Array.from(document.querySelectorAll('.island-nav .island-nav-btn'));
+    let sectionOffsets=[], scrollMax=0, lastSpIdx=-1, navJump=false;
+
+    function recomputeLayout(){
+        sectionOffsets=sections.map(s=>s?s.offsetTop:0);
+        scrollMax=document.documentElement.scrollHeight-window.innerHeight;
+    }
+    function updateScrollSpy(y){
+        if(navJump) return;
+        let idx=0;
+        for(let i=0;i<sectionOffsets.length;i++){ if(sectionOffsets[i]-120<=y) idx=i; }
+        if(idx!==lastSpIdx){
+            lastSpIdx=idx; navIdx=idx;
+            navBtns.forEach((b,i)=>b.classList.toggle('active',i===idx));
+            _syncNavDots();
+        }
+        const pct=scrollMax>0?Math.min(100,y/scrollMax*100):0;
+        _updateNavRing(pct);
+        // preview 百分比
+        const pctEl=island&&island.querySelector('.island-preview-pct');
+        if(pctEl) pctEl.textContent=Math.round(pct)+'%';
+    }
+    window.addEventListener('scroll',()=>{
+        scrolling=true;
+        const y=window.scrollY||document.documentElement.scrollTop||0;
+        updateScrollSpy(y);
+        const cur=curState;
+        if(cur==='confirm'){clr('confirm');pendingHref=null;toast('error','已取消');}
+        else if(cur==='email') go('idle');
+        else if(cur==='idle'||cur==='mbar'||cur==='mcard') go('nav');
+        clr('scrollEnd');
+        after('scrollEnd',220,()=>{
+            scrolling=false;
+            if(!hovering&&!scrubbing&&!isLocked()) after('collapse',700,()=>{ if(!hovering&&!scrolling&&!isLocked()) go(base()); });
+        });
+    },{passive:true});
+
+    navBtns.forEach(btn=>{
+        btn.addEventListener('click',e=>{
+            const target=btn.getAttribute('href');
+            if(target&&target.startsWith('#')){
+                e.preventDefault(); e.stopPropagation();
+                const el=document.querySelector(target);
+                if(el){
+                    navJump=true;
+                    const i=parseInt(btn.getAttribute('data-index')||'0');
+                    navIdx=i;
+                    navBtns.forEach(b=>b.classList.toggle('active',b===btn));
+                    _syncNavDots();
+                    el.scrollIntoView({behavior:'smooth',block:'start'});
+                    setTimeout(()=>navJump=false,800);
                 }
             }
         });
     });
-    let sectionOffsets = [];
-    let scrollMax = 0, lastSpIdx = -1, lastSpPctTxt = '', lastSpBarPctTxt = '';
-    function recomputeLayoutMetrics() {
-        sectionOffsets = sections.map(s => s ? s.offsetTop : 0);
-        scrollMax = document.documentElement.scrollHeight - window.innerHeight;
-    }
-    function updateScrollSpy(y) {
-        if (navJump) return;
-        let idx = 0;
-        for (let i = 0; i < sectionOffsets.length; i++) {
-            if (sectionOffsets[i] - 120 <= y) idx = i;
-        }
-        if (idx !== lastSpIdx) {
-            lastSpIdx = idx;
-            for (let i = 0; i < navBtns.length; i++) {
-                const b = navBtns[i];
-                const should = i === idx;
-                const wasActive = b.classList.contains('active');
-                if (wasActive !== should) {
-                    b.classList.toggle('active', should);
-                    if (should) moveIndicatorTo(b);
-                }
-            }
-            if (spSection) spSection.textContent = SECTION_NAMES[idx];
-        }
-    }
 
-    requestAnimationFrame(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); repositionIndicator(); }));
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => requestAnimationFrame(() => { recomputeLayoutMetrics(); repositionIndicator(); }));
-    }
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => { recomputeLayoutMetrics(); repositionIndicator(); }, 120);
-    }, { passive: true });
-    function updateScrollProgress(y) {
-        const pct = scrollMax > 0 ? (y / scrollMax) * 100 : 0;
-        const clamped = pct > 100 ? 100 : (pct < 0 ? 0 : pct);
-        const barTxt = clamped.toFixed(2) + '%';
-        if (barTxt !== lastSpBarPctTxt) {
-            lastSpBarPctTxt = barTxt;
-            if (progressBar) progressBar.style.width = barTxt;
-        }
-        const pctTxt = Math.round(clamped) + '%';
-        if (pctTxt !== lastSpPctTxt) {
-            lastSpPctTxt = pctTxt;
-            if (spPct) spPct.textContent = pctTxt;
-        }
-    }
-    const explore = document.querySelector('.explore-btn');
-    if (explore) explore.addEventListener('click', () => document.querySelector('#github').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    document.addEventListener('click',e=>{
+        if(island&&island.contains(e.target)) return;
+        if(e.target.closest('.social-btn')) return;
+        if(curState==='confirm'){clr('confirm');pendingHref=null;}
+        if(curState!=='idle'&&curState!=='mbar'&&curState!=='toast') go(base());
+    });
 
-    const twEl = document.querySelector('.typewriter-text');
-    const phrases = ['今後也請多多指教。', '願你的明天比今天滿溢更多的幸福與笑容。', '世界由無數的言語構成。','所謂人生，就是自己筆下的故事。', '幸福的活下去吧！', "人在孤獨中降生，在孤獨中死去。", 'Welcome To Real Me!', '這個世界，總有一天也會微笑。', 'userhali.com', 'Hali'];
-    if (twEl) {
-        let pi = 0, ci = 0, deleting = false;
-        (function type() {
-            if (document.hidden) { setTimeout(type, 1000); return; }
-            const full = phrases[pi];
-            ci += deleting ? -1 : 1;
-            twEl.textContent = full.slice(0, ci);
-            let delay = deleting ? 45 : 95;
-            if (!deleting && ci === full.length) { delay = 1600; deleting = true; }
-            else if (deleting && ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; delay = 450; }
-            setTimeout(type, delay);
+    // ===== typewriter =====
+    const twEl=document.querySelector('.typewriter-text');
+    const phrases=['今後也請多多指教。','願你的明天比今天滿溢更多的幸福與笑容。','世界由無數的言語構成。','所謂人生，就是自己筆下的故事。','幸福的活下去吧！',"人在孤獨中降生，在孤獨中死去。",'Welcome To Real Me!','這個世界，總有一天也會微笑。','userhali.com','Hali'];
+    if(twEl){
+        let pi=0,ci=0,deleting=false;
+        (function type(){
+            if(document.hidden){setTimeout(type,1000);return;}
+            const full=phrases[pi];
+            ci+=deleting?-1:1;
+            twEl.textContent=full.slice(0,ci);
+            let delay=deleting?45:95;
+            if(!deleting&&ci===full.length){delay=1600;deleting=true;}
+            else if(deleting&&ci===0){deleting=false;pi=(pi+1)%phrases.length;delay=450;}
+            setTimeout(type,delay);
         })();
     }
 
-    const revealObs = new IntersectionObserver(entries => {
-        entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); revealObs.unobserve(en.target); } });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+    // ===== reveal =====
+    const revealObs=new IntersectionObserver(entries=>{
+        entries.forEach(en=>{ if(en.isIntersecting){en.target.classList.add('in');revealObs.unobserve(en.target);} });
+    },{threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
 
-    function hoverExpand() {
-        if (isLocked()) return;
-        if (musicActive) setState('music-card');
-        else setState('nav');
-        updateScrollProgress(window.scrollY || document.documentElement.scrollTop || 0);
-    }
-    island.addEventListener('mouseenter', () => { hovering = true; clearTimeout(collapseTimer); hoverExpand(); });
-    island.addEventListener('mouseleave', () => { hovering = false; if (!userScrolling && !scrubbing) scheduleCollapse(); });
-    // ===== Mouse tracking: rAF-throttled, skipped on touch devices =====
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    let mouseMovePending = false;
-    function onMouseMove(e) {
-        if (isTouchDevice) return; // touch 设备不需要 mouseenter 逻辑
-        mouse.x = e.clientX; mouse.y = e.clientY;
-        if (mouseMovePending) return;
-        mouseMovePending = true;
-        requestAnimationFrame(() => { mouseMovePending = false; armIdle(); });
-    }
-    document.addEventListener('mousemove', onMouseMove, { passive: true });
-    document.addEventListener('keydown', armIdle);
-    document.addEventListener('touchstart', armIdle, { passive: true });
+    const explore=document.querySelector('.explore-btn');
+    if(explore) explore.addEventListener('click',()=>document.querySelector('#github').scrollIntoView({behavior:'smooth',block:'start'}));
 
-    island.addEventListener('click', e => {
-        if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub')) return;
-        const cur = getCurrentState();
-        if (cur === 'default' || cur === 'music-bar') {
-            if (musicActive && e.target.closest('.island-music-bar')) setState('music-card');
-            else setState('nav');
-        }
-    });
+    window.addEventListener('resize',()=>{ recomputeLayout(); const y=window.scrollY||0; updateScrollSpy(y); },{passive:true});
 
-    let scrollRaf = 0;
-    function flushScroll() {
-        scrollRaf = 0;
-        const y = window.scrollY || document.documentElement.scrollTop || 0;
-        updateScrollProgress(y);
-        updateScrollSpy(y);
-    }
-    function onScroll() {
-        if (!scrollRaf) scrollRaf = requestAnimationFrame(flushScroll);
-        userScrolling = true;
-        const cur = getCurrentState();
-        if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; showToast('error', '已取消'); island.classList.remove('idle'); }
-        else if (cur === 'email') { setState('default'); island.classList.remove('idle'); }
-        else if (cur === 'default' || cur === 'music-bar' || cur === 'music-card') { setState('nav'); island.classList.remove('idle'); }
-        clearTimeout(scrollEndTimer);
-        scrollEndTimer = setTimeout(() => {
-            userScrolling = false;
-            armIdle();
-            if (!hovering && !scrubbing && !pointInIsland()) scheduleCollapse(700);
-        }, 220);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => {
-        recomputeLayoutMetrics();
-        const y = window.scrollY || document.documentElement.scrollTop || 0;
-        updateScrollProgress(y);
-    }, { passive: true });
-
-    document.addEventListener('click', e => {
-        if (island.contains(e.target) || e.target.closest('.social-btn')) return;
-        const cur = getCurrentState();
-        if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; }
-        if (cur !== 'default' && cur !== 'music-bar' && cur !== 'toast') setState('default');
-    });
-
-    let islandRevealed = false;
-    function revealIsland() {
-        if (islandRevealed) return;
-        islandRevealed = true;
-        // 入场动画:scale(.6) -> 1.08 -> 1 的弹性放大,结束后自动移除 class 释放 will-change
-        island.classList.add('island-entrance');
-        island.addEventListener('animationend', function h() {
-            island.classList.remove('island-entrance');
-            island.removeEventListener('animationend', h);
-        });
-        // island 默认已可见（CSS 移除 opacity:0），只需启动 idle 计时器
-        armIdle();
-    }
-    function runIntro() {
-        const intro = document.getElementById('intro');
-        if (!intro) { document.body.classList.remove('intro-lock'); revealIsland(); handlePostIntro(); return; }
-        if (getCookie('introShown')) {
-            intro.remove();
-            document.body.classList.remove('intro-lock');
-            revealIsland();
-            handlePostIntro();
-            return;
-        }
-        setCookie('introShown', '1', 86400);
-        const prefix = intro.querySelector('.intro-prefix');
-        const first  = intro.querySelector('.intro-first');
-        const rest   = intro.querySelector('.intro-rest');
-        const fr = first.getBoundingClientRect();
-        const dx = window.innerWidth / 2 - (fr.left + fr.width / 2);
-
-        prefix.style.opacity = '0'; prefix.style.transform = 'translateY(12px)';
-        first.style.opacity = '0';  first.style.transform = 'translateX(' + dx + 'px) scale(2)';
-        rest.style.opacity = '0';   rest.style.transform = 'translateY(12px)';
-
-        let raf = null, done = false;
-        const t0 = performance.now();
-        function finish() {
-            if (done) return;
-            done = true;
-            if (raf) cancelAnimationFrame(raf);
-            intro.classList.add('done');
-            intro.style.transition = 'opacity .45s ease';
-            intro.style.opacity = '0';
-            setTimeout(() => { if (intro.parentNode) intro.remove(); document.body.classList.remove('intro-lock'); }, 470);
-            revealIsland();
-            handlePostIntro();
-        }
-        function frame(now) {
-            const e = now - t0;
-            const pp = easeOutCubic((e - 300) / 600);
-            prefix.style.opacity = pp;
-            prefix.style.transform = 'translateY(' + (1 - pp) * 12 + 'px)';
-
-            let zScale = 2, zAlpha = 0;
-            if (e >= 1100) {
-                const s = e - 1100;
-                if (s <= 900) { const zp = easeOutCubic(s / 900); zScale = 2 + (1 - 2) * zp; zAlpha = zp; }
-                else { zScale = 1; zAlpha = 1; }
-            }
-            let slide = 0;
-            if (e > 2200) slide = e <= 3000 ? easeInOutCubic((e - 2200) / 800) : 1;
-            const curDx = dx + (0 - dx) * slide;
-            first.style.opacity = zAlpha;
-            first.style.transform = 'translateX(' + curDx + 'px) scale(' + zScale + ')';
-
-            let enA = 0, enY = 12;
-            if (e > 2850) {
-                if (e <= 3250) { const ep = easeOutCubic((e - 2850) / 400); enA = ep; enY = (1 - ep) * 12; }
-                else { enA = 1; enY = 0; }
-            }
-            rest.style.opacity = enA;
-            rest.style.transform = 'translateY(' + enY + 'px)';
-
-            if (e >= 4400) { finish(); return; }
-            raf = requestAnimationFrame(frame);
-        }
-        raf = requestAnimationFrame(frame);
-
-        function skipAndPlay() { finish(); }
-        intro.addEventListener('click', skipAndPlay);
-        window.addEventListener('keydown', skipAndPlay, { once: true });
-        window.addEventListener('wheel', skipAndPlay, { once: true, passive: true });
-        window.addEventListener('touchstart', skipAndPlay, { once: true, passive: true });
-            setTimeout(finish, 6000);
-    }
-
-    // ===== 启动动画结束后的处理：自动播放策略 =====
-    // 'enabled' → 用户曾勾选"不再提示 + 开启"，尝试直接播放（浏览器策略限制时降级为首次手势解锁）
-    // 'off'    → 用户曾拒绝并不再提示，静默不播
-    // 'ask'    → 默认 / 仍未表态，弹小型 Toast 询问
-    function handlePostIntro() {
-        const pref = getAutoplayPref();
-        if (pref === 'enabled') {
-            beginMusic();
-            armAudioUnlock();
-        } else if (pref === 'off') {
-            // 用户已明确拒绝且不再提示 → 静默不播
-        } else {
-            // 首次访问或仍需询问 → 展示小型 Toast
-            showAutoplayPrompt();
-        }
-    }
-
-    renderPlaylist();
-    loadSong(0, false);
-    // HTML 已自带 data-state="default" + active-content，无需 setState
-    // setState('default', { force: true }) 会触发强制重渲染，破坏首屏
-    recomputeLayoutMetrics();
-    const _y0 = window.scrollY || document.documentElement.scrollTop || 0;
-    updateScrollProgress(_y0);
-    updateScrollSpy(_y0);
-    const yearEl = document.getElementById('year');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-    /* ===== Projects: GitHub API ===== */
-    const GITHUB_USER = 'haliChina';
-    const CACHE_KEY = 'projects_cache_v3';
-    const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-    const LANG_COLORS = {
-        JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',Java:'#b07219',
-        'C++':'#f34b7d',C:'#555555',Go:'#00ADD8',Rust:'#dea584',HTML:'#e34c26',
-        CSS:'#563d7c',Vue:'#41b883',Shell:'#89e051',Dockerfile:'#384d54',
-        Kotlin:'#A97BFF',Swift:'#F05138',Ruby:'#701516',PHP:'#4F5D95'
-    };
-    function langColor(l){ return LANG_COLORS[l] || '#8b8b8b'; }
-    function timeAgo(dateStr){
-        if (!dateStr) return '';
-        const d = new Date(dateStr); const diff = Date.now() - d.getTime();
-        const day = 86400000;
-        if (diff < day) return '今天';
-        if (diff < day*2) return '昨天';
-        if (diff < day*30) return Math.floor(diff/day)+'天前';
-        if (diff < day*365) return Math.floor(diff/(day*30))+'个月前';
-        return Math.floor(diff/(day*365))+'年前';
-    }
-    function esc(s){ return (s||'').replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
-
-    /* --- 数据源: GitHub API (浏览器直连) --- */
-    async function fetchGitHubRepos(){
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
-        try {
-            const res = await fetch('https://api.github.com/users/'+GITHUB_USER+'/repos?sort=pushed&per_page=100', {
-                headers: {'Accept': 'application/vnd.github.v3+json'},
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!res.ok) {
-                if (res.status === 403) {
-                    console.warn('[Projects] GitHub API rate limited (403)');
-                    throw new Error('GitHub API rate limited');
-                }
-                if (res.status === 404) {
-                    console.warn('[Projects] GitHub user not found (404)');
-                    throw new Error('GitHub user not found');
-                }
-                throw new Error('GitHub HTTP '+res.status);
-            }
-            const data = await res.json();
-            console.log('[Projects] GitHub repos fetched:', data.length);
-            return data.filter(r => !r.fork).map(r => ({
-                name: r.name,
-                description: r.description || '',
-                language: r.language,
-                stars: r.stargazers_count || 0,
-                forks: r.forks_count || 0,
-                homepage: r.homepage || '',
-                html_url: r.html_url,
-                pushed_at: r.pushed_at,
-                source: 'github'
-            }));
-        } catch(e) {
-            clearTimeout(timeoutId);
-            if (e.name === 'AbortError') {
-                console.warn('[Projects] GitHub fetch timeout (12s)');
-                throw new Error('GitHub fetch timeout');
-            }
-            throw e;
-        }
-    }
-
-    function renderProjects(projects){
-        const grid = document.getElementById('projects-grid');
-        if (!grid) return;
-        if (!projects.length){ grid.innerHTML = '<div class="projects-loading">暂无公开项目</div>'; return; }
-        console.log('[Projects] Rendering', projects.length, 'projects');
-        grid.innerHTML = projects.map(r => {
-            const lang = r.language ? '<span class="proj-lang"><i style="background:'+langColor(r.language)+'"></i>'+esc(r.language)+'</span>' : '';
-            const stars = r.stars ? '<span>★ '+r.stars+'</span>' : '';
-            const forks = r.forks ? '<span>⑂ '+r.forks+'</span>' : '';
-            const updated = r.pushed_at ? '<span class="proj-time">'+timeAgo(r.pushed_at)+'</span>' : '';
-            const sourceTag = '<span class="proj-source">GitHub</span>';
-            const homepage = r.homepage ? '<a class="proj-link proj-link--primary" href="'+esc(r.homepage)+'" target="_blank" rel="noopener">在线预览</a>' : '';
-            const sourceLink = r.html_url
-                ? '<a class="proj-link" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">源码</a>'
-                : '';
-            const nameLink = r.html_url
-                ? '<a class="proj-name" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.name)+'</a>'
-                : '<span class="proj-name">'+esc(r.name)+'</span>';
-            return '<div class="proj-card">'+
-                '<div class="proj-head">'+nameLink+sourceTag+'</div>'+
-                (r.description ? '<p class="proj-desc">'+esc(r.description)+'</p>' : '')+
-                '<div class="proj-meta">'+lang+'<div class="proj-stats">'+stars+forks+'</div>'+updated+'</div>'+
-                '<div class="proj-links">'+homepage+sourceLink+'</div></div>';
-        }).join('');
-    }
-
-    function showProjectsError(msg){
-        const grid = document.getElementById('projects-grid');
-        if (!grid) return;
-        grid.innerHTML = '<div class="projects-error"><div class="projects-error-text">'+esc(msg)+'</div><button class="projects-retry" id="projects-retry-btn">重新加载</button></div>';
-        const btn = document.getElementById('projects-retry-btn');
-        if (btn) btn.addEventListener('click', () => { grid.innerHTML = '<div class="projects-loading">加载中...</div>'; loadProjects(); });
-    }
-
-    async function loadProjects(){
-        const grid = document.getElementById('projects-grid');
-        if (!grid) return;
-        // 24小时缓存
-        const cached = (() => { try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch(_) { return null; } })();
-        if (cached && cached.ts && Date.now() - cached.ts < CACHE_TTL && cached.projects) {
-            console.log('[Projects] Using cache,', cached.projects.length, 'projects');
-            renderProjects(cached.projects); return;
-        }
-        // 有旧缓存先展示
-        if (cached && cached.projects) renderProjects(cached.projects);
-        // 浏览器直连 GitHub API
-        try {
-            const projects = await fetchGitHubRepos();
-            console.log('[Projects] Fetched total:', projects.length);
-            if (!projects.length && !cached) {
-                showProjectsError('该 GitHub 账号下暂无公开仓库');
-                return;
-            }
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), projects})); } catch(_){}
-            renderProjects(projects);
-        } catch(e) {
-            console.warn('[Projects] Fetch failed:', e.message, '(浏览器可能无法访问 api.github.com，部署到 Vercel 后会正常)');
-            if (!cached || !cached.projects) {
-                const isSandbox = location.hostname.includes('agent-sandbox') || location.hostname.includes('trae.cn');
-                const hint = isSandbox ? '（沙箱环境无法访问 GitHub API，部署到 Vercel 后可正常加载）' : '（请检查网络）';
-                showProjectsError('项目加载失败 ' + hint);
-            }
-        }
-    }
-    loadProjects();
-
-    // ===== GitHub Stats / Top Languages 加载失败时的本地兜底卡片 =====
-    // 用 inline SVG 替代原图，保持布局占位并提供"加载失败"提示与重试入口
-    window.__ghStatsFallback = function(label) {
-        const wrap = document.createElement('div');
-        wrap.className = 'gh-stats-card gh-stats-fallback';
-        wrap.setAttribute('role', 'img');
-        wrap.setAttribute('aria-label', label + ' 加载失败');
-        wrap.innerHTML =
-            '<div class="gh-fb-title">' + label + '</div>' +
-            '<div class="gh-fb-msg">加载失败</div>' +
-            '<button class="gh-fb-retry" type="button">重试</button>';
-        // 点击重试：把容器替换回 <img>，让浏览器重新发起请求
-        wrap.querySelector('.gh-fb-retry').addEventListener('click', () => {
-            const img = document.createElement('img');
-            img.className = 'gh-stats-card';
-            img.alt = label;
-            img.decoding = 'async';
-            img.loading = 'lazy';
-            const base = 'https://github-stats-extended.vercel.app/api';
-            img.src = (label === 'Stats')
-                ? base + '?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true&_r=' + Date.now()
-                : base + '/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true&_r=' + Date.now();
-            img.onerror = function() { this.replaceWith(window.__ghStatsFallback(label)); };
+    // ===== Github Stats fallback =====
+    window.__ghStatsFallback=function(label){
+        const wrap=document.createElement('div');
+        wrap.className='gh-stats-card gh-stats-fallback';
+        wrap.innerHTML='<div class="gh-fb-title">'+label+'</div><div class="gh-fb-msg">加载失败</div><button class="gh-fb-retry" type="button">重试</button>';
+        wrap.querySelector('.gh-fb-retry').addEventListener('click',()=>{
+            const img=document.createElement('img');
+            img.className='gh-stats-card'; img.alt=label; img.decoding='async'; img.loading='lazy';
+            const base='https://github-stats-extended.vercel.app/api';
+            img.src=(label==='Stats')?base+'?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true&_r='+Date.now():base+'/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true&_r='+Date.now();
+            img.onerror=function(){this.replaceWith(window.__ghStatsFallback(label));};
             wrap.replaceWith(img);
         });
         return wrap;
     };
 
-    if (document.readyState === 'complete') runIntro();
-    else window.addEventListener('load', runIntro);
+    // ===== Projects =====
+    const GITHUB_USER='haliChina', CACHE_KEY='projects_cache_v3', CACHE_TTL=24*60*60*1000;
+    const LANG_COLORS={JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',Java:'#b07219','C++':'#f34b7d',C:'#555555',Go:'#00ADD8',Rust:'#dea584',HTML:'#e34c26',CSS:'#563d7c',Vue:'#41b883',Shell:'#89e051',Dockerfile:'#384d54',Kotlin:'#A97BFF',Swift:'#F05138',Ruby:'#701516',PHP:'#4F5D95'};
+    function langColor(l){return LANG_COLORS[l]||'#8b8b8b';}
+    function timeAgo(dateStr){if(!dateStr)return'';const d=new Date(dateStr),diff=Date.now()-d.getTime(),day=86400000;if(diff<day)return'今天';if(diff<day*2)return'昨天';if(diff<day*30)return Math.floor(diff/day)+'天前';if(diff<day*365)return Math.floor(diff/(day*30))+'个月前';return Math.floor(diff/(day*365))+'年前';}
+    function esc(s){return(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+    async function fetchGitHubRepos(){
+        const ctrl=new AbortController(); const tid=setTimeout(()=>ctrl.abort(),12000);
+        try{
+            const res=await fetch('https://api.github.com/users/'+GITHUB_USER+'/repos?sort=pushed&per_page=100',{headers:{'Accept':'application/vnd.github.v3+json'},signal:ctrl.signal});
+            clearTimeout(tid);
+            if(!res.ok) throw new Error('GitHub HTTP '+res.status);
+            const data=await res.json();
+            return data.filter(r=>!r.fork).map(r=>({name:r.name,description:r.description||'',language:r.language,stars:r.stargazers_count||0,forks:r.forks_count||0,homepage:r.homepage||'',html_url:r.html_url,pushed_at:r.pushed_at,source:'github'}));
+        }catch(e){clearTimeout(tid);throw e;}
+    }
+    function renderProjects(projects){
+        const grid=document.getElementById('projects-grid');
+        if(!grid)return;
+        if(!projects.length){grid.innerHTML='<div class="projects-loading">暂无公开项目</div>';return;}
+        grid.innerHTML=projects.map(r=>{
+            const lang=r.language?'<span class="proj-lang"><i style="background:'+langColor(r.language)+'"></i>'+esc(r.language)+'</span>':'';
+            const stars=r.stars?'<span>★ '+r.stars+'</span>':'';
+            const forks=r.forks?'<span>⑂ '+r.forks+'</span>':'';
+            const updated=r.pushed_at?'<span class="proj-time">'+timeAgo(r.pushed_at)+'</span>':'';
+            const homepage=r.homepage?'<a class="proj-link proj-link--primary" href="'+esc(r.homepage)+'" target="_blank" rel="noopener">在线预览</a>':'';
+            const sourceLink=r.html_url?'<a class="proj-link" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">源码</a>':'';
+            const nameLink=r.html_url?'<a class="proj-name" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.name)+'</a>':'<span class="proj-name">'+esc(r.name)+'</span>';
+            return '<div class="proj-card"><div class="proj-head">'+nameLink+'<span class="proj-source">GitHub</span></div>'+(r.description?'<p class="proj-desc">'+esc(r.description)+'</p>':'')+'<div class="proj-meta">'+lang+'<div class="proj-stats">'+stars+forks+'</div>'+updated+'</div><div class="proj-links">'+homepage+sourceLink+'</div></div>';
+        }).join('');
+    }
+    function showProjectsError(msg){
+        const grid=document.getElementById('projects-grid');
+        if(!grid)return;
+        grid.innerHTML='<div class="projects-error"><div class="projects-error-text">'+esc(msg)+'</div><button class="projects-retry" id="projects-retry-btn">重新加载</button></div>';
+        const btn=document.getElementById('projects-retry-btn');
+        if(btn) btn.addEventListener('click',()=>{grid.innerHTML='<div class="projects-loading">加载中...</div>';loadProjects();});
+    }
+    async function loadProjects(){
+        const grid=document.getElementById('projects-grid');
+        if(!grid)return;
+        const cached=(()=>{try{return JSON.parse(localStorage.getItem(CACHE_KEY));}catch(_){return null;}})();
+        if(cached&&cached.ts&&Date.now()-cached.ts<CACHE_TTL&&cached.projects){renderProjects(cached.projects);return;}
+        if(cached&&cached.projects) renderProjects(cached.projects);
+        try{
+            const projects=await fetchGitHubRepos();
+            if(!projects.length&&!cached){showProjectsError('该 GitHub 账号下暂无公开仓库');return;}
+            try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),projects}));}catch(_){}
+            renderProjects(projects);
+        }catch(e){
+            if(!cached||!cached.projects){
+                const isSandbox=location.hostname.includes('agent-sandbox')||location.hostname.includes('trae.cn');
+                showProjectsError('项目加载失败'+(isSandbox?' （沙箱环境，部署后正常）':'（请检查网络）'));
+            }
+        }
+    }
+    loadProjects();
+
+    // ===== 入场 + autoplay 策略 =====
+    function easeOutCubic(t){return 1-Math.pow(1-Math.min(1,Math.max(0,t)),3);}
+    function easeInOutCubic(t){t=Math.min(1,Math.max(0,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+    function handlePostIntro(){
+        after('greet',900,greet);
+        after('autoplay',3400,()=>{if(curState==='idle'||curState==='greet') go('autoplay');});
+    }
+
+    function runIntro(){
+        const intro=document.getElementById('intro');
+        if(!intro){document.body.classList.remove('intro-lock');handlePostIntro();return;}
+        if(getCookie('introShown')){intro.remove();document.body.classList.remove('intro-lock');handlePostIntro();return;}
+        setCookie('introShown','1',86400);
+        const prefix=intro.querySelector('.intro-prefix');
+        const first=intro.querySelector('.intro-first');
+        const rest=intro.querySelector('.intro-rest');
+        const fr=first.getBoundingClientRect();
+        const dx=window.innerWidth/2-(fr.left+fr.width/2);
+        prefix.style.opacity='0';prefix.style.transform='translateY(12px)';
+        first.style.opacity='0';first.style.transform='translateX('+dx+'px) scale(2)';
+        rest.style.opacity='0';rest.style.transform='translateY(12px)';
+        let raf=null,done=false;
+        const t0=performance.now();
+        function finish(){
+            if(done)return;done=true;
+            if(raf)cancelAnimationFrame(raf);
+            intro.style.transition='opacity .45s ease';intro.style.opacity='0';
+            setTimeout(()=>{if(intro.parentNode)intro.remove();document.body.classList.remove('intro-lock');},470);
+            handlePostIntro();
+        }
+        function frame(now){
+            const e=now-t0;
+            const pp=easeOutCubic((e-300)/600);
+            prefix.style.opacity=pp;prefix.style.transform='translateY('+((1-pp)*12)+'px)';
+            let zS=2,zA=0;
+            if(e>=1100){const s=e-1100;if(s<=900){const zp=easeOutCubic(s/900);zS=2+(1-2)*zp;zA=zp;}else{zS=1;zA=1;}}
+            let slide=0;if(e>2200)slide=e<=3000?easeInOutCubic((e-2200)/800):1;
+            const curDx=dx+(0-dx)*slide;
+            first.style.opacity=zA;first.style.transform='translateX('+curDx+'px) scale('+zS+')';
+            let enA=0,enY=12;
+            if(e>2850){if(e<=3250){const ep=easeOutCubic((e-2850)/400);enA=ep;enY=(1-ep)*12;}else{enA=1;enY=0;}}
+            rest.style.opacity=enA;rest.style.transform='translateY('+enY+'px)';
+            if(e>=4400){finish();return;}
+            raf=requestAnimationFrame(frame);
+        }
+        raf=requestAnimationFrame(frame);
+        [intro,'click'].forEach(()=>{});
+        intro.addEventListener('click',finish);
+        window.addEventListener('keydown',finish,{once:true});
+        window.addEventListener('wheel',finish,{once:true,passive:true});
+        window.addEventListener('touchstart',finish,{once:true,passive:true});
+        setTimeout(finish,6000);
+    }
+
+    // ===== 初始化 =====
+    go('idle',{force:true});
+    _applyIdlePhase();
+    _syncNavDots();
+    loadSong(0,false);
+    recomputeLayout();
+    updateScrollSpy(window.scrollY||0);
+
+    const yearEl=document.getElementById('year');
+    if(yearEl) yearEl.textContent=new Date().getFullYear();
+
+    island.classList.add('island-entrance');
+    island.addEventListener('animationend',function h(){island.classList.remove('island-entrance');island.removeEventListener('animationend',h);});
+
+    if(document.readyState==='complete') runIntro();
+    else window.addEventListener('load',runIntro);
 
 })();

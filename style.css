@@ -304,19 +304,129 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .island-content{
     position:relative;pointer-events:auto;cursor:pointer;overflow:hidden;
-    width:236px;height:40px;border-radius:22px;
-    background-color:rgba(12,12,16,.86);
-    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
-    border:1px solid rgba(255,255,255,.06);
+    /* 1c: 待机 122×36，初始值由 JS 立即写入 */
+    width:122px;height:36px;border-radius:18px;
+    /* 1c 玻璃态：深紫半透明 + 粉色边框 + 毛玻璃 */
+    background-color:rgba(22,15,24,.72);
+    backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+    border:1px solid rgba(255,143,182,.2);
+    box-shadow:0 14px 44px rgba(255,107,157,.15), inset 0 1px 0 rgba(255,255,255,.08);
     display:flex;align-items:center;justify-content:center;
-    /* 仅在状态切换时短暂启用 will-change，避免长期占 GPU 合成层 */
-    transition:width 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               height 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               border-radius 0.6s cubic-bezier(0.175,0.885,0.32,1.15),
-               background-color 0.4s ease;
+    transition:width .55s cubic-bezier(.34,1.2,.4,1),
+               height .55s cubic-bezier(.34,1.2,.4,1),
+               border-radius .55s cubic-bezier(.34,1.2,.4,1),
+               background-color .4s ease;
     touch-action:manipulation;
     contain:layout paint}
 /* island 默认可见，revealIsland 仅是触发 idle 计时器（不再做动画覆盖） */
+
+.island-satellite{
+    position:relative;pointer-events:auto;cursor:pointer;overflow:hidden;
+    width:0;height:36px;border-radius:18px;margin-left:-8px;
+    background-color:rgba(12,12,16,.86);
+    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+    border:1px solid rgba(255,255,255,.06);
+    display:flex;align-items:center;justify-content:center;gap:6px;padding:0;
+    opacity:0;transform:scale(0.6);
+    transition:width .55s cubic-bezier(.34,1.2,.4,1),
+               height .55s cubic-bezier(.34,1.2,.4,1),
+               border-radius .55s cubic-bezier(.34,1.2,.4,1),
+               opacity .35s ease,
+               transform .55s cubic-bezier(.34,1.2,.4,1),
+               margin-left .55s cubic-bezier(.34,1.2,.4,1),
+               padding .55s cubic-bezier(.34,1.2,.4,1);
+    touch-action:manipulation;contain:layout paint}
+.island-satellite.sat-hidden{pointer-events:none}
+.island-satellite.sat-icon{padding:0 0 0 4px}
+.island-satellite.sat-pill{padding:0 10px 0 4px}
+.sat-cover{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;
+    box-shadow:0 2px 6px rgba(0,0,0,.5);display:block}
+.island-satellite.sat-icon .sat-cover{width:28px;height:28px}
+.island-satellite.sat-pill .sat-cover{width:28px;height:28px}
+.sat-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg);transition:opacity .25s ease,transform .25s ease}
+
+/* ===== 1c 新状态层：idle 双相位 / preview / greet / hint / nav / mbar / mcard ===== */
+
+/* --- idle --- */
+.island-idle{padding:0 15px}
+.island-idle-inner{display:flex;align-items:center;gap:7px;position:relative;white-space:nowrap}
+.island-idle-dot{width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);
+    animation:dotPulse 2.4s ease-in-out infinite;flex-shrink:0;display:block}
+@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.island-idle-brand{font-size:12px;font-weight:600;letter-spacing:.4px;white-space:nowrap;
+    background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;color:transparent;
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    transition:opacity .45s ease,transform .55s cubic-bezier(.34,1.2,.4,1)}
+.island-idle-time{font-size:12px;font-weight:600;letter-spacing:.4px;white-space:nowrap;color:rgba(255,255,255,.92);
+    position:absolute;left:12px;top:50%;transform:translateY(calc(-50% + 8px));opacity:0;
+    transition:opacity .45s ease,transform .55s cubic-bezier(.34,1.2,.4,1)}
+
+/* --- preview --- */
+.island-preview{padding:0 15px;justify-content:space-between;width:100%;box-sizing:border-box}
+.island-preview-section{font-size:12.5px;font-weight:600;color:#ffd8e7;white-space:nowrap}
+.island-preview-dots{display:flex;gap:5px;align-items:center}
+.island-preview-dots .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.28);
+    transition:background .3s,box-shadow .3s}
+.island-preview-dots .dot.active{background:#ff8fb6;box-shadow:0 0 6px rgba(255,143,182,.8)}
+.island-preview-pct{font-family:var(--font-mono);font-size:10.5px;color:rgba(255,214,228,.6);white-space:nowrap}
+
+/* --- greet --- */
+.island-greet{gap:7px;white-space:nowrap}
+.island-greet-jp{font-size:12.5px;font-weight:600;color:#ff8fb6;white-space:nowrap}
+.island-greet-sep{font-size:12.5px;color:rgba(255,255,255,.4)}
+.island-greet-zh{font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap}
+
+/* --- hint --- */
+.island-hint{gap:6px;white-space:nowrap}
+.island-hint-label{font-size:12px;color:rgba(255,214,228,.6);white-space:nowrap}
+.island-hint-section{font-size:12.5px;font-weight:700;color:#ff8fb6;white-space:nowrap}
+
+/* --- nav 1c: 单排 + 右侧进度环 --- */
+.island-nav{flex-direction:row!important;align-items:center;justify-content:flex-start;
+    padding:0 14px;gap:2px;width:100%;box-sizing:border-box}
+.island-nav .island-nav-btn{padding:6px 13px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+    white-space:nowrap;text-decoration:none;transition:background .3s,color .3s;
+    background:transparent;color:rgba(255,214,228,.55)}
+.island-nav .island-nav-btn.active{background:rgba(255,143,182,.22);color:#ffd8e7}
+.island-nav .island-nav-btn:hover{color:#fff}
+.nav-divider{width:1px;height:18px;background:rgba(255,143,182,.22);margin:0 9px 0 auto;flex-shrink:0}
+.nav-progress-ring{width:20px;height:20px;flex-shrink:0}
+.nav-pct{font-family:var(--font-mono);font-size:10.5px;color:rgba(255,214,228,.6);margin-left:6px;white-space:nowrap}
+
+/* --- mbar 1c: 小封面 + EQ --- */
+.island-mbar{padding:0 11px;justify-content:space-between;width:100%;box-sizing:border-box}
+.island-mbar .ib-cover{width:25px;height:25px;border-radius:8px;object-fit:cover;flex-shrink:0;
+    box-shadow:0 2px 8px rgba(255,107,157,.35)}
+.island-mbar .island-eq{margin-left:auto}
+
+/* --- mcard 1c: 封面+曲名+进度条+控制 --- */
+.island-mcard{padding:0;width:100%;box-sizing:border-box}
+.mcard-inner{width:100%;height:100%;display:flex;flex-direction:column;padding:16px 18px 13px;box-sizing:border-box;gap:0}
+.mcard-top{display:flex;align-items:center;gap:13px;min-width:0}
+.mcard-top .mc-cover{width:56px;height:56px;border-radius:15px;object-fit:cover;flex-shrink:0;
+    box-shadow:0 8px 20px rgba(255,107,157,.3);animation:coverIn .5s cubic-bezier(.34,1.2,.4,1)}
+@keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.mcard-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mcard-meta .mc-title{font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard-meta .mc-artist{font-size:11.5px;color:rgba(255,214,228,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard-eq.island-eq{height:16px}
+.mcard-progress{margin-top:12px}
+.mcard-bar-wrap{height:4px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden;position:relative;cursor:pointer}
+.mcard-fill{display:block;position:absolute;left:0;top:0;height:100%;border-radius:999px;
+    background:linear-gradient(90deg,#ff8fb6,#ffc5d8);width:0%;transition:width .5s linear}
+.mcard-time{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9.5px;color:rgba(255,214,228,.5);margin-top:3px}
+.mcard-ctrls{display:flex;align-items:center;justify-content:center;gap:32px;margin-top:7px}
+.mc-btn-ghost{background:none;border:none;padding:4px;cursor:pointer;display:flex;
+    transition:transform .25s;color:rgba(255,214,228,.7)}
+.mc-btn-ghost:hover{transform:scale(1.15)}
+.mc-btn-ghost svg{width:17px;height:17px;fill:rgba(255,214,228,.7)}
+.mc-btn-main{background:none;border:none;padding:4px;cursor:pointer;display:flex;
+    transition:transform .25s}
+.mc-btn-main:hover{transform:scale(1.15)}
+.mc-btn-main svg{width:20px;height:20px;fill:#fff}
+.mc-btn-main .ic-pause{display:none}
+body.audio-playing .mc-btn-main .ic-play{display:none}
+body.audio-playing .mc-btn-main .ic-pause{display:block}
 
 .island-specular{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:6;
     background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.07) 50%,transparent 65%);
@@ -332,11 +442,11 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     opacity:1;pointer-events:auto;transform:scale(1) translateY(0);
     transition:opacity 0.4s ease 0.15s,transform 0.4s cubic-bezier(0.25,1,0.5,1) 0.1s}
 
-.island-default{position:relative}
+.island-idle-legacy-delete{position:relative}
 .island-idle-brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;opacity:1;pointer-events:none;
     font-size:.82rem;font-weight:600;letter-spacing:.5px;transition:opacity .55s var(--ease);
     background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.island-content.island-state-default.idle .island-idle-brand{opacity:1}
+.island-content.island-idle-legacy-delete.idle .island-idle-brand{opacity:1}
 
 .island-mini-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
     border:none;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;width:28px;height:28px;padding:0;
@@ -366,25 +476,25 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 @keyframes eqBarC{0%,100%{height:26%}45%{height:82%}78%{height:36%}}
 @keyframes eqBarD{0%,100%{height:56%}38%{height:30%}72%{height:88%}}
 
-.island-music-bar{justify-content:flex-start;gap:10px;padding:0 14px 0 10px}
+.island-mbar{justify-content:flex-start;gap:10px;padding:0 14px 0 10px}
 .ib-cover{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.5);
     transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
 .ib-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
 .ib-title,.ib-progress{display:none}
-.island-music-bar .island-eq{margin-left:auto;order:3;view-transition-name:music-eq}
+.island-mbar .island-eq{margin-left:auto;order:3;view-transition-name:music-eq}
 
-.island-music-card{justify-content:flex-start;gap:18px;padding:0 24px}
+.island-mcard{justify-content:flex-start;gap:18px;padding:0 24px}
 .mc-cover{width:96px;height:96px;border-radius:17px;object-fit:cover;flex-shrink:0;box-shadow:0 8px 22px rgba(0,0,0,.55);
     transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
 .mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
-.mc-main{position:relative;flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:7px}
-.mc-main .island-eq{position:absolute;right:0;top:0;margin:0;view-transition-name:music-eq}
+/* removed */
+/* removed */
 .mc-title{font-size:1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:24px}
 .mc-artist{font-size:.78rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-scrub{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;margin:2px 0}
 .mc-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .mc-scrub::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#fff}
-.mc-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* removed */
 .mc-ctrls{display:flex;align-items:center;justify-content:center;gap:18px;flex:1 1 auto}
 /* Island 卡片控制按钮：同样去掉外框/圆圈，仅保留 SVG，居中 */
 .mc-ctrls .island-mini-btn,
@@ -399,13 +509,9 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .mc-dur{text-align:right}
 
 .island-nav{flex-direction:column;justify-content:center;gap:2px;padding:10px 18px 4px}
-.pill-nav{position:relative;display:flex;align-items:center;gap:4px;padding:3px;margin-top:2px;background:rgba(255,255,255,.10);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);
-    border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
-.pill-indicator{position:absolute;top:5px;bottom:5px;background:linear-gradient(120deg,var(--accent),var(--accent-3));
-    border-radius:999px;box-shadow:0 4px 14px -3px rgba(255,107,157,.35);pointer-events:none;z-index:0;
-    transition:left .42s var(--island-spring),width .42s var(--island-spring),opacity .28s var(--ease);opacity:0}
-.pill-indicator.ready{opacity:1}
+/* removed */
+/* removed */
+/* removed */
 .island-nav-btn{color:var(--text-dim);font-size:.93rem;font-weight:600;border-radius:999px;padding:7px 16px;text-decoration:none;
     position:relative;z-index:1;white-space:nowrap;transition:color .25s var(--ease),transform .35s var(--spring);
     opacity:0;transform:translateY(8px)}
@@ -416,19 +522,17 @@ body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out 
 .island-content.island-state-nav .island-nav-btn:nth-child(5){transition-delay:.28s}
 .island-nav-btn:hover{color:#fff}
 .island-nav-btn.active{color:#fff}
-.scroll-progress{width:100%;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(4px);transition:opacity .3s ease .2s,transform .3s ease .2s}
-.island-content.island-state-nav .scroll-progress{opacity:1;transform:none}
-.scroll-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:600;letter-spacing:.4px}
-.sp-section{color:var(--text-dim)}
-.sp-pct{color:#fff;font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
-.scroll-progress-container{position:relative;width:100%;height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}
-.scroll-progress-bar{position:relative;height:100%;width:0%;border-radius:999px;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3),var(--accent));background-size:200% 100%;
-    transition:width .15s ease-out;animation:spFlow 3s linear infinite}
+/* removed */
+.island-content.island-state-nav /* removed */
+/* removed */
+/* removed */
+/* removed */
+/* removed */
+/* removed */
 @keyframes spFlow{to{background-position:-200% 0}}
-.scroll-progress-bar::after{content:'';position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);animation:spShimmer 3.2s ease-in-out infinite}
+/* removed */
 @keyframes spShimmer{0%{transform:translateX(-100%)}55%,100%{transform:translateX(260%)}}
-.sp-head{position:absolute;right:0;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--accent-2),0 0 4px #fff;transform:translateY(-50%);opacity:.9}
+/* removed */
 
 .island-confirm{justify-content:flex-start;align-items:stretch;padding:14px 18px 14px;flex-direction:column;gap:11px;height:156px;overflow:hidden}
 
@@ -615,6 +719,9 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .page{padding-left:18px;padding-right:18px}
 }
 @media (max-width:768px){
+    .island-satellite{height:34px;border-radius:17px;margin-left:-6px}
+    .sat-cover{width:26px;height:26px}
+
     .page{padding:110px 16px 70px}
     .card-body{padding:22px 18px}
     .netease-body{gap:22px}
@@ -627,7 +734,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .island-content.island-state-music-card[data-state="music-card"]{width:min(94vw,560px)}
     .island-content.island-state-music-bar[data-state="music-bar"]{width:min(86vw,212px)}
     .island-content.island-state-autoplay[data-state="autoplay"]{width:min(90vw,300px)}
-    .nav-buttons{gap:4px}
+    /* removed */
     .island-nav-btn{padding:6px 10px;font-size:.86rem}
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
