@@ -812,6 +812,11 @@
         if (pctTxt !== lastSpPctTxt) {
             lastSpPctTxt = pctTxt;
             if (spPct) spPct.textContent = pctTxt;
+            // 同步更新导航圆环进度 (1:1 demo: ring 跟随滚动百分比)
+            updateNavRing(clamped);
+            // 同步 preview 状态的百分比
+            const previewPct = document.querySelector('.preview-pct');
+            if (previewPct) previewPct.textContent = pctTxt;
         }
     }
     const explore = document.querySelector('.explore-btn');
