@@ -406,8 +406,7 @@ body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out
 /* E: music-bar (1:1 demo mbar: 192x36, padding 0 10px, cover 24x24 r7) */
 .island-music-bar{justify-content:space-between;padding:0 10px}
 .ib-cover{width:24px;height:24px;border-radius:7px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.5);
-    transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
-.ib-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
+    animation:coverIn .5s cubic-bezier(.34,1.2,.4,1);view-transition-name:cover}
 .island-music-bar .island-eq{view-transition-name:music-eq}
 
 /* G: music-card 列布局 (1:1 demo mcard: 392x156, padding 16px 18px 13px, column, align-items stretch) */
@@ -417,8 +416,7 @@ body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out
 .island-music-card .mc-cover{
     width:52px;height:52px;border-radius:13px;object-fit:cover;flex-shrink:0;
     box-shadow:0 6px 16px rgba(0,0,0,.5);
-    transition:opacity .32s var(--ease),transform .32s var(--spring);view-transition-name:cover}
-.island-music-card .mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
+    animation:coverIn .5s cubic-bezier(.34,1.2,.4,1);view-transition-name:cover}
 .island-music-card .mc-info{
     flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
 .island-music-card .mc-info .mc-title{
@@ -626,14 +624,14 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .island-eq{view-transition-name:none}
 
 /* 卫星岛封面: 圆形 28x28 (1:1 demo coverSat), 无阴影 */
-.island-sat .ib-cover{width:28px;height:28px;border-radius:50%;box-shadow:none}
+.island-sat .ib-cover{width:28px;height:28px;border-radius:50%;box-shadow:none;animation:coverIn .5s cubic-bezier(.34,1.2,.4,1)}
 
 /* pill 模式内容: pad=(h-2-cover)/2=3px 确保左间距==上下有效间距 (1:1 demo satL1) */
 .island-sat .sat-pill{justify-content:flex-start;gap:8px;padding:0 3px;box-sizing:border-box;
     transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill.active-sat-content{
     transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
-.island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;justify-content:center}
+.island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;align-items:center;justify-content:center}
 .island-sat .sat-pill .island-eq i{width:3.5px}
 .island-sat[data-sat="pill"] .sat-pill{display:flex}
 .island-sat[data-sat="open"] .sat-pill{display:none}
@@ -656,7 +654,8 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* 封面: 52x52, 13px radius (1:1 demo coverL for 'c') */
 .island-sat .sat-card .mc-cover{
     width:52px;height:52px;border-radius:13px;
-    box-shadow:0 6px 16px rgba(0,0,0,.5)}
+    box-shadow:0 6px 16px rgba(0,0,0,.5);
+    animation:coverIn .5s cubic-bezier(.34,1.2,.4,1)}
 
 /* 标题/歌手列 (1:1 demo: flex column, gap:2px) */
 .island-sat .sat-card-info{
@@ -683,8 +682,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .sat-card-scrub-fill{
     position:absolute;left:0;top:0;bottom:0;border-radius:999px;
     background:#ff8fb6;width:0%}
-/* 卫星岛封面 cover-swap 动画 (与主岛一致) */
-.island-sat .sat-card .mc-cover.cover-swap{opacity:0;transform:scale(.7) rotate(-8deg)}
+/* 卫星岛封面 coverIn 动画 (与主岛一致, 由 JS 重触发) */
 
 /* 时间标签: mono, 9.5px, space-between, 无 margin (1:1 demo) */
 .island-sat .sat-card-time{
@@ -730,7 +728,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* ===== 岛入场动画(1:1 demo: islandIn .7s cubic-bezier(.34,1.2,.4,1) both) ===== */
 @keyframes islandIn{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
 @keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
-.island-entrance{animation:islandIn .7s cubic-bezier(.34,1.2,.4,1) both;transform-origin:center top}
+.island-entrance{animation:islandIn .7s cubic-bezier(.34,1.2,.4,1) both}
 
 /* ===== 鼠标点击水波纹(ripple.js) =====
    - 径向渐变环带:波峰高光(白)+波谷(粉渐隐),有体积感不是细线

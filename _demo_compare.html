@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050508;-webkit-font-smoothing:antialiased}
+a{color:#ff8fb6}a:hover{color:#ffc5d8}
+@keyframes eqA{0%,100%{height:34%}34%{height:92%}68%{height:48%}}
+@keyframes eqB{0%,100%{height:70%}28%{height:38%}74%{height:100%}}
+@keyframes eqC{0%,100%{height:26%}45%{height:82%}78%{height:36%}}
+@keyframes eqD{0%,100%{height:56%}38%{height:30%}72%{height:88%}}
+@keyframes cfDown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
+@keyframes swapA{0%{opacity:0;transform:scale(.9);filter:blur(4px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes swapB{0%{opacity:0;transform:scale(.9);filter:blur(4px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes islandIn{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,24px) scale(1.08)}}
+</style>
+</helmet>
+<section id="t2" style="display:flex;flex-direction:column;gap:34px;padding:52px 56px 40px;box-sizing:border-box;background:#050508;font-family:'Noto Sans SC','PingFang SC',sans-serif">
+  <header style="display:flex;flex-direction:column;gap:10px;max-width:860px">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:#ff8fb6">TURN 2 · 404 REDESIGN + MOBILE UI</span>
+    <h1 style="margin:0;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:900;color:#fff;letter-spacing:.5px">404 重设计 · 站内移动端 UI</h1>
+    <p style="margin:0;font-size:13px;line-height:1.8;color:rgba(241,191,210,.7);text-wrap:pretty">404 页延续灵动岛语言(顶部小岛播报错误状态);移动端是站点页面本身的手机版:触屏点岛展开、岛与分岛尺寸收窄、内容居中排布。移动端舞台同样可交互。</p>
+  </header>
+  <div style="display:flex;gap:38px;align-items:flex-start;flex-wrap:wrap">
+
+    <div id="2a" data-screen-label="2a 404 重设计" style="display:flex;flex-direction:column;gap:12px;width:480px;flex-shrink:0">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#ff8fb6;border:1px solid rgba(255,143,182,.35);padding:2px 8px;border-radius:7px">2a</span>
+        <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Noto Serif JP',serif">404 · 迷失在樱花中</span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(241,191,210,.6);text-wrap:pretty">顶部小岛播报错误态,serif 渐变大字,主/次按钮分层;去掉 emoji,光晕收敛,角标与 mono 路径回执呼应站点语言。</p>
+      <div data-stage="1" style="position:relative;width:480px;height:650px;border-radius:24px;overflow:hidden;background:#07070b;border:1px solid rgba(255,255,255,.08)">
+        <div style="position:absolute;width:340px;height:340px;border-radius:50%;filter:blur(70px);background:radial-gradient(circle,rgba(255,143,182,.14),transparent 70%);top:-8%;left:-10%;animation:orbFloat 14s ease-in-out infinite"></div>
+        <div style="position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(70px);background:radial-gradient(circle,rgba(255,107,157,.1),transparent 70%);bottom:-8%;right:-10%;animation:orbFloat 18s ease-in-out infinite reverse"></div>
+        <div style="position:absolute;top:18px;left:18px;width:54px;height:54px;border-top:2px solid rgba(255,143,182,.3);border-left:2px solid rgba(255,143,182,.3);border-radius:8px 0 0 0"></div>
+        <div style="position:absolute;bottom:18px;right:18px;width:54px;height:54px;border-bottom:2px solid rgba(255,143,182,.3);border-right:2px solid rgba(255,143,182,.3);border-radius:0 0 8px 0"></div>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 40px;text-align:center">
+          <div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:18px;background:#0c0c12;border:1px solid rgba(255,255,255,.1);box-shadow:0 12px 32px rgba(0,0,0,.55);animation:fadeUp .7s cubic-bezier(.34,1.2,.4,1) both">
+            <span style="width:5px;height:5px;border-radius:50%;background:#ff5f57;box-shadow:0 0 8px rgba(255,95,87,.8);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.85)">404 · NOT FOUND</span>
+          </div>
+          <div style="font-family:'Noto Serif JP',serif;font-size:126px;font-weight:900;line-height:1;letter-spacing:-.04em;background:linear-gradient(135deg,#fff 0%,#ffd8e7 45%,#ff6b9d 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:26px;animation:fadeUp .7s cubic-bezier(.34,1.2,.4,1) .1s both">404</div>
+          <div style="width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#ff8fb6,transparent);margin-top:8px;animation:fadeUp .7s ease .18s both"></div>
+          <div style="font-family:'Noto Serif JP',serif;font-size:19px;font-weight:700;color:#fff;margin-top:22px;animation:fadeUp .7s ease .22s both">迷失在樱花中</div>
+          <p style="margin:8px 0 0;font-size:12.5px;line-height:1.8;color:#d885a2;animation:fadeUp .7s ease .3s both">你寻找的页面不存在,可能已被移动或删除。<br>不如回到起点,重新出发。</p>
+          <div style="display:flex;gap:10px;margin-top:26px;animation:fadeUp .7s ease .4s both">
+            <a href="#2a" style="display:inline-flex;align-items:center;gap:7px;padding:11px 26px;border-radius:16px;background:linear-gradient(120deg,#ff8fb6,#ff6b9d);color:#1a0610;font-weight:700;text-decoration:none;font-size:13px;box-shadow:0 8px 24px -8px rgba(255,143,182,.5);transition:transform .35s cubic-bezier(.34,1.45,.5,1),box-shadow .35s ease" style-hover="transform:translateY(-3px) scale(1.03);box-shadow:0 14px 34px -8px rgba(255,143,182,.65)">返回首页</a>
+            <a href="#2a" style="display:inline-flex;align-items:center;padding:11px 22px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#fff;font-weight:600;text-decoration:none;font-size:13px;transition:background .3s ease" style-hover="background:rgba(255,255,255,.12)">回上一页</a>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:rgba(255,255,255,.28);margin-top:34px;animation:fadeUp .7s ease .5s both">GET /you-are-lost → 404 · userhali.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="2b" data-screen-label="2b 移动端 UI" style="display:flex;flex-direction:column;gap:12px;width:400px;flex-shrink:0">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#ff8fb6;border:1px solid rgba(255,143,182,.35);padding:2px 8px;border-radius:7px">2b</span>
+        <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Noto Serif JP',serif">移动端 · Mobile</span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(241,191,210,.6);text-wrap:pretty">站点页面的手机版:岛体收窄(34px 高),点按展开(无 hover),导航单行收紧,分岛在主岛忙碌时缩成圆形图标;内容居中排布。</p>
+      <div data-stage="1" style="position:relative;width:400px;height:800px;border-radius:34px;overflow:hidden;background:#08080d;border:1px solid rgba(255,255,255,.1)">
+        <div style="position:absolute;inset:0;background:radial-gradient(100% 50% at 50% -5%,rgba(255,143,182,.12),transparent 60%),radial-gradient(70% 40% at 88% 102%,rgba(255,107,157,.07),transparent 65%)"></div>
+        <sc-if value="{{ showLabel }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:18px;right:14px;z-index:41;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:3px 8px;border-radius:999px">{{ m.st }}</div>
+        </sc-if>
+        <div style="position:absolute;top:14px;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;gap:8px;z-index:40">
+          <div data-isl="m" onMouseEnter="{{ m.enter }}" onMouseLeave="{{ m.leave }}" onClick="{{ m.shellClick }}" style="{{ m.box }}" style-active="transform:scale(.97)">
+            <div style="{{ m.L.idle }}"><div style="position:relative;width:100%;height:100%;overflow:hidden">
+              <div style="{{ m.idleBrandSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;color:rgba(255,255,255,.9)">userhali.com</span>
+              </div>
+              <div style="{{ m.idleTimeSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;color:rgba(255,255,255,.9)">{{ clockDate }}</span>
+              </div>
+            </div></div>
+            <div style="{{ m.L.preview }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 13px;box-sizing:border-box">
+              <span style="font-size:12px;font-weight:600;color:#fff;white-space:nowrap">{{ m.section }}</span>
+              {{ m.dots }}
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.5);white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ m.L.nav }}"><div style="width:100%;height:100%;display:flex;align-items:center;gap:2px;padding:0 10px;box-sizing:border-box">
+              <a onClick="{{ m.navClick }}" data-i="0" style="{{ m.nav0 }}">首页</a>
+              <a onClick="{{ m.navClick }}" data-i="1" style="{{ m.nav1 }}">GitHub</a>
+              <a onClick="{{ m.navClick }}" data-i="2" style="{{ m.nav2 }}">QQ音乐</a>
+              <a onClick="{{ m.navClick }}" data-i="3" style="{{ m.nav3 }}">Projects</a>
+              <span style="width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 7px 0 auto;flex-shrink:0"></span>
+              <svg viewBox="0 0 22 22" style="width:18px;height:18px;flex-shrink:0"><circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2.4"></circle><circle cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)"></circle></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.5);margin-left:5px;white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ m.L.mbar }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 9px;box-sizing:border-box">
+              {{ m.coverS }}
+              {{ m.eq }}
+            </div></div>
+            <div style="{{ m.L.mcard }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                {{ m.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</span>
+                  <span style="font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.artist }}</span>
+                </div>
+                {{ m.eqBig }}
+              </div>
+              <div onClick="{{ m.seek }}" style="margin-top:11px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#ff8fb6;width:{{ m.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.4)">
+                <span>{{ m.cur }}</span><span>{{ m.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:28px;margin-top:6px">
+                <button onClick="{{ m.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ m.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ m.playIcon }}</button>
+                <button onClick="{{ m.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+            <div style="{{ m.L.confirm }}"><div style="{{ m.cfSwap }}">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <div style="{{ m.cfTile }}">{{ m.cfGlyph }}</div>
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.cfTitle }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.cfHost }}</span>
+                </div>
+              </div>
+              <div style="position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden">{{ m.cfBar }}</div>
+              <div style="display:flex;gap:8px;margin-top:auto">
+                <button onClick="{{ m.cfCancel }}" style="flex:0 0 34%;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.15)">取消</button>
+                <button onClick="{{ m.cfGo }}" style="flex:1 1 auto;height:34px;border-radius:12px;border:1px solid rgba(255,143,182,.4);background:rgba(255,143,182,.16);color:#ffb3cd;font-size:12px;font-weight:700;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.28)">前往</button>
+              </div>
+            </div></div>
+            <div style="{{ m.L.email }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 16px;box-sizing:border-box">
+              <span style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace">联系邮箱 · MAIL</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12px;color:#fff">admin@userhali.com</span>
+                <button onClick="{{ m.copy }}" data-mail="admin@userhali.com" style="padding:4px 12px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:10.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12px;color:#fff">8661415@qq.com</span>
+                <button onClick="{{ m.copy }}" data-mail="8661415@qq.com" style="padding:4px 12px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:10.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+            </div></div>
+            <div style="{{ m.L.toast }}"><div style="display:flex;align-items:center;gap:8px;padding:0 13px">
+              {{ m.toastIcon }}<span style="font-size:12px;font-weight:600;color:#fff;white-space:nowrap">{{ m.toastMsg }}</span>
+            </div></div>
+            <div style="{{ m.L.autoplay }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:11px 14px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:26px;height:26px;border-radius:50%;background:rgba(255,143,182,.18);border:1px solid rgba(255,143,182,.4);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box"><svg viewBox="0 0 24 24" style="width:11px;height:11px;fill:#ffb3cd;transform:translateX(.5px)"><path d="M8 5v14l11-7z"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                  <span style="font-size:12px;font-weight:700;color:#fff">开启背景音乐</span>
+                  <span style="font-size:9.5px;color:rgba(255,255,255,.45)">进入即播放 · 沉浸氛围</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                <button onClick="{{ m.apLater }}" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);font-size:10.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.16)">稍后</button>
+                <button onClick="{{ m.apOk }}" style="padding:5px 14px;border-radius:999px;border:1px solid rgba(255,143,182,.4);background:rgba(255,143,182,.16);color:#ffb3cd;font-size:10.5px;font-weight:700;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.28)">开启</button>
+              </div>
+            </div></div>
+            <div style="{{ m.L.greet }}"><div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;font-weight:600;color:#ff8fb6;white-space:nowrap">はじめまして</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.85);white-space:nowrap">· 欢迎来访</span>
+            </div></div>
+            <div style="{{ m.L.hint }}"><div style="{{ m.hintSwap }}">
+              <span style="font-size:11.5px;color:rgba(255,255,255,.55);white-space:nowrap">正在看</span>
+              <span style="font-size:12px;font-weight:700;color:#ff8fb6;white-space:nowrap">{{ m.hintSec }}</span>
+            </div></div>
+          </div>
+          <div data-isl="m" onClick="{{ m.satClick }}" onMouseEnter="{{ m.satEnter }}" onMouseLeave="{{ m.satLeave }}" style="{{ m.sat }}">
+            <div style="{{ m.satL1 }}">
+              {{ m.coverSat }}
+              <div style="{{ m.satEqSt }}">{{ m.eqS }}</div>
+            </div>
+            <div style="{{ m.satL2 }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                {{ m.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</span>
+                  <span style="font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.artist }}</span>
+                </div>
+                {{ m.eqBig }}
+              </div>
+              <div onClick="{{ m.seek }}" style="margin-top:11px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#ff8fb6;width:{{ m.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.4)">
+                <span>{{ m.cur }}</span><span>{{ m.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:28px;margin-top:6px">
+                <button onClick="{{ m.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ m.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ m.playIcon }}</button>
+                <button onClick="{{ m.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:28px;right:28px;top:170px;display:flex;flex-direction:column;align-items:center;text-align:center">
+          <span style="font-size:10px;letter-spacing:2.5px;color:rgba(241,191,210,.6)">HELLO, I'M</span>
+          <span style="font-family:'Noto Serif JP',serif;font-size:42px;font-weight:900;line-height:1.15;background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px">Hali</span>
+          <span style="font-size:11.5px;color:rgba(241,191,210,.7);margin-top:8px">願你的明天比今天滿溢更多的幸福與笑容。</span>
+          <span style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;margin-top:30px">我的账户 · ACCOUNT</span>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">
+            <button onClick="{{ m.socClick }}" data-site="Bilibili" data-host="space.bilibili.com/1300732833" data-glyph="B" data-color="#fb7299" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fb7299;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">B</button>
+            <button onClick="{{ m.socClick }}" data-site="QQ" data-host="qm.qq.com/q/SCmKcHTXma" data-glyph="Q" data-color="#12b7f5" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#12b7f5;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">Q</button>
+            <button onClick="{{ m.socClick }}" data-site="Discord" data-host="discordapp.com/users/b_bbb_b" data-glyph="D" data-color="#5865f2" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#5865f2;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">D</button>
+            <button onClick="{{ m.socClick }}" data-site="QQ音乐" data-host="c6.y.qq.com/base/fcgi-bin/u" data-glyph="M" data-color="#31c27c" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#31c27c;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">M</button>
+            <button onClick="{{ m.socClick }}" data-site="GitHub" data-host="github.com/haliChina" data-glyph="G" data-color="#ffffff" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">G</button>
+            <button onClick="{{ m.socClick }}" data-site="X" data-host="x.com/HaliForX" data-glyph="X" data-color="#ffffff" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">X</button>
+            <button onClick="{{ m.socClick }}" data-mail="1" data-glyph="@" style="width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#ea4335;font-weight:800;font-size:13px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">@</button>
+          </div>
+          <span style="font-size:9px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;margin-top:26px;line-height:1.8">触屏无 hover:点岛 = 展开导航<br>主岛忙碌时分岛缩成圆形图标</span>
+        </div>
+        <div style="position:absolute;left:20px;right:20px;bottom:16px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:8.5px;letter-spacing:2px;color:rgba(255,255,255,.32);font-family:'JetBrains Mono',monospace">状态触发器 · TRIGGERS</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <button onClick="{{ m.tMusic }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">播放 / 暂停</button>
+            <button onClick="{{ m.tHint }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">区块提示</button>
+            <button onClick="{{ m.tGreet }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">问候</button>
+            <button onClick="{{ m.tToast }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">Toast</button>
+            <button onClick="{{ m.tAutoplay }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">自动播放</button>
+            <button onClick="{{ m.tEmail }}" style="padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:10.5px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">邮箱</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section id="t1" data-canvas="1" style="display:flex;flex-direction:column;gap:34px;padding:52px 56px 90px;min-height:100vh;box-sizing:border-box;background:radial-gradient(120% 60% at 50% -10%,#130d14 0%,#050508 58%);font-family:'Noto Sans SC','PingFang SC',sans-serif">
+  <header style="display:flex;flex-direction:column;gap:10px;max-width:860px">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:#ff8fb6">USERHALI.COM · DYNAMIC ISLAND REDESIGN</span>
+    <h1 style="margin:0;font-family:'Noto Serif JP',serif;font-size:30px;font-weight:900;color:#fff;letter-spacing:.5px">灵动岛重设计 · 定稿方向 1c</h1>
+    <p style="margin:0;font-size:13px;line-height:1.8;color:rgba(241,191,210,.7);text-wrap:pretty">统一交互模型:待机 hover 半展开预览 → 点击全展开;新增「时间待机 / 访客问候 / 区块提示」三个状态。尺寸回到 iOS 真机比例(待机 36px 高胶囊),动效为一体流变 + 模糊交叉过渡,内容沿左右边缘锚定、跟随外壳挤压。每个舞台都可交互:悬停/点击岛体、点账户图标走外链确认流程、或用底部触发器切换全部状态。</p>
+  </header>
+  <div data-optrow="1" style="display:flex;gap:38px;align-items:flex-start;flex-wrap:wrap">
+
+    <div id="1a" data-screen-label="1a 原生纯黑(已弃用)" style="display:none">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#ff8fb6;border:1px solid rgba(255,143,182,.35);padding:2px 8px;border-radius:7px">1a</span>
+        <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Noto Serif JP',serif">原生纯黑 · Pure Black</span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(241,191,210,.6);text-wrap:pretty">硬件级纯黑岛体,粉色只作信号色;尺寸最贴近真机,主按钮为 iOS 式白底黑字。</p>
+      <div data-stage="1" style="position:relative;width:480px;height:650px;border-radius:24px;overflow:hidden;background:#08080d;border:1px solid rgba(255,255,255,.08)">
+        <div style="position:absolute;inset:0;background:radial-gradient(90% 55% at 50% -5%,rgba(255,143,182,.12),transparent 60%),radial-gradient(70% 45% at 88% 102%,rgba(255,107,157,.07),transparent 65%)"></div>
+        <sc-if value="{{ showLabel }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:20px;right:16px;z-index:41;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:3px 8px;border-radius:999px">{{ a.st }}</div>
+        </sc-if>
+        <div style="position:absolute;top:16px;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;gap:8px;z-index:40">
+          <div data-isl="a" onMouseEnter="{{ a.enter }}" onMouseLeave="{{ a.leave }}" onClick="{{ a.shellClick }}" style="{{ a.box }}" style-active="transform:scale(.97)">
+            <div style="{{ a.L.idle }}"><div style="display:flex;align-items:center;gap:7px">
+              <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+              <span style="font-size:12px;font-weight:600;letter-spacing:.4px;color:rgba(255,255,255,.92);white-space:nowrap">{{ a.idleText }}</span>
+            </div></div>
+            <div style="{{ a.L.preview }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 15px;box-sizing:border-box">
+              <span style="font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap">{{ a.section }}</span>
+              {{ a.dots }}
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,.5);white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ a.L.nav }}"><div style="width:100%;height:100%;display:flex;align-items:center;gap:3px;padding:0 14px;box-sizing:border-box">
+              <a onClick="{{ a.navClick }}" data-i="0" style="{{ a.nav0 }}">首页</a>
+              <a onClick="{{ a.navClick }}" data-i="1" style="{{ a.nav1 }}">GitHub</a>
+              <a onClick="{{ a.navClick }}" data-i="2" style="{{ a.nav2 }}">QQ音乐</a>
+              <a onClick="{{ a.navClick }}" data-i="3" style="{{ a.nav3 }}">Projects</a>
+              <span style="width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 9px 0 auto;flex-shrink:0"></span>
+              <svg viewBox="0 0 22 22" style="width:20px;height:20px;flex-shrink:0"><circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2.4"></circle><circle cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)"></circle></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,.5);margin-left:6px;white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ a.L.mbar }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 10px;box-sizing:border-box">
+              {{ a.coverS }}
+              {{ a.eq }}
+            </div></div>
+            <div style="{{ a.L.mcard }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:16px 18px 13px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                {{ a.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.title }}</span>
+                  <span style="font-size:11.5px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.artist }}</span>
+                </div>
+                {{ a.eqBig }}
+              </div>
+              <div onClick="{{ a.seek }}" style="margin-top:12px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#fff;width:{{ a.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.4)">
+                <span>{{ a.cur }}</span><span>{{ a.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:7px">
+                <button onClick="{{ a.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ a.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ a.playIcon }}</button>
+                <button onClick="{{ a.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+            <div style="{{ a.L.confirm }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:14px 16px;box-sizing:border-box;gap:10px">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                <div style="{{ a.cfTile }}">{{ a.cfGlyph }}</div>
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.cfTitle }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.cfHost }}</span>
+                </div>
+              </div>
+              <div style="position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden">{{ a.cfBar }}</div>
+              <div style="display:flex;gap:8px;margin-top:auto">
+                <button onClick="{{ a.cfCancel }}" style="flex:0 0 34%;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.15)">取消</button>
+                <button onClick="{{ a.cfGo }}" style="flex:1 1 auto;height:36px;border-radius:12px;border:none;background:#fff;color:#000;font-size:12.5px;font-weight:700;cursor:pointer;transition:filter .25s" style-hover="filter:brightness(.88)">前往</button>
+              </div>
+            </div></div>
+            <div style="{{ a.L.email }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 18px;box-sizing:border-box">
+              <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace">联系邮箱 · MAIL</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">admin@userhali.com</span>
+                <button onClick="{{ a.copy }}" data-mail="admin@userhali.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">8661415@qq.com</span>
+                <button onClick="{{ a.copy }}" data-mail="8661415@qq.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+            </div></div>
+            <div style="{{ a.L.toast }}"><div style="display:flex;align-items:center;gap:8px;padding:0 14px">
+              {{ a.toastIcon }}<span style="font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap">{{ a.toastMsg }}</span>
+            </div></div>
+            <div style="{{ a.L.autoplay }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:11px;padding:12px 16px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#ff8fb6;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#1a060f;transform:translateX(.5px)"><path d="M8 5v14l11-7z"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                  <span style="font-size:12.5px;font-weight:700;color:#fff">开启背景音乐</span>
+                  <span style="font-size:10px;color:rgba(255,255,255,.45)">进入即播放 · 沉浸氛围</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                <button onClick="{{ a.apLater }}" style="padding:5px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.16)">稍后</button>
+                <button onClick="{{ a.apOk }}" style="padding:5px 15px;border-radius:999px;border:none;background:#fff;color:#000;font-size:11px;font-weight:700;cursor:pointer;transition:filter .25s" style-hover="filter:brightness(.88)">开启</button>
+              </div>
+            </div></div>
+            <div style="{{ a.L.greet }}"><div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12.5px;font-weight:600;color:#ff8fb6;white-space:nowrap">はじめまして</span>
+              <span style="font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap">· 欢迎来访</span>
+            </div></div>
+            <div style="{{ a.L.hint }}"><div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:rgba(255,255,255,.55);white-space:nowrap">正在看</span>
+              <span style="font-size:12.5px;font-weight:700;color:#ff8fb6;white-space:nowrap">{{ a.hintSec }}</span>
+            </div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:36px;right:36px;top:230px;display:flex;flex-direction:column;align-items:flex-start">
+          <span style="font-size:10.5px;letter-spacing:2.5px;color:rgba(241,191,210,.6)">HELLO, I'M</span>
+          <span style="font-family:'Noto Serif JP',serif;font-size:46px;font-weight:900;line-height:1.15;background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px">Hali</span>
+          <span style="font-size:12px;color:rgba(241,191,210,.7);margin-top:8px">願你的明天比今天滿溢更多的幸福與笑容。</span>
+          <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;margin-top:26px">我的账户 · ACCOUNT</span>
+          <div style="display:flex;gap:9px;margin-top:10px;flex-wrap:wrap">
+            <button onClick="{{ a.socClick }}" data-site="Bilibili" data-host="space.bilibili.com/1300732833" data-glyph="B" data-color="#fb7299" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fb7299;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">B</button>
+            <button onClick="{{ a.socClick }}" data-site="QQ" data-host="qm.qq.com/q/SCmKcHTXma" data-glyph="Q" data-color="#12b7f5" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#12b7f5;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">Q</button>
+            <button onClick="{{ a.socClick }}" data-site="Discord" data-host="discordapp.com/users/b_bbb_b" data-glyph="D" data-color="#5865f2" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#5865f2;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">D</button>
+            <button onClick="{{ a.socClick }}" data-site="QQ音乐" data-host="c6.y.qq.com/base/fcgi-bin/u" data-glyph="M" data-color="#31c27c" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#31c27c;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">M</button>
+            <button onClick="{{ a.socClick }}" data-site="GitHub" data-host="github.com/haliChina" data-glyph="G" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">G</button>
+            <button onClick="{{ a.socClick }}" data-site="X" data-host="x.com/HaliForX" data-glyph="X" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">X</button>
+            <button onClick="{{ a.socClick }}" data-mail="1" data-glyph="@" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#ea4335;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">@</button>
+          </div>
+          <span style="font-size:9.5px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;margin-top:24px;line-height:1.8">hover 岛体 = 半展开预览 · 点击 = 全展开导航<br>点击账户图标 = 外链确认 · 点空白处 = 收起</span>
+        </div>
+        <div style="position:absolute;left:26px;right:26px;bottom:18px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.32);font-family:'JetBrains Mono',monospace">状态触发器 · TRIGGERS</span>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <button onClick="{{ a.tMusic }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">播放 / 暂停</button>
+            <button onClick="{{ a.tHint }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">区块提示</button>
+            <button onClick="{{ a.tGreet }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">问候</button>
+            <button onClick="{{ a.tToast }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">Toast</button>
+            <button onClick="{{ a.tAutoplay }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">自动播放</button>
+            <button onClick="{{ a.tEmail }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">邮箱</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1b" data-screen-label="1b 樱花玻璃(已弃用)" style="display:none">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#ff8fb6;border:1px solid rgba(255,143,182,.35);padding:2px 8px;border-radius:7px">1b</span>
+        <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Noto Serif JP',serif">樱花玻璃 · Sakura Glass</span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(241,191,210,.6);text-wrap:pretty">延续站点粉色基因:毛玻璃 + 粉色描边辉光,品牌字渐变,主按钮粉色渐变。主岛空闲时音乐住进主岛;主岛忙碌时分裂出玻璃音乐小岛,点小岛原地展开播放卡。</p>
+      <div data-stage="1" style="position:relative;width:480px;height:650px;border-radius:24px;overflow:hidden;background:#08080d;border:1px solid rgba(255,255,255,.08)">
+        <div style="position:absolute;inset:0;background:radial-gradient(90% 55% at 50% -5%,rgba(255,143,182,.16),transparent 60%),radial-gradient(70% 45% at 88% 102%,rgba(255,107,157,.08),transparent 65%)"></div>
+        <sc-if value="{{ showLabel }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:20px;right:16px;z-index:41;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:3px 8px;border-radius:999px">{{ b.st }}</div>
+        </sc-if>
+        <div style="position:absolute;top:16px;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;gap:8px;z-index:40">
+          <div data-isl="b" onMouseEnter="{{ b.enter }}" onMouseLeave="{{ b.leave }}" onClick="{{ b.shellClick }}" style="{{ b.box }}" style-active="transform:scale(.97)">
+            <div style="{{ b.L.idle }}"><div style="position:relative;width:100%;height:100%;overflow:hidden">
+              <div style="{{ b.idleBrandSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-size:12px;font-weight:600;letter-spacing:.4px;background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;color:transparent">userhali.com</span>
+              </div>
+              <div style="{{ b.idleTimeSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-size:12px;font-weight:600;letter-spacing:.4px;background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;color:transparent">{{ clockDate }}</span>
+              </div>
+            </div></div>
+            <div style="{{ b.L.preview }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 15px;box-sizing:border-box">
+              <span style="font-size:12.5px;font-weight:600;color:#ffd8e7;white-space:nowrap">{{ b.section }}</span>
+              {{ b.dots }}
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,214,228,.6);white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ b.L.nav }}"><div style="width:100%;height:100%;display:flex;align-items:center;gap:3px;padding:0 15px;box-sizing:border-box">
+              <a onClick="{{ b.navClick }}" data-i="0" style="{{ b.nav0 }}">首页</a>
+              <a onClick="{{ b.navClick }}" data-i="1" style="{{ b.nav1 }}">GitHub</a>
+              <a onClick="{{ b.navClick }}" data-i="2" style="{{ b.nav2 }}">QQ音乐</a>
+              <a onClick="{{ b.navClick }}" data-i="3" style="{{ b.nav3 }}">Projects</a>
+              <span style="width:1px;height:18px;background:rgba(255,143,182,.22);margin:0 9px 0 auto;flex-shrink:0"></span>
+              <svg viewBox="0 0 22 22" style="width:20px;height:20px;flex-shrink:0"><circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,143,182,.18)" stroke-width="2.4"></circle><circle cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)"></circle></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,214,228,.6);margin-left:6px;white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ b.L.mbar }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 11px;box-sizing:border-box">
+              {{ b.coverS }}
+              {{ b.eq }}
+            </div></div>
+            <div style="{{ b.L.mcard }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:17px 19px 14px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:13px;min-width:0">
+                {{ b.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.title }}</span>
+                  <span style="font-size:11.5px;color:rgba(255,214,228,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.artist }}</span>
+                </div>
+                {{ b.eqBig }}
+              </div>
+              <div onClick="{{ b.seek }}" style="margin-top:13px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#ff8fb6,#ffc5d8);width:{{ b.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,214,228,.5)">
+                <span>{{ b.cur }}</span><span>{{ b.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:8px">
+                <button onClick="{{ b.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,214,228,.7)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ b.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ b.playIcon }}</button>
+                <button onClick="{{ b.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,214,228,.7)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+            <div style="{{ b.L.confirm }}"><div style="{{ b.cfSwap }}">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                <div style="{{ b.cfTile }}">{{ b.cfGlyph }}</div>
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(120deg,#fff,#ffd8e7,#ff8fb6);-webkit-background-clip:text;background-clip:text;color:transparent">{{ b.cfTitle }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,214,228,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.cfHost }}</span>
+                </div>
+              </div>
+              <div style="position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden">{{ b.cfBar }}</div>
+              <div style="display:flex;gap:8px;margin-top:auto">
+                <button onClick="{{ b.cfCancel }}" style="flex:0 0 34%;height:37px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.15)">取消</button>
+                <button onClick="{{ b.cfGo }}" style="flex:1 1 auto;height:37px;border-radius:13px;border:none;background:linear-gradient(120deg,#ff8fb6,#ff6b9d);color:#22060f;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -6px rgba(255,107,157,.55);transition:filter .25s" style-hover="filter:brightness(1.08)">前往</button>
+              </div>
+            </div></div>
+            <div style="{{ b.L.email }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 19px;box-sizing:border-box">
+              <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,214,228,.5);font-family:'JetBrains Mono',monospace">联系邮箱 · MAIL</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">admin@userhali.com</span>
+                <button onClick="{{ b.copy }}" data-mail="admin@userhali.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,143,182,.18);color:#ffd8e7;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.32)">复制</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">8661415@qq.com</span>
+                <button onClick="{{ b.copy }}" data-mail="8661415@qq.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,143,182,.18);color:#ffd8e7;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.32)">复制</button>
+              </div>
+            </div></div>
+            <div style="{{ b.L.toast }}"><div style="display:flex;align-items:center;gap:8px;padding:0 14px">
+              {{ b.toastIcon }}<span style="font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap">{{ b.toastMsg }}</span>
+            </div></div>
+            <div style="{{ b.L.autoplay }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:11px;padding:13px 17px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ff8fb6,#ff6b9d);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(255,107,157,.4)"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#22060f;transform:translateX(.5px)"><path d="M8 5v14l11-7z"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                  <span style="font-size:12.5px;font-weight:700;color:#fff">开启背景音乐</span>
+                  <span style="font-size:10px;color:rgba(255,214,228,.55)">进入即播放 · 沉浸氛围</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                <button onClick="{{ b.apLater }}" style="padding:5px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.16)">稍后</button>
+                <button onClick="{{ b.apOk }}" style="padding:5px 15px;border-radius:999px;border:none;background:linear-gradient(120deg,#ff8fb6,#ff6b9d);color:#22060f;font-size:11px;font-weight:700;cursor:pointer;transition:filter .25s" style-hover="filter:brightness(1.08)">开启</button>
+              </div>
+            </div></div>
+            <div style="{{ b.L.greet }}"><div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12.5px;font-weight:600;color:#ff8fb6;white-space:nowrap">はじめまして</span>
+              <span style="font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap">· 欢迎来访</span>
+            </div></div>
+            <div style="{{ b.L.hint }}"><div style="{{ b.hintSwap }}">
+              <span style="font-size:12px;color:rgba(255,214,228,.6);white-space:nowrap">正在看</span>
+              <span style="font-size:12.5px;font-weight:700;color:#ff8fb6;white-space:nowrap">{{ b.hintSec }}</span>
+            </div></div>
+          </div>
+          <div data-isl="b" onClick="{{ b.satClick }}" onMouseEnter="{{ b.satEnter }}" onMouseLeave="{{ b.satLeave }}" style="{{ b.sat }}">
+            <div style="{{ b.satL1 }}">
+              {{ b.coverSat }}
+              <div style="{{ b.satEqSt }}">{{ b.eqS }}</div>
+            </div>
+            <div style="{{ b.satL2 }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:17px 19px 14px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:13px;min-width:0">
+                {{ b.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.title }}</span>
+                  <span style="font-size:11.5px;color:rgba(255,214,228,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.artist }}</span>
+                </div>
+                {{ b.eqBig }}
+              </div>
+              <div onClick="{{ b.seek }}" style="margin-top:13px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#ff8fb6,#ffc5d8);width:{{ b.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,214,228,.5)">
+                <span>{{ b.cur }}</span><span>{{ b.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:8px">
+                <button onClick="{{ b.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,214,228,.7)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ b.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ b.playIcon }}</button>
+                <button onClick="{{ b.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,214,228,.7)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:36px;right:36px;top:230px;display:flex;flex-direction:column;align-items:flex-start">
+          <span style="font-size:10.5px;letter-spacing:2.5px;color:rgba(241,191,210,.6)">HELLO, I'M</span>
+          <span style="font-family:'Noto Serif JP',serif;font-size:46px;font-weight:900;line-height:1.15;background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px">Hali</span>
+          <span style="font-size:12px;color:rgba(241,191,210,.7);margin-top:8px">願你的明天比今天滿溢更多的幸福與笑容。</span>
+          <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;margin-top:26px">我的账户 · ACCOUNT</span>
+          <div style="display:flex;gap:9px;margin-top:10px;flex-wrap:wrap">
+            <button onClick="{{ b.socClick }}" data-site="Bilibili" data-host="space.bilibili.com/1300732833" data-glyph="B" data-color="#fb7299" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fb7299;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">B</button>
+            <button onClick="{{ b.socClick }}" data-site="QQ" data-host="qm.qq.com/q/SCmKcHTXma" data-glyph="Q" data-color="#12b7f5" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#12b7f5;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">Q</button>
+            <button onClick="{{ b.socClick }}" data-site="Discord" data-host="discordapp.com/users/b_bbb_b" data-glyph="D" data-color="#5865f2" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#5865f2;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">D</button>
+            <button onClick="{{ b.socClick }}" data-site="QQ音乐" data-host="c6.y.qq.com/base/fcgi-bin/u" data-glyph="M" data-color="#31c27c" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#31c27c;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">M</button>
+            <button onClick="{{ b.socClick }}" data-site="GitHub" data-host="github.com/haliChina" data-glyph="G" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">G</button>
+            <button onClick="{{ b.socClick }}" data-site="X" data-host="x.com/HaliForX" data-glyph="X" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">X</button>
+            <button onClick="{{ b.socClick }}" data-mail="1" data-glyph="@" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#ea4335;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">@</button>
+          </div>
+          <span style="font-size:9.5px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;margin-top:24px;line-height:1.8">hover 岛体 = 半展开预览 · 点击 = 全展开导航<br>点击账户图标 = 外链确认 · 点空白处 = 收起</span>
+        </div>
+        <div style="position:absolute;left:26px;right:26px;bottom:18px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.32);font-family:'JetBrains Mono',monospace">状态触发器 · TRIGGERS</span>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <button onClick="{{ b.tMusic }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">播放 / 暂停</button>
+            <button onClick="{{ b.tHint }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">区块提示</button>
+            <button onClick="{{ b.tGreet }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">问候</button>
+            <button onClick="{{ b.tToast }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">Toast</button>
+            <button onClick="{{ b.tAutoplay }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">自动播放</button>
+            <button onClick="{{ b.tEmail }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">邮箱</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1c" data-screen-label="1c 石墨分体" data-opt="1" style="display:flex;flex-direction:column;gap:12px;width:480px;flex-shrink:0">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#ff8fb6;border:1px solid rgba(255,143,182,.35);padding:2px 8px;border-radius:7px">1c</span>
+        <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Noto Serif JP',serif">石墨分体 · Graphite Split</span>
+      </div>
+      <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(241,191,210,.6);text-wrap:pretty">iOS 双活动分体:主岛空闲时音乐住进主岛(经典音乐条);主岛显示其他内容时才分裂出右侧音乐小岛,点小岛由它原地展开播放卡。</p>
+      <div data-stage="1" style="position:relative;width:480px;height:650px;border-radius:24px;overflow:hidden;background:#08080d;border:1px solid rgba(255,255,255,.08)">
+        <div style="position:absolute;inset:0;background:radial-gradient(90% 55% at 50% -5%,rgba(255,143,182,.1),transparent 60%),radial-gradient(70% 45% at 88% 102%,rgba(255,107,157,.06),transparent 65%)"></div>
+        <sc-if value="{{ showLabel }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:20px;right:16px;z-index:41;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:3px 8px;border-radius:999px">{{ c.st }}</div>
+        </sc-if>
+        <div style="position:absolute;top:16px;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;gap:8px;z-index:40">
+          <div data-isl="c" onMouseEnter="{{ c.enter }}" onMouseLeave="{{ c.leave }}" onClick="{{ c.shellClick }}" style="{{ c.box }}" style-active="transform:scale(.97)">
+            <div style="{{ c.L.idle }}"><div style="position:relative;width:100%;height:100%;overflow:hidden">
+              <div style="{{ c.idleBrandSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.9)">userhali.com</span>
+              </div>
+              <div style="{{ c.idleTimeSt }}">
+                <span style="width:5px;height:5px;border-radius:50%;background:#ff8fb6;box-shadow:0 0 8px rgba(255,143,182,.9);animation:dotPulse 2.4s ease-in-out infinite;display:block"></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.9)">{{ clockDate }}</span>
+              </div>
+            </div></div>
+            <div style="{{ c.L.preview }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 15px;box-sizing:border-box">
+              <span style="font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap">{{ c.section }}</span>
+              {{ c.dots }}
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,.5);white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ c.L.nav }}"><div style="width:100%;height:100%;display:flex;align-items:center;gap:3px;padding:0 14px;box-sizing:border-box">
+              <a onClick="{{ c.navClick }}" data-i="0" style="{{ c.nav0 }}">首页</a>
+              <a onClick="{{ c.navClick }}" data-i="1" style="{{ c.nav1 }}">GitHub</a>
+              <a onClick="{{ c.navClick }}" data-i="2" style="{{ c.nav2 }}">QQ音乐</a>
+              <a onClick="{{ c.navClick }}" data-i="3" style="{{ c.nav3 }}">Projects</a>
+              <span style="width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 9px 0 auto;flex-shrink:0"></span>
+              <svg viewBox="0 0 22 22" style="width:20px;height:20px;flex-shrink:0"><circle cx="11" cy="11" r="8.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2.4"></circle><circle cx="11" cy="11" r="8.5" fill="none" stroke="#ff8fb6" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12.8 40.6" transform="rotate(-90 11 11)"></circle></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,.5);margin-left:6px;white-space:nowrap">24%</span>
+            </div></div>
+            <div style="{{ c.L.mbar }}"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 10px;box-sizing:border-box">
+              {{ c.coverS }}
+              {{ c.eq }}
+            </div></div>
+            <div style="{{ c.L.mcard }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:16px 18px 13px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                {{ c.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</span>
+                  <span style="font-size:11.5px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.artist }}</span>
+                </div>
+                {{ c.eqBig }}
+              </div>
+              <div onClick="{{ c.seek }}" style="margin-top:12px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#ff8fb6;width:{{ c.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.4)">
+                <span>{{ c.cur }}</span><span>{{ c.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:7px">
+                <button onClick="{{ c.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ c.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ c.playIcon }}</button>
+                <button onClick="{{ c.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+            <div style="{{ c.L.confirm }}"><div style="{{ c.cfSwap }}">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                <div style="{{ c.cfTile }}">{{ c.cfGlyph }}</div>
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.cfTitle }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.cfHost }}</span>
+                </div>
+              </div>
+              <div style="position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden">{{ c.cfBar }}</div>
+              <div style="display:flex;gap:8px;margin-top:auto">
+                <button onClick="{{ c.cfCancel }}" style="flex:0 0 34%;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.15)">取消</button>
+                <button onClick="{{ c.cfGo }}" style="flex:1 1 auto;height:36px;border-radius:12px;border:1px solid rgba(255,143,182,.4);background:rgba(255,143,182,.16);color:#ffb3cd;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.28)">前往</button>
+              </div>
+            </div></div>
+            <div style="{{ c.L.email }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 18px;box-sizing:border-box">
+              <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace">联系邮箱 · MAIL</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">admin@userhali.com</span>
+                <button onClick="{{ c.copy }}" data-mail="admin@userhali.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12.5px;color:#fff">8661415@qq.com</span>
+                <button onClick="{{ c.copy }}" data-mail="8661415@qq.com" style="padding:4px 13px;border-radius:999px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.22)">复制</button>
+              </div>
+            </div></div>
+            <div style="{{ c.L.toast }}"><div style="display:flex;align-items:center;gap:8px;padding:0 14px">
+              {{ c.toastIcon }}<span style="font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap">{{ c.toastMsg }}</span>
+            </div></div>
+            <div style="{{ c.L.autoplay }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:11px;padding:12px 16px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:rgba(255,143,182,.18);border:1px solid rgba(255,143,182,.4);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#ffb3cd;transform:translateX(.5px)"><path d="M8 5v14l11-7z"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                  <span style="font-size:12.5px;font-weight:700;color:#fff">开启背景音乐</span>
+                  <span style="font-size:10px;color:rgba(255,255,255,.45)">进入即播放 · 沉浸氛围</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                <button onClick="{{ c.apLater }}" style="padding:5px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);font-size:11px;font-weight:600;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,255,255,.16)">稍后</button>
+                <button onClick="{{ c.apOk }}" style="padding:5px 15px;border-radius:999px;border:1px solid rgba(255,143,182,.4);background:rgba(255,143,182,.16);color:#ffb3cd;font-size:11px;font-weight:700;cursor:pointer;transition:background .25s" style-hover="background:rgba(255,143,182,.28)">开启</button>
+              </div>
+            </div></div>
+            <div style="{{ c.L.greet }}"><div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12.5px;font-weight:600;color:#ff8fb6;white-space:nowrap">はじめまして</span>
+              <span style="font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap">· 欢迎来访</span>
+            </div></div>
+            <div style="{{ c.L.hint }}"><div style="{{ c.hintSwap }}">
+              <span style="font-size:12px;color:rgba(255,255,255,.55);white-space:nowrap">正在看</span>
+              <span style="font-size:12.5px;font-weight:700;color:#ff8fb6;white-space:nowrap">{{ c.hintSec }}</span>
+            </div></div>
+          </div>
+          <div data-isl="c" onClick="{{ c.satClick }}" onMouseEnter="{{ c.satEnter }}" onMouseLeave="{{ c.satLeave }}" style="{{ c.sat }}">
+            <div style="{{ c.satL1 }}">
+              {{ c.coverSat }}
+              <div style="{{ c.satEqSt }}">{{ c.eqS }}</div>
+            </div>
+            <div style="{{ c.satL2 }}"><div style="width:100%;height:100%;display:flex;flex-direction:column;padding:16px 18px 13px;box-sizing:border-box">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                {{ c.coverL }}
+                <div style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:14.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</span>
+                  <span style="font-size:11.5px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.artist }}</span>
+                </div>
+                {{ c.eqBig }}
+              </div>
+              <div onClick="{{ c.seek }}" style="margin-top:12px;height:14px;display:flex;align-items:center;cursor:pointer">
+                <div style="position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden">
+                  <div style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#ff8fb6;width:{{ c.pctW }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.4)">
+                <span>{{ c.cur }}</span><span>{{ c.dur }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:7px">
+                <button onClick="{{ c.prev }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M7 6h2v12H7z"></path><path d="M20 6v12l-9-6z"></path></svg></button>
+                <button onClick="{{ c.playToggle }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)">{{ c.playIcon }}</button>
+                <button onClick="{{ c.next }}" style="background:none;border:none;padding:4px;cursor:pointer;display:flex;transition:transform .25s" style-hover="transform:scale(1.15)"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:rgba(255,255,255,.65)"><path d="M15 6h2v12h-2z"></path><path d="M4 6l9 6-9 6z"></path></svg></button>
+              </div>
+            </div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:36px;right:36px;top:230px;display:flex;flex-direction:column;align-items:flex-start">
+          <span style="font-size:10.5px;letter-spacing:2.5px;color:rgba(241,191,210,.6)">HELLO, I'M</span>
+          <span style="font-family:'Noto Serif JP',serif;font-size:46px;font-weight:900;line-height:1.15;background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px">Hali</span>
+          <span style="font-size:12px;color:rgba(241,191,210,.7);margin-top:8px">願你的明天比今天滿溢更多的幸福與笑容。</span>
+          <span style="font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;margin-top:26px">我的账户 · ACCOUNT</span>
+          <div style="display:flex;gap:9px;margin-top:10px;flex-wrap:wrap">
+            <button onClick="{{ c.socClick }}" data-site="Bilibili" data-host="space.bilibili.com/1300732833" data-glyph="B" data-color="#fb7299" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fb7299;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">B</button>
+            <button onClick="{{ c.socClick }}" data-site="QQ" data-host="qm.qq.com/q/SCmKcHTXma" data-glyph="Q" data-color="#12b7f5" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#12b7f5;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">Q</button>
+            <button onClick="{{ c.socClick }}" data-site="Discord" data-host="discordapp.com/users/b_bbb_b" data-glyph="D" data-color="#5865f2" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#5865f2;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">D</button>
+            <button onClick="{{ c.socClick }}" data-site="QQ音乐" data-host="c6.y.qq.com/base/fcgi-bin/u" data-glyph="M" data-color="#31c27c" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#31c27c;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">M</button>
+            <button onClick="{{ c.socClick }}" data-site="GitHub" data-host="github.com/haliChina" data-glyph="G" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">G</button>
+            <button onClick="{{ c.socClick }}" data-site="X" data-host="x.com/HaliForX" data-glyph="X" data-color="#ffffff" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">X</button>
+            <button onClick="{{ c.socClick }}" data-mail="1" data-glyph="@" style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#15151b;color:#ea4335;font-weight:800;font-size:14px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.45,.5,1),background .25s" style-hover="transform:translateY(-3px);background:#1d1d25">@</button>
+          </div>
+          <span style="font-size:9.5px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;margin-top:24px;line-height:1.8">主岛忙碌时音乐分裂到右侧小岛<br>点小岛 = 原地展开播放卡 · 主岛空闲时音乐回主岛</span>
+        </div>
+        <div style="position:absolute;left:26px;right:26px;bottom:18px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.32);font-family:'JetBrains Mono',monospace">状态触发器 · TRIGGERS</span>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <button onClick="{{ c.tMusic }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">播放 / 暂停</button>
+            <button onClick="{{ c.tHint }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">区块提示</button>
+            <button onClick="{{ c.tGreet }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">问候</button>
+            <button onClick="{{ c.tToast }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">Toast</button>
+            <button onClick="{{ c.tAutoplay }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">自动播放</button>
+            <button onClick="{{ c.tEmail }}" style="padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:background .25s,color .25s;font-family:inherit" style-hover="background:rgba(255,255,255,.1);color:#fff">邮箱</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;demoLoop&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;演示&quot;},&quot;showStateLabel&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;演示&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.STATES = ['idle','preview','nav','mbar','mcard','confirm','email','toast','autoplay','greet','hint'];
+    this.SECTIONS = ['首页','GitHub','QQ音乐','Projects'];
+    this.SONGS = [
+      {n:'All The Things She Said',a:'t.A.T.u.',c:'https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300',d:214},
+      {n:'渡口',a:'蔡琴',c:'https://p4.music.126.net/4pltwvzYfOy1PSWM6X5_hQ==/109951167871247765.jpg?param=224y224',d:283},
+      {n:'Miss You',a:'Oliver Tree & Robin Schulz',c:'https://y.qq.com/music/photo_new/T002R500x500M000003N37OX0ByL7H_2.jpg?max_age=2592000&err_retry=1',d:206},
+      {n:'Life Goes On',a:'Oliver Tree',c:'https://y.qq.com/music/photo_new/T002R500x500M000000UAKjE2m6ksi_1.jpg?max_age=2592000',d:220}
+    ];
+    this.LY = {
+      a:{idle:[122,36,18],idleT:[196,36,18],preview:[224,36,18],nav:[464,56,28],mbar:[192,36,18],mcard:[392,156,32],confirm:[344,130,28],email:[312,132,28],toast:[228,42,21],autoplay:[312,106,26],greet:[244,36,18],hint:[228,36,18]},
+      b:{idle:[130,38,19],idleT:[206,38,19],preview:[232,38,19],nav:[480,60,30],mbar:[200,38,19],mcard:[404,166,34],confirm:[356,134,30],email:[322,136,30],toast:[236,44,22],autoplay:[320,112,28],greet:[252,38,19],hint:[236,38,19]},
+      c:{idle:[122,36,18],idleT:[196,36,18],preview:[224,36,18],nav:[408,56,28],mbar:[192,36,18],mcard:[392,156,32],confirm:[344,130,28],email:[312,132,28],toast:[228,42,21],autoplay:[312,106,26],greet:[244,36,18],hint:[228,36,18]},
+      m:{idle:[112,34,17],idleT:[184,34,17],preview:[212,34,17],nav:[320,52,26],mbar:[176,34,17],mcard:[352,148,30],confirm:[330,128,26],email:[300,126,26],toast:[212,40,20],autoplay:[300,104,24],greet:[228,34,17],hint:[214,34,17]}
+    };
+    this.TH = {
+      a:{bg:'#000',bd:'1px solid rgba(255,255,255,.07)',sh:'0 12px 32px rgba(0,0,0,.6)',bf:'none'},
+      b:{bg:'rgba(22,15,24,.72)',bd:'1px solid rgba(255,143,182,.2)',sh:'0 14px 44px rgba(255,107,157,.15), inset 0 1px 0 rgba(255,255,255,.08)',bf:'blur(22px) saturate(150%)'},
+      c:{bg:'#0c0c12',bd:'1px solid rgba(255,255,255,.1)',sh:'0 12px 32px rgba(0,0,0,.55)',bf:'none'},
+      m:{bg:'#0c0c12',bd:'1px solid rgba(255,255,255,.1)',sh:'0 12px 32px rgba(0,0,0,.55)',bf:'none'}
+    };
+    const mk = () => ({st:'idle',navIdx:0,playing:false,song:0,pos:0,idlePhase:0,satOpen:false,toastMsg:'',toastKind:'ok',cf:{title:'外部链接',host:'',glyph:'↗',color:'#ff8fb6'},cfKey:0});
+    this.state = {a:mk(),b:mk(),c:mk(),m:mk(),clock:this.fmtClock()};
+    this.T = {};
+    this.hov = {a:false,b:false,c:false,m:false};
+    this.demoI = 0;
+  }
+  fmtClock(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  dateStr(){const d=new Date();return (d.getMonth()+1)+'月'+d.getDate()+'日';}
+  fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0');}
+  up(id,patch){this.setState(p=>{const o={};o[id]=Object.assign({},p[id],patch);return o;});}
+  clearT(k){if(this.T[k]){clearTimeout(this.T[k]);this.T[k]=null;}}
+  after(k,ms,fn){this.clearT(k);this.T[k]=setTimeout(fn,ms);}
+  base(id){return this.state[id].playing?'mbar':'idle';}
+  go(id,st){const p={st:st};if(this.state[id].satOpen&&st!=='idle')p.satOpen=false;this.up(id,p);}
+  toast(id,kind,msg){this.up(id,{st:'toast',toastKind:kind,toastMsg:msg,satOpen:false});this.after(id+'toast',1500,()=>{if(this.state[id].st==='toast')this.go(id,this.base(id));});}
+  greet(id){this.go(id,'greet');this.after(id+'greet',2300,()=>{if(this.state[id].st==='greet')this.go(id,this.base(id));});}
+  hint(id){const s=this.state[id];this.up(id,{navIdx:(s.navIdx+1)%4,st:'hint',satOpen:false});this.after(id+'hint',1700,()=>{if(this.state[id].st==='hint')this.go(id,this.base(id));});}
+  askConfirm(id,d){this.up(id,{cf:{title:d.site,host:d.host,glyph:d.glyph,color:d.color},cfKey:this.state[id].cfKey+1,st:'confirm',satOpen:false});this.after(id+'cf',8000,()=>{if(this.state[id].st==='confirm')this.toast(id,'err','已自动取消');});}
+  toggleMusic(id){const s=this.state[id];if(!s.playing){const st=(s.st==='idle'||s.st==='preview')?'mbar':s.st;this.up(id,{playing:true,st:st});}else{this.up(id,{playing:false,st:s.st==='mbar'?'idle':s.st,satOpen:false});}}
+  chSong(id,d){const s=this.state[id];const n=((s.song+d)%this.SONGS.length+this.SONGS.length)%this.SONGS.length;this.up(id,{song:n,pos:0});}
+  mkEq(id,h,w,n){
+    const playing=this.state[id].playing;
+    const hs=['42%','76%','34%','58%','66%'];
+    const an=['eqA .72s ease-in-out infinite','eqB .93s ease-in-out infinite','eqC .81s ease-in-out infinite','eqD 1.05s ease-in-out infinite','eqB .87s ease-in-out .12s infinite'];
+    const kids=hs.slice(0,n||4).map((hh,i)=>React.createElement('i',{key:i,style:{width:w+'px',borderRadius:'2px',background:'linear-gradient(#ff6b9d,#ffc5d8)',height:hh,animation:playing?an[i]:'none',display:'block'}}));
+    return React.createElement('div',{style:{display:'flex',alignItems:'flex-end',gap:'2.5px',height:h+'px',flexShrink:0}},kids);
+  }
+  swapSt(id,key,extra){
+    return Object.assign({animation:'swap'+(key%2?'A':'B')+' .45s cubic-bezier(.34,1.2,.4,1)'},extra||{});
+  }
+  mkCover(id,size,radius,shadow){
+    const s=this.state[id];const song=this.SONGS[s.song];
+    return React.createElement('img',{key:s.song,src:song.c,alt:'',style:{width:size+'px',height:size+'px',borderRadius:(typeof radius==='number'?radius+'px':radius),objectFit:'cover',flexShrink:0,boxShadow:shadow||'none',display:'block',animation:'coverIn .5s cubic-bezier(.34,1.2,.4,1)'}});
+  }
+  mkIdleRow(on){
+    return {position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:'7px',whiteSpace:'nowrap',pointerEvents:'none',
+      opacity:on?1:0,filter:on?'blur(0px)':'blur(4px)',transform:on?'scale(1)':'scale(.85)',
+      transition:'opacity .45s ease,transform .55s cubic-bezier(.34,1.2,.4,1),filter .45s ease'};
+  }
+  mkDots(id){
+    const n=this.state[id].navIdx;
+    const kids=[0,1,2,3].map(i=>React.createElement('span',{key:i,style:{width:'4px',height:'4px',borderRadius:'50%',display:'block',background:i===n?'#ff8fb6':'rgba(255,255,255,.28)',boxShadow:i===n?'0 0 6px rgba(255,143,182,.8)':'none',transition:'background .3s'}}));
+    return React.createElement('div',{style:{display:'flex',gap:'5px',alignItems:'center'}},kids);
+  }
+  mkPlayIcon(id){
+    const p=this.state[id].playing;
+    const st={width:'20px',height:'20px',fill:'#fff'};
+    if(p)return React.createElement('svg',{viewBox:'0 0 24 24',style:st},React.createElement('rect',{x:6,y:5,width:4,height:14,rx:1,key:1}),React.createElement('rect',{x:14,y:5,width:4,height:14,rx:1,key:2}));
+    return React.createElement('svg',{viewBox:'0 0 24 24',style:st},React.createElement('path',{d:'M8 5v14l11-7z',key:1}));
+  }
+  mkToastIcon(id){
+    const err=this.state[id].toastKind==='err';
+    const glyph=err
+      ?[React.createElement('line',{key:1,x1:3.2,y1:3.2,x2:8.8,y2:8.8,stroke:'#fff',strokeWidth:1.7,strokeLinecap:'square'}),
+        React.createElement('line',{key:2,x1:8.8,y1:3.2,x2:3.2,y2:8.8,stroke:'#fff',strokeWidth:1.7,strokeLinecap:'square'})]
+      :React.createElement('path',{d:'M2.4 6.4 L5 9 L9.8 3.2',fill:'none',stroke:'#fff',strokeWidth:1.7,strokeLinecap:'square',strokeLinejoin:'miter'});
+    return React.createElement('span',{style:{width:'18px',height:'18px',borderRadius:'50%',background:err?'#ff5f57':'#32d74b',display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}},
+      React.createElement('svg',{viewBox:'0 0 12 12',style:{width:'10px',height:'10px',display:'block'}},glyph));
+  }
+  mkCfBar(id){
+    const s=this.state[id];
+    return React.createElement('span',{key:s.cfKey,style:{position:'absolute',left:0,top:0,height:'100%',width:'100%',borderRadius:'999px',transformOrigin:'left center',background:'linear-gradient(90deg,#ff8fb6,#ffc5d8)',animation:s.st==='confirm'?'cfDown 8s linear forwards':'none',display:'block'}});
+  }
+  navSt(id,i){
+    const on=this.state[id].navIdx===i;const glass=id==='b';const mob=id==='m';
+    return {padding:mob?'5px 10px':'6px 13px',borderRadius:'999px',fontSize:mob?'12px':'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',textDecoration:'none',transition:'background .3s,color .3s',
+      background:on?(glass?'rgba(255,143,182,.22)':'rgba(255,255,255,.14)'):'transparent',
+      color:on?(glass?'#ffd8e7':'#fff'):(glass?'rgba(255,214,228,.55)':'rgba(255,255,255,.5)')};
+  }
+  satGeo(id){
+    if(id==='b')return {h:38,pill:90,card:[404,166,34]};
+    if(id==='m')return {h:34,pill:80,card:[352,148,30]};
+    return {h:36,pill:86,card:[392,156,32]};
+  }
+  satMode(id){
+    const s=this.state[id];
+    if(!s.playing)return 'hidden';
+    if(s.satOpen)return 'open';
+    const busy=['preview','nav','confirm','email','toast','autoplay','greet','hint'].indexOf(s.st)>=0;
+    if(!busy)return 'hidden';
+    return ['nav','confirm','email','autoplay'].indexOf(s.st)>=0?'icon':'pill';
+  }
+  satSt(id){
+    const s=this.state[id],th=this.TH[id],g=this.satGeo(id);
+    const mode=this.satMode(id);
+    const vis=mode!=='hidden';
+    const merge=s.playing&&!vis;
+    const w=mode==='open'?g.card[0]:(mode==='icon'?g.h:g.pill);
+    const h=mode==='open'?g.card[1]:g.h;
+    const r=mode==='open'?g.card[2]:g.h/2;
+    return {position:'relative',overflow:'hidden',cursor:'pointer',flexShrink:0,boxSizing:'border-box',
+      background:th.bg,border:th.bd,boxShadow:th.sh,backdropFilter:th.bf,WebkitBackdropFilter:th.bf,
+      width:vis?w+'px':'0px',height:h+'px',borderRadius:r+'px',
+      opacity:vis?1:0,marginLeft:vis&&mode!=='open'?'0px':'-8px',
+      transform:vis?'none':(merge?'translateX(-46px) scale(.35)':'scale(.6)'),
+      transition:'width .55s cubic-bezier(.34,1.2,.4,1),height .55s cubic-bezier(.34,1.2,.4,1),border-radius .55s cubic-bezier(.34,1.2,.4,1),opacity .35s ease,transform .55s cubic-bezier(.34,1.2,.4,1),margin-left .55s cubic-bezier(.34,1.2,.4,1)',
+      pointerEvents:vis?'auto':'none'};
+  }
+  satLayer(on,base){
+    return Object.assign({opacity:on?1:0,pointerEvents:on?'auto':'none',transform:on?'scale(1)':'scale(.85)',filter:on?'blur(0px)':'blur(5px)',
+      transition:on?'opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s':'opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease'},base);
+  }
+  layerStyle(on){
+    return {position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',
+      opacity:on?1:0,pointerEvents:on?'auto':'none',
+      transform:on?'scale(1)':'scale(.84)',filter:on?'blur(0px)':'blur(5px)',
+      transition:on?'opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s':'opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease'};
+  }
+  isl(id){
+    const s=this.state[id],th=this.TH[id],Ld=this.LY[id];
+    let dk=s.st;if(s.idlePhase&&s.st==='idle')dk='idleT';
+    const dims=Ld[dk]||Ld.idle;
+    const act=s.st;
+    const box={position:'relative',overflow:'hidden',cursor:'pointer',flexShrink:0,boxSizing:'border-box',
+      width:dims[0]+'px',height:dims[1]+'px',borderRadius:dims[2]+'px',
+      background:th.bg,border:th.bd,boxShadow:th.sh,backdropFilter:th.bf,WebkitBackdropFilter:th.bf,
+      animation:'islandIn .7s cubic-bezier(.34,1.2,.4,1) both',
+      transition:'width .55s cubic-bezier(.34,1.2,.4,1),height .55s cubic-bezier(.34,1.2,.4,1),border-radius .55s cubic-bezier(.34,1.2,.4,1),opacity .35s ease,transform .55s cubic-bezier(.34,1.2,.4,1)'};
+    if(s.satOpen){box.width='0px';box.opacity=0;box.transform='scale(.6)';box.pointerEvents='none';box.borderWidth='0px';}
+    const L={};
+    this.STATES.forEach(k=>{L[k]=this.layerStyle(k===act);});
+    const song=this.SONGS[s.song];
+    const stop=f=>e=>{e.stopPropagation();f(e);};
+    return {
+      box:box,L:L,st:s.st,
+      idleBrandSt:this.mkIdleRow(!s.idlePhase),idleTimeSt:this.mkIdleRow(!!s.idlePhase),
+      idleText:s.idlePhase?this.state.clock+' · '+this.dateStr():'userhali.com',
+      section:this.SECTIONS[s.navIdx],hintSec:this.SECTIONS[s.navIdx],
+      dots:this.mkDots(id),eq:this.mkEq(id,15,3),eqS:this.mkEq(id,15,3.5,5),eqBig:this.mkEq(id,16,3),
+      cfSwap:this.swapSt(id,s.cfKey,{width:'100%',height:'100%',display:'flex',flexDirection:'column',padding:id==='b'?'15px 17px':'14px 16px',boxSizing:'border-box',gap:'10px'}),
+      hintSwap:this.swapSt(id,s.navIdx,{display:'flex',alignItems:'center',gap:'6px'}),
+      title:song.n,artist:song.a,cur:this.fmt(s.pos),dur:this.fmt(song.d),
+      coverS:id==='b'?this.mkCover(id,25,8,'0 2px 8px rgba(255,107,157,.35)'):this.mkCover(id,24,7,'0 2px 6px rgba(0,0,0,.5)'),
+      coverL:id==='b'?this.mkCover(id,56,15,'0 8px 20px rgba(255,107,157,.3)'):this.mkCover(id,52,13,'0 6px 16px rgba(0,0,0,.5)'),
+      coverSat:this.mkCover(id,id==='b'?30:(id==='m'?26:28),'50%',''),
+      satL1:(function(self){
+        const g=self.satGeo(id),sm=self.satMode(id),on=sm!=='open';
+        const base={position:'absolute',left:0,top:0,right:0,bottom:0,display:'flex',alignItems:'center',boxSizing:'border-box'};
+        if(sm==='icon'){base.justifyContent='center';base.padding='0';}
+        else{const cv=id==='b'?30:(id==='m'?26:28);const pad=(g.h-2-cv)/2;base.justifyContent='flex-start';base.padding='0 '+pad+'px';base.gap='8px';}
+        return Object.assign(self.satLayer(on,base),{
+          transition:(on?'opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s':'opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease')+',width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)'});
+      })(this),
+      satEqSt:(function(self){
+        const sm=self.satMode(id);
+        return sm==='icon'?{display:'none'}:{display:'flex',alignItems:'center',justifyContent:'center',flex:'1 1 auto',margin:'0 auto'};
+      })(this),
+      satL2:this.satLayer(!!s.satOpen,{position:'absolute',inset:0}),
+      pctW:Math.min(100,s.pos/song.d*100).toFixed(1)+'%',
+      playIcon:this.mkPlayIcon(id),
+      nav0:this.navSt(id,0),nav1:this.navSt(id,1),nav2:this.navSt(id,2),nav3:this.navSt(id,3),
+      cfTitle:s.cf.title,cfHost:s.cf.host,cfGlyph:s.cf.glyph,
+      cfTile:{width:'40px',height:'40px',borderRadius:'12px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:'16px',flexShrink:0,color:s.cf.color,background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.12)',boxSizing:'border-box'},
+      cfBar:this.mkCfBar(id),
+      toastMsg:s.toastMsg,toastIcon:this.mkToastIcon(id),
+      sat:id==='a'?{display:'none'}:this.satSt(id),
+      enter:()=>{this.hov[id]=true;this.clearT(id+'col');if(this.state[id].st==='idle')this.go(id,'preview');},
+      leave:()=>{this.hov[id]=false;const st=this.state[id].st;
+        if(st==='preview')this.go(id,this.base(id));
+        else if(st==='nav'||st==='mcard'){this.after(id+'col',700,()=>{const s2=this.state[id].st;if(!this.hov[id]&&(s2==='nav'||s2==='mcard'))this.go(id,this.base(id));});}},
+      shellClick:stop(()=>{const st=this.state[id].st;
+        if(st==='idle'||st==='preview'||st==='greet'||st==='hint')this.go(id,'nav');
+        else if(st==='mbar')this.go(id,'mcard');}),
+      satClick:stop(()=>{const s2=this.state[id];if(s2.playing&&!s2.satOpen)this.up(id,{satOpen:true,st:'idle'});}),
+      satEnter:()=>{this.hov[id]=true;this.clearT(id+'satcol');},
+      satLeave:()=>{this.hov[id]=false;if(this.state[id].satOpen)this.after(id+'satcol',700,()=>{if(!this.hov[id]&&this.state[id].satOpen)this.up(id,{satOpen:false,st:this.base(id)});});},
+      navClick:stop(e=>{const i=parseInt(e.currentTarget.dataset.i,10)||0;this.up(id,{navIdx:i});}),
+      tMusic:stop(()=>this.toggleMusic(id)),
+      tEmail:stop(()=>this.go(id,'email')),
+      tToast:stop(()=>this.toast(id,'ok','已复制邮箱至剪切板')),
+      tAutoplay:stop(()=>this.go(id,'autoplay')),
+      tGreet:stop(()=>this.greet(id)),
+      tHint:stop(()=>this.hint(id)),
+      socClick:stop(e=>{const d=e.currentTarget.dataset;if(d.mail){this.go(id,'email');return;}this.askConfirm(id,{site:d.site,host:d.host,glyph:d.glyph,color:d.color});}),
+      cfGo:stop(()=>{this.clearT(id+'cf');this.toast(id,'ok','跳转成功');}),
+      cfCancel:stop(()=>{this.clearT(id+'cf');this.toast(id,'err','已取消');}),
+      copy:stop(e=>{const m=e.currentTarget.dataset.mail;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(m).catch(()=>{});this.toast(id,'ok','已复制邮箱至剪切板');}),
+      apOk:stop(()=>{this.up(id,{playing:true});this.toast(id,'ok','已开启背景音乐');}),
+      apLater:stop(()=>this.go(id,this.base(id))),
+      playToggle:stop(()=>this.toggleMusic(id)),
+      prev:stop(()=>this.chSong(id,-1)),
+      next:stop(()=>this.chSong(id,1)),
+      seek:stop(e=>{const r=e.currentTarget.getBoundingClientRect();const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));this.up(id,{pos:p*this.SONGS[this.state[id].song].d});})
+    };
+  }
+  componentDidMount(){
+    this.T.clock=setInterval(()=>this.setState({clock:this.fmtClock()}),10000);
+    this.T.idleCycle=setInterval(()=>{['c','m'].forEach(id=>this.up(id,{idlePhase:this.state[id].idlePhase?0:1}));},4200);
+    this.T.tick=setInterval(()=>{
+      this.setState(p=>{const o={};let ch=false;
+        ['c','m'].forEach(id=>{const s=p[id];
+          if(s.playing){ch=true;let pos=s.pos+.5,song=s.song;
+            if(pos>=this.SONGS[song].d){song=(song+1)%this.SONGS.length;pos=0;}
+            o[id]=Object.assign({},s,{pos:pos,song:song});}});
+        return ch?o:null;});
+    },500);
+    const demoSteps=[
+      id=>this.greet(id),
+      id=>this.go(id,'preview'),
+      id=>this.go(id,'nav'),
+      id=>this.up(id,{playing:true,st:'mbar'}),
+      id=>this.go(id,'mcard'),
+      id=>this.go(id,'nav'),
+      id=>this.up(id,{satOpen:true,st:'idle'}),
+      id=>this.up(id,{satOpen:false,st:'mbar'}),
+      id=>this.askConfirm(id,{site:'GitHub',host:'github.com/haliChina',glyph:'G',color:'#ffffff'}),
+      id=>{this.clearT(id+'cf');this.toast(id,'ok','跳转成功');},
+      id=>this.go(id,'email'),
+      id=>this.go(id,'autoplay'),
+      id=>this.hint(id),
+      id=>this.up(id,{playing:false,st:'idle'})
+    ];
+    this.T.demo=setInterval(()=>{
+      if(!(this.props.demoLoop??false))return;
+      const f=demoSteps[this.demoI%demoSteps.length];this.demoI++;
+      ['c','m'].forEach(f);
+    },2600);
+    ['c','m'].forEach((id,i)=>this.after(id+'greet0',900+i*350,()=>{if(this.state[id].st==='idle')this.greet(id);}));
+    this.docClick=e=>{
+      if(e.target&&e.target.closest&&e.target.closest('[data-isl]'))return;
+      ['c','m'].forEach(id=>{const st=this.state[id].st;
+        if(this.state[id].satOpen)this.up(id,{satOpen:false,st:this.base(id)});
+        if(st==='confirm'){this.clearT(id+'cf');this.toast(id,'err','已取消');}
+        else if(['nav','mcard','email','autoplay','preview'].indexOf(st)>=0)this.go(id,this.base(id));});
+    };
+    document.addEventListener('click',this.docClick);
+  }
+  componentWillUnmount(){
+    Object.keys(this.T).forEach(k=>{clearTimeout(this.T[k]);clearInterval(this.T[k]);});
+    if(this.docClick)document.removeEventListener('click',this.docClick);
+  }
+  renderVals(){
+    return {a:this.isl('a'),b:this.isl('b'),c:this.isl('c'),m:this.isl('m'),clockDate:this.state.clock+' · '+this.dateStr(),showLabel:this.props.showStateLabel??true};
+  }
+}
+</script>
+</body>
+</html>

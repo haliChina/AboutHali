@@ -42,17 +42,11 @@
     function setCoverAnimated(sel, src) {
         document.querySelectorAll(sel).forEach(img => {
             if (img.getAttribute('src') === src) return;
-            let done = false;
-            const swap = () => {
-                if (done) return;
-                done = true;
-                img.removeEventListener('transitionend', swap);
-                img.src = src;
-                img.classList.remove('cover-swap');
-            };
-            img.addEventListener('transitionend', swap);
-            setTimeout(swap, 360);
-            img.classList.add('cover-swap');
+            img.src = src;
+            // Re-trigger coverIn animation (1:1 demo: React key=s.song recreates element)
+            img.style.animation = 'none';
+            void img.offsetWidth;
+            img.style.animation = '';
         });
     }
     function fmt(t) {
