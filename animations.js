@@ -164,7 +164,7 @@
     // ===== 状态布局映射表 (1:1 demo LY.c 桌面 + LY.m 移动) =====
     // bg 统一 #0c0c12, 无 backdrop-filter (1:1 demo TH.c/TH.m)
     const LAYOUTS_DESKTOP = {
-        'default':     { width: '122px', height: '36px',  radius: '18px', bg: '#0c0c12' },
+        'default':     { width: '146px', height: '36px',  radius: '18px', bg: '#0c0c12' },
         'idleT':       { width: '196px', height: '36px',  radius: '18px', bg: '#0c0c12' },
         'preview':     { width: '224px', height: '36px',  radius: '18px', bg: '#0c0c12' },
         'music-bar':   { width: '192px', height: '36px',  radius: '18px', bg: '#0c0c12' },
@@ -178,7 +178,7 @@
         'hint':        { width: '228px', height: '36px',  radius: '18px', bg: '#0c0c12' }
     };
     const LAYOUTS_MOBILE = {
-        'default':     { width: '112px', height: '34px',  radius: '17px', bg: '#0c0c12' },
+        'default':     { width: '132px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'idleT':       { width: '184px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'preview':     { width: '212px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'music-bar':   { width: '176px', height: '34px',  radius: '17px', bg: '#0c0c12' },
@@ -877,9 +877,10 @@
 
     function hoverExpand() {
         if (isLocked() || satOpen) return;
-        // B+I: 1c 分体两段式 — hover 先展开 preview, 点击才展开 nav
+        // B+I: 1c 分体两段式 — default hover → preview, 点击才展开 nav
+        // music-bar 不在 hover 时展开 preview, 保留给 click → music-card
         const cur = getCurrentState();
-        if (cur === 'default' || cur === 'music-bar') {
+        if (cur === 'default') {
             updatePreviewContent();
             setState('preview');
         }
@@ -905,13 +906,13 @@
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub-wrap')) return;
         if (satOpen) return; // 卫星岛 open 时不响应主岛点击
         const cur = getCurrentState();
-        // 点击逻辑: default/preview/music-bar → nav, nav → 收回, music-card → music-bar
+        // 点击逻辑: default/preview → nav, music-bar → music-card(展开), nav → 收回, music-card → music-bar
         if (cur === 'default') {
             setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'preview') {
             setState('nav'); updateScrollProgress(window.scrollY || 0);
         } else if (cur === 'music-bar') {
-            setState('nav'); updateScrollProgress(window.scrollY || 0);
+            setState('music-card');
         } else if (cur === 'music-card') {
             setState('music-bar');
         } else if (cur === 'nav') {

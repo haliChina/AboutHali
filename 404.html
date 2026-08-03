@@ -6,17 +6,24 @@
     <title>404 · 迷失了</title>
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#07070b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         :root{
             --accent:#ff8fb6;--accent-2:#ffc5d8;--accent-3:#ff6b9d;
             --ease:cubic-bezier(.22,.61,.36,1);
             --spring:cubic-bezier(.34,1.45,.5,1);
+            --font-display:'Noto Serif JP','PingFang SC',serif;
+            --font-body:'Noto Sans JP','PingFang SC',-apple-system,sans-serif;
+            --font-mono:'JetBrains Mono',ui-monospace,monospace;
         }
         body{
             min-height:100vh;display:flex;align-items:center;justify-content:center;
             background:#07070b;color:#fff8fc;overflow:hidden;
-            font-family:'Noto Sans JP','PingFang SC',-apple-system,sans-serif;
+            font-family:var(--font-body);
             position:relative;
         }
         /* 背景光晕 */
@@ -33,10 +40,29 @@
         @keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.1)}}
         @keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-40px) scale(.9)}}
 
+        /* 飘落樱花瓣 */
+        .petal{position:fixed;top:-20px;z-index:0;pointer-events:none;
+            background:radial-gradient(circle at 30% 30%,rgba(255,200,220,.7),rgba(255,143,182,.3));
+            border-radius:50% 0 50% 0;opacity:0;
+            animation:petalFall linear infinite}
+        .petal:nth-child(1){left:10%;width:10px;height:10px;animation-duration:9s;animation-delay:0s}
+        .petal:nth-child(2){left:25%;width:14px;height:14px;animation-duration:12s;animation-delay:2s}
+        .petal:nth-child(3){left:45%;width:8px;height:8px;animation-duration:10s;animation-delay:4s}
+        .petal:nth-child(4){left:65%;width:12px;height:12px;animation-duration:14s;animation-delay:1s}
+        .petal:nth-child(5){left:80%;width:9px;height:9px;animation-duration:11s;animation-delay:3s}
+        .petal:nth-child(6){left:92%;width:11px;height:11px;animation-duration:13s;animation-delay:5s}
+        @keyframes petalFall{
+            0%{transform:translateY(0) rotate(0deg);opacity:0}
+            10%{opacity:.5}
+            90%{opacity:.4}
+            100%{transform:translateY(105vh) rotate(360deg);opacity:0}
+        }
+
         .wrap{position:relative;z-index:1;text-align:center;padding:20px;max-width:480px}
         /* 404 大字 */
         .code{
             font-size:clamp(7rem,22vw,12rem);font-weight:900;line-height:.9;
+            font-family:var(--font-display);
             background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 50%,#c44eff 100%);
             -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
             letter-spacing:-.04em;position:relative;display:inline-block;
@@ -58,6 +84,7 @@
         /* 标题 */
         .title{
             font-size:1.3rem;font-weight:700;margin:24px 0 8px;
+            font-family:var(--font-display);
             animation:textIn .8s var(--ease) .2s both;
         }
         .desc{
@@ -86,11 +113,25 @@
             border-top:2px solid var(--accent);border-left:2px solid var(--accent);border-radius:8px 0 0 0}
         .deco-br{bottom:20px;right:20px;width:60px;height:60px;
             border-bottom:2px solid var(--accent);border-right:2px solid var(--accent);border-radius:0 0 8px 0}
+        /* 终端提示 */
+        .terminal{
+            margin-top:28px;font-family:var(--font-mono);font-size:.78rem;color:rgba(255,143,182,.4);
+            animation:textIn .8s var(--ease) .65s both;
+        }
+        .terminal .cursor{display:inline-block;width:7px;height:13px;background:var(--accent);margin-left:3px;
+            vertical-align:text-bottom;animation:cursorBlink 1s steps(1) infinite}
+        @keyframes cursorBlink{50%{opacity:0}}
     </style>
 </head>
 <body>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
     <div class="deco deco-tl"></div>
     <div class="deco deco-br"></div>
     <div class="wrap">
@@ -102,6 +143,12 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             返回首页
         </a>
+        <div class="terminal">GET / — 404 Not Found<span class="cursor"></span></div>
     </div>
+    <script>
+        // 与主页一致的控制台彩蛋
+        console.log('%c🌸 userhali.com','font-size:16px;font-weight:bold;color:#ff8fb6;');
+        console.log('%c你迷路了吗？','font-size:12px;color:#d885a2;');
+    </script>
 </body>
 </html>
