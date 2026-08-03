@@ -303,6 +303,25 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .dynamic-island{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
 
+/* ===== Liquid metaball overlay (split/merge 液态桥接) =====
+   原理: 两个 #000 blob 放在岛后面 (z-index:0), 岛本身 #000 盖住 blob,
+   只有两岛之间的 gap 区域露出 blob 的液态桥接。
+   关键: opacity 无 CSS 过渡 (瞬时切换), blob 尺寸无 CSS 过渡 (rAF 控制),
+   避免 opacity 渐变导致的闪烁和尺寸不同步导致的胖一圈。 */
+.island-gooey{
+    position:absolute;inset:0;z-index:0;
+    display:flex;justify-content:center;align-items:flex-start;gap:8px;
+    filter:none;opacity:0;
+    pointer-events:none;
+    transition:none}
+.island-gooey.gooey-active{
+    opacity:1;filter:url(#goo)}
+.goo-blob{
+    background:#000;flex-shrink:0;box-sizing:border-box;
+    transition:none}
+.goo-main{width:146px;height:36px;border-radius:18px;opacity:1}
+.goo-sat{width:0;height:36px;border-radius:18px;opacity:0}
+
 /* ===== 1:1 demo 灵动岛架构 (1c 石墨分体) =====
    外壳（流形变）+ 内层（淡入淡出）双层独立动画
    状态切换由 JS 同步 3 步完成：remove active → 改 inline style → add active */

@@ -3,6 +3,9 @@
 
     const island      = document.querySelector('.island-content');
     const satIsland   = document.querySelector('.island-sat');
+    const gooMain     = document.getElementById('goo-main');
+    const gooSat      = document.getElementById('goo-sat');
+    const gooLayer    = document.getElementById('island-gooey');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -294,6 +297,61 @@
         }
 
         prevSatMode = mode;
+
+        // Trigger liquid bridge on mode change (prevMode was captured at function start)
+        if (mode !== prevMode) {
+            triggerGooey(mode);
+        }
+    }
+
+    // ===== Liquid metaball bridge: rAF-tracked blob sync during split/merge =====
+    // 关键改进:
+    // 1. opacity 无 CSS 过渡 (瞬时切换), 避免闪烁
+    // 2. rAF 循环持续读取岛的实际尺寸, 同步到 blob, 避免尺寸不同步
+    // 3. 持续时间 = CSS 过渡时间 (550ms), 桥接完整覆盖整个动画
+    let gooeyRAF = null;
+    let gooeyEndTime = 0;
+    const GOOEY_DURATION = 600; // 略大于 CSS 过渡 550ms, 确保覆盖完整
+
+    function triggerGooey(satMode) {
+        if (!gooLayer || !gooMain || !gooSat) return;
+
+        // 瞬时激活 (无 opacity 过渡 = 无闪烁)
+        gooLayer.classList.add('gooey-active');
+        gooeyEndTime = performance.now() + GOOEY_DURATION;
+
+        // 取消之前的 rAF 循环
+        if (gooeyRAF) cancelAnimationFrame(gooeyRAF);
+
+        // rAF 循环: 每帧读取岛的实际尺寸, 同步到 blob
+        function syncFrame() {
+            // 读取主岛实际尺寸 (getComputedStyle 获取过渡中的实时值)
+            const mainRect = island.getBoundingClientRect();
+            gooMain.style.width = mainRect.width + 'px';
+            gooMain.style.height = mainRect.height + 'px';
+            // borderRadius 用百分比形式 (圆角 = height/2)
+            gooMain.style.borderRadius = (mainRect.height / 2) + 'px';
+
+            // 读取卫星岛实际尺寸
+            if (satIsland) {
+                const satRect = satIsland.getBoundingClientRect();
+                gooSat.style.width = Math.max(0, satRect.width) + 'px';
+                gooSat.style.height = satRect.height + 'px';
+                gooSat.style.borderRadius = (satRect.height / 2) + 'px';
+                // 卫星岛可见性: 宽度 > 2px 时显示 blob
+                gooSat.style.opacity = satRect.width > 2 ? '1' : '0';
+            }
+
+            // 继续循环直到持续时间结束
+            if (performance.now() < gooeyEndTime) {
+                gooeyRAF = requestAnimationFrame(syncFrame);
+            } else {
+                // 结束: 瞬时关闭 (无过渡 = 无闪烁)
+                gooLayer.classList.remove('gooey-active');
+                gooeyRAF = null;
+            }
+        }
+        gooeyRAF = requestAnimationFrame(syncFrame);
     }
 
     function openSatellite() {
