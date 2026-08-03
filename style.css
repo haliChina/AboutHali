@@ -389,7 +389,7 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 body.audio-playing .ic-play{display:none}
 body.audio-playing .ic-pause{display:inline}
 
-.island-eq{display:flex;align-items:flex-end;gap:2px;height:15px;flex-shrink:0}
+.island-eq{display:flex;align-items:center;gap:2px;height:15px;flex-shrink:0}
 .island-eq i{width:2px;height:28%;border-radius:2px;background:linear-gradient(var(--accent-3),var(--accent-2))}
 .island-eq i:nth-child(1){height:42%}
 .island-eq i:nth-child(2){height:76%}
@@ -649,7 +649,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .sat-pill.active-sat-content{
     transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;align-items:center;justify-content:center}
-.island-sat .sat-pill .island-eq i{width:2.5px}
+.island-sat .sat-pill .island-eq i{width:2px}
 /* sat-pill/sat-card 可见性由 active-sat-content class 控制 (opacity+transform+filter),
    不使用 display:none 切换, 避免 open 时浏览器重新布局 sat-card 内容导致卡顿 (1:1 demo satLayer) */
 
