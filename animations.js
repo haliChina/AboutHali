@@ -174,7 +174,7 @@
         'music-card':  { width: '392px', height: '156px', radius: '32px', bg: '#0c0c12' },
         'confirm':     { width: '344px', height: '130px', radius: '28px', bg: '#0c0c12' },
         'email':       { width: '312px', height: '132px', radius: '28px', bg: '#0c0c12' },
-        'toast':       { width: '228px', height: '42px',  radius: '21px', bg: '#0c0c12' },
+        'toast':       { width: '228px', height: '36px',  radius: '18px', bg: '#0c0c12' },
         'autoplay':    { width: '312px', height: '106px', radius: '26px', bg: '#0c0c12' },
         'greet':       { width: '244px', height: '36px',  radius: '18px', bg: '#0c0c12' },
         'hint':        { width: '228px', height: '36px',  radius: '18px', bg: '#0c0c12' }
@@ -188,7 +188,7 @@
         'music-card':  { width: '352px', height: '138px', radius: '30px', bg: '#0c0c12' },
         'confirm':     { width: '330px', height: '128px', radius: '26px', bg: '#0c0c12' },
         'email':       { width: '300px', height: '126px', radius: '26px', bg: '#0c0c12' },
-        'toast':       { width: '212px', height: '40px',  radius: '20px', bg: '#0c0c12' },
+        'toast':       { width: '212px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'autoplay':    { width: '300px', height: '104px', radius: '24px', bg: '#0c0c12' },
         'greet':       { width: '228px', height: '34px',  radius: '17px', bg: '#0c0c12' },
         'hint':        { width: '214px', height: '34px',  radius: '17px', bg: '#0c0c12' }
@@ -256,11 +256,13 @@
             if (satPill) satPill.classList.add('active-sat-content');
         }
 
-        // Collapse/restore main island when satellite opens
+        // Collapse/restore main island + gooey main blob when satellite opens
         if (mode === 'open') {
             island.classList.add('sat-collapsed');
+            if (gooMain) gooMain.classList.add('is-collapsed');
         } else {
             island.classList.remove('sat-collapsed');
+            if (gooMain) gooMain.classList.remove('is-collapsed');
         }
 
         // Trigger liquid bridge effect only during mode change (split/merge)

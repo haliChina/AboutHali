@@ -752,6 +752,9 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-content.sat-collapsed{
     width:0px!important;opacity:0!important;transform:scale(.6)!important;
     pointer-events:none!important;border-width:0!important}
+/* Gooey main blob collapses with main island (防止半岛残影) */
+.goo-main.is-collapsed{
+    width:0px!important;opacity:0!important;transform:scale(.6)!important}
 
 /* 封面入场动画 */
 @keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
