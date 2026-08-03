@@ -256,11 +256,13 @@
             if (satPill) satPill.classList.add('active-sat-content');
         }
 
-        // Collapse/restore main island
+        // Collapse/restore main island + gooey main blob
         if (mode === 'open') {
             island.classList.add('sat-collapsed');
+            if (gooMain) gooMain.classList.add('is-collapsed');
         } else {
             island.classList.remove('sat-collapsed');
+            if (gooMain) gooMain.classList.remove('is-collapsed');
         }
 
         // Sync gooey satellite blob state
@@ -279,10 +281,10 @@
         if (!layer) return;
         clearTimeout(gooeyTimer);
         layer.classList.add('gooey-active');
-        // Remove after transition completes (~650ms = 55s CSS transition + buffer)
+        // Short burst: just enough for the split/merge visual (~300ms)
         gooeyTimer = setTimeout(() => {
             layer.classList.remove('gooey-active');
-        }, 650);
+        }, 300);
     }
 
     // ===== Apple Liquid Island: sync gooey blob dimensions =====
@@ -316,9 +318,24 @@
     function openSatellite() {
         if (!musicActive || satOpen) return;
         satOpen = true;
-        // Collapse main island to idle
+        // Set mode first so updateSatellite sees the correct state
+        // Collapse main island to idle (skip setState to avoid premature updateSatellite call)
         if (getCurrentState() !== 'default') {
-            setState('default', { force: true });
+            // Manually collapse main island without triggering updateSatellite
+            const current = getCurrentState();
+            if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
+            const layout = getLayout('default');
+            if (layout) {
+                island.style.width = layout.width;
+                island.style.height = layout.height;
+                island.style.borderRadius = layout.radius;
+                island.style.backgroundColor = 'transparent';
+            }
+            island.classList.remove('island-state-default','island-state-preview','island-state-music-bar','island-state-nav','island-state-music-card','island-state-confirm','island-state-email','island-state-toast','island-state-autoplay','island-state-greet','island-state-hint');
+            island.setAttribute('data-state', 'default');
+            island.classList.add('island-state-default');
+            if (STATE_CONTENTS['default']) STATE_CONTENTS['default'].classList.add('active-content');
+            syncGooeyMain();
         }
         updateSatellite();
     }
