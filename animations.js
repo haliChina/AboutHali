@@ -3,8 +3,6 @@
 
     const island      = document.querySelector('.island-content');
     const satIsland   = document.querySelector('.island-sat');
-    const gooMain     = document.getElementById('goo-main');
-    const gooSat      = document.getElementById('goo-sat');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -222,6 +220,7 @@
     // ===== Satellite Island (1c 石墨分体) =====
     let satOpen = false;
     let satCollapseTimer = null;
+    let satCollapsing = false; // true while satellite shrinks from open→hidden
 
     function getSatMode() {
         if (!musicActive) return 'hidden';
@@ -237,7 +236,6 @@
     }
 
     let prevSatMode = 'hidden';
-    let gooeyTimer = null;
 
     function updateSatellite() {
         if (!satIsland) return;
@@ -245,104 +243,66 @@
         const prevMode = prevSatMode;
         satIsland.setAttribute('data-sat', mode);
 
-        // Toggle active layer in satellite
+        // Toggle active layer in satellite — keep sat-card visible during collapse from 'open'
         const satPill = satIsland.querySelector('.sat-pill');
         const satCard = satIsland.querySelector('.sat-card');
         if (mode === 'open') {
+            // Opening: show sat-card, hide sat-pill
+            satCollapsing = false;
             if (satPill) satPill.classList.remove('active-sat-content');
             if (satCard) satCard.classList.add('active-sat-content');
-        } else {
+        } else if (prevMode === 'open' && mode !== 'open') {
+            // Collapsing from open: keep sat-card visible during the shrink transition
+            // so pill content doesn't flash mid-collapse
+            satCollapsing = true;
+            if (satCard) satCard.classList.add('active-sat-content');
+            if (satPill) satPill.classList.remove('active-sat-content');
+            clearTimeout(satCollapseTimer);
+            satCollapseTimer = setTimeout(function () {
+                satCollapsing = false;
+                if (satIsland.getAttribute('data-sat') !== 'open') {
+                    if (satCard) satCard.classList.remove('active-sat-content');
+                    if (satPill) satPill.classList.add('active-sat-content');
+                }
+            }, 550);
+        } else if (!satCollapsing) {
+            // Normal mode: show sat-pill (or icon), hide sat-card
             if (satCard) satCard.classList.remove('active-sat-content');
             if (satPill) satPill.classList.add('active-sat-content');
         }
+        // If satCollapsing is true, don't touch content layers — let the timer handle it
 
-        // Collapse/restore main island + gooey main blob when satellite opens
+        // Collapse/restore main island when satellite opens (smooth, no !important)
+        // Must clear inline width/height/radius so the CSS class can take effect
         if (mode === 'open') {
             island.classList.add('sat-collapsed');
-            if (gooMain) gooMain.classList.add('is-collapsed');
+            // Clear inline styles so CSS .sat-collapsed (width:0) applies with transition
+            island.style.width = '';
+            island.style.height = '';
+            island.style.borderRadius = '';
         } else {
+            // Restore inline styles from current layout before removing class
+            // so the island animates from collapsed → correct size
+            const cur = getCurrentState();
+            const layout = getLayout(cur);
+            if (layout && island.classList.contains('sat-collapsed')) {
+                island.style.width = layout.width;
+                island.style.height = layout.height;
+                island.style.borderRadius = layout.radius;
+            }
             island.classList.remove('sat-collapsed');
-            if (gooMain) gooMain.classList.remove('is-collapsed');
         }
 
-        // Trigger liquid bridge effect only during mode change (split/merge)
-        if (mode !== prevMode) {
-            triggerGooey(mode);
-        }
         prevSatMode = mode;
-    }
-
-    // ===== Gooey liquid bridge: brief overlay during split/merge =====
-    // 原理: 同步 blob 到岛当前尺寸 → 下一帧激活 SVG goo 滤镜 → 250ms 后关闭
-    // blob 尺寸由 JS inline style 直接设定 (无 CSS 过渡), 避免橄榄球畸变
-    function triggerGooey(satMode) {
-        const layer = document.getElementById('island-gooey');
-        if (!layer) return;
-
-        // Sync blobs to current island dimensions BEFORE showing
-        syncGooeyMain();
-        syncGooeySat(satMode);
-
-        // Force layout so blobs are at correct size before filter activates
-        void layer.offsetWidth;
-
-        // Activate in next frame to ensure blobs have settled
-        requestAnimationFrame(function () {
-            layer.classList.add('gooey-active');
-            clearTimeout(gooeyTimer);
-            gooeyTimer = setTimeout(function () {
-                layer.classList.remove('gooey-active');
-            }, 250);
-        });
-    }
-
-    function syncGooeyMain() {
-        if (!gooMain || !island) return;
-        var w = island.style.width || '146px';
-        var h = island.style.height || '36px';
-        var r = island.style.borderRadius || '18px';
-        gooMain.style.width = w;
-        gooMain.style.height = h;
-        gooMain.style.borderRadius = r;
-    }
-
-    function syncGooeySat(mode) {
-        if (!gooSat) return;
-        var dims = {
-            hidden: { w: '0px', h: '36px', r: '18px', op: '0' },
-            pill:   { w: '86px', h: '36px', r: '18px', op: '1' },
-            icon:   { w: '36px', h: '36px', r: '18px', op: '1' },
-            open:   { w: '392px', h: '156px', r: '32px', op: '1' }
-        };
-        var d = dims[mode] || dims.hidden;
-        var w = satIsland ? (satIsland.style.width || d.w) : d.w;
-        var h = satIsland ? (satIsland.style.height || d.h) : d.h;
-        var r = satIsland ? (satIsland.style.borderRadius || d.r) : d.r;
-        gooSat.style.width = w;
-        gooSat.style.height = h;
-        gooSat.style.borderRadius = r;
-        gooSat.style.opacity = d.op;
     }
 
     function openSatellite() {
         if (!musicActive || satOpen) return;
         satOpen = true;
-        // Set mode first so updateSatellite sees the correct state
-        // Collapse main island to idle (skip setState to avoid premature updateSatellite call)
+        // Collapse main island to default using setState (smooth transition)
+        // then expand satellite — both animate in sync
         if (getCurrentState() !== 'default') {
-            // Manually collapse main island without triggering updateSatellite
-            const current = getCurrentState();
-            if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
-            const layout = getLayout('default');
-            if (layout) {
-                island.style.width = layout.width;
-                island.style.height = layout.height;
-                island.style.borderRadius = layout.radius;
-            }
-            island.classList.remove('island-state-default','island-state-preview','island-state-music-bar','island-state-nav','island-state-music-card','island-state-confirm','island-state-email','island-state-toast','island-state-autoplay','island-state-greet','island-state-hint');
-            island.setAttribute('data-state', 'default');
-            island.classList.add('island-state-default');
-            if (STATE_CONTENTS['default']) STATE_CONTENTS['default'].classList.add('active-content');
+            setState('default', { force: true });
         }
         updateSatellite();
     }
@@ -350,8 +310,8 @@
     function closeSatellite() {
         if (!satOpen) return;
         satOpen = false;
-        updateSatellite();
-        // Restore main island
+        // setState internally calls updateSatellite() which handles the
+        // smooth open→hidden transition (keeps sat-card visible during collapse)
         setState(musicActive ? 'music-bar' : 'default');
     }
 

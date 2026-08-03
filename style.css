@@ -303,25 +303,6 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .dynamic-island{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
 
-/* ===== Gooey overlay: liquid metaball bridge during split/merge =====
-   原理: 两个黑色 blob 放在岛后面 (z-index:0), 岛本身 background:#000 盖住 blob,
-   只有两岛之间的 gap 区域露出 blob 的液态桥接。
-   默认 opacity:0 不可见; .gooey-active 时 opacity:1 + SVG goo 滤镜, 持续 ~250ms。
-   blob 尺寸无 CSS 过渡 (JS 直接设 inline style), 避免过渡中产生橄榄球畸变。 */
-.island-gooey{
-    position:absolute;inset:0;z-index:0;
-    display:flex;justify-content:center;align-items:flex-start;gap:8px;
-    filter:none;opacity:0;
-    pointer-events:none;
-    transition:opacity .15s ease}
-.island-gooey.gooey-active{
-    opacity:1;filter:url(#goo)}
-.goo-blob{
-    background:#000;flex-shrink:0;box-sizing:border-box;
-    transition:opacity .2s ease}
-.goo-main{width:146px;height:36px;border-radius:18px;opacity:1}
-.goo-sat{width:0;height:36px;border-radius:18px;opacity:0}
-
 /* ===== 1:1 demo 灵动岛架构 (1c 石墨分体) =====
    外壳（流形变）+ 内层（淡入淡出）双层独立动画
    状态切换由 JS 同步 3 步完成：remove active → 改 inline style → add active */
@@ -334,11 +315,11 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     border:none;
     box-shadow:none;
     display:flex;align-items:center;justify-content:center;
-    /* 1:1 demo: .55s cubic-bezier(.34,1.2,.4,1) */
+    /* 1:1 demo: .55s cubic-bezier(.34,1.2,.4,1) — 所有属性同步, 避免先消失后收缩 */
     transition:width .55s cubic-bezier(.34,1.2,.4,1),
                height .55s cubic-bezier(.34,1.2,.4,1),
                border-radius .55s cubic-bezier(.34,1.2,.4,1),
-               opacity .35s ease,
+               opacity .55s cubic-bezier(.34,1.2,.4,1),
                transform .55s cubic-bezier(.34,1.2,.4,1);
     touch-action:manipulation;
     contain:layout paint;
@@ -349,15 +330,15 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.07) 50%,transparent 65%);
     transform:translateX(-120%);opacity:0;transition:opacity .4s;display:none}
 
-/* 内层：默认隐藏，缩放偏移 (1:1 demo layerStyle: scale .84 + blur 5px) */
+/* 内层：默认隐藏，缩放偏移 — 淡出与淡入对称交叉渐变 (无空窗期) */
 .island-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     opacity:0;pointer-events:none;transform:scale(.84);filter:blur(5px);
-    transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease}
+    transition:opacity .3s ease,transform .4s cubic-bezier(.4,0,.7,1),filter .3s ease}
 
-/* 内层：激活态 (1:1 demo: opacity .3s .12s delay, transform .5s .08s delay, filter .3s .12s delay) */
+/* 内层：激活态 — 淡入延迟缩短, 与淡出时长对称, 实现交叉渐变 */
 .island-layer.active-content{
     opacity:1;pointer-events:auto;transform:scale(1);filter:blur(0);
-    transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s}
+    transition:opacity .3s ease .05s,transform .5s cubic-bezier(.34,1.2,.4,1) .05s,filter .3s ease .05s}
 
 .island-default{}
 .island-idle-wrap{position:relative;width:100%;height:100%;overflow:hidden}
@@ -615,14 +596,12 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     transition:width .55s cubic-bezier(.34,1.2,.4,1),
                height .55s cubic-bezier(.34,1.2,.4,1),
                border-radius .55s cubic-bezier(.34,1.2,.4,1),
-               opacity .35s ease,
+               opacity .55s cubic-bezier(.34,1.2,.4,1),
                transform .55s cubic-bezier(.34,1.2,.4,1),
                margin-left .55s cubic-bezier(.34,1.2,.4,1);
     contain:layout paint;
     will-change:width,height,transform;
     z-index:1}
-body.audio-playing .island-sat[data-sat="hidden"]{
-    transform:translateX(-46px) scale(.35)}
 
 /* pill 模式: 小药丸 (cover + 5-bar EQ) — 1:1 demo satGeo c: pill=86, h=36 */
 .island-sat[data-sat="pill"]{
@@ -644,19 +623,19 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     opacity:1;transform:none;pointer-events:auto;
     margin-left:-8px}
 
-/* hidden 模式: 0 宽度, 不可见 (未播放时简单缩小) */
+/* hidden 模式: 0 宽度, 不可见 — 直接缩小, 不经过 pill/icon 中间态 */
 .island-sat[data-sat="hidden"]{
     width:0px;height:36px;border-radius:18px;
     opacity:0;transform:scale(.6);
     pointer-events:none;margin-left:-8px}
 
-/* 卫星岛内层: on 慢且有延迟 + blur, off 快 (1:1 demo satLayer) */
+/* 卫星岛内层: 与主岛对称的交叉渐变 (淡出淡入同时长) */
 .island-sat .island-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
     opacity:0;pointer-events:none;transform:scale(.85);filter:blur(5px);
-    transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease}
+    transition:opacity .3s ease,transform .4s cubic-bezier(.4,0,.7,1),filter .3s ease}
 .island-sat .island-layer.active-sat-content{
     opacity:1;pointer-events:auto;transform:scale(1);filter:blur(0);
-    transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s}
+    transition:opacity .3s ease .05s,transform .5s cubic-bezier(.34,1.2,.4,1) .05s,filter .3s ease .05s}
 
 /* 卫星岛元素禁用 view-transition-name, 避免与主岛同名冲突 */
 .island-sat .ib-cover,.island-sat .mc-cover{view-transition-name:none}
@@ -667,9 +646,9 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 
 /* pill 模式内容: cover+EQ 居中排列, 左右间距对称 */
 .island-sat .sat-pill{justify-content:center;gap:7px;padding:0;box-sizing:border-box;
-    transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
+    transition:opacity .3s ease,transform .4s cubic-bezier(.4,0,.7,1),filter .3s ease,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill.active-sat-content{
-    transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
+    transition:opacity .3s ease .05s,transform .5s cubic-bezier(.34,1.2,.4,1) .05s,filter .3s ease .05s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill .island-eq{align-items:center;justify-content:center}
 .island-sat .sat-pill .island-eq i{width:2px}
 /* sat-pill/sat-card 可见性由 active-sat-content class 控制 (opacity+transform+filter),
@@ -748,13 +727,10 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* 显示/隐藏切换 */
 /* sat-card 可见性同样由 active-sat-content class 控制, 不使用 display 切换 */
 
-/* 主岛在卫星岛 open 时折叠 (1:1 demo satOpen box) */
+/* 主岛在卫星岛 open 时折叠 — 使用与正常状态相同的过渡, 无 !important, 平滑收缩 */
 .island-content.sat-collapsed{
-    width:0px!important;opacity:0!important;transform:scale(.6)!important;
-    pointer-events:none!important;border-width:0!important}
-/* Gooey main blob collapses with main island (防止半岛残影) */
-.goo-main.is-collapsed{
-    width:0px!important;opacity:0!important;transform:scale(.6)!important}
+    width:0px;opacity:0;transform:scale(.6) translateX(-20px);
+    pointer-events:none;border-width:0}
 
 /* 封面入场动画 */
 @keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
@@ -903,10 +879,6 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .island-sat .sat-card .mc-artist{font-size:11px}
     .island-sat .sat-card-scrub-wrap{margin-top:11px}
     .island-sat .sat-card-ctrls{gap:28px;margin-top:6px}
-
-    /* Gooey blobs mobile sizes */
-    .goo-main{width:132px;height:34px;border-radius:17px}
-    .goo-sat{height:34px;border-radius:17px}
 
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
