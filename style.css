@@ -303,48 +303,6 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .dynamic-island{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
 
-/* ===== Apple Liquid Island: Gooey metaball shape layer =====
-   常驻: 两个独立黑色 blob (无滤镜, 无桥接)
-   过渡: .gooey-active 时启用 SVG goo 滤镜, blob 间出现液态粘连 */
-.island-gooey{
-    position:absolute;inset:0;z-index:0;
-    display:flex;justify-content:center;align-items:flex-start;gap:2px;
-    filter:none;
-    pointer-events:none;
-    transition:filter .15s ease}
-.island-gooey.gooey-active{
-    filter:url(#goo)}
-.goo-blob{
-    background:#000;
-    flex-shrink:0;
-    box-sizing:border-box;
-    transition:width .55s cubic-bezier(.34,1.2,.4,1),
-               height .55s cubic-bezier(.34,1.2,.4,1),
-               border-radius .55s cubic-bezier(.34,1.2,.4,1),
-               opacity .35s ease,
-               transform .55s cubic-bezier(.34,1.2,.4,1),
-               margin-left .55s cubic-bezier(.34,1.2,.4,1)}
-.goo-main{
-    width:146px;height:36px;border-radius:18px;
-    margin-left:0;opacity:1}
-.goo-sat{
-    width:0px;height:36px;border-radius:18px;
-    opacity:0;transform:scale(.6);margin-left:-8px}
-/* goo-sat visible states mirror satellite modes */
-.goo-sat[data-sat="pill"]{
-    width:86px;height:36px;border-radius:18px;
-    opacity:1;transform:none;margin-left:0}
-.goo-sat[data-sat="icon"]{
-    width:36px;height:36px;border-radius:18px;
-    opacity:1;transform:none;margin-left:0}
-.goo-sat[data-sat="open"]{
-    width:392px;height:156px;border-radius:32px;
-    opacity:1;transform:none;margin-left:-8px}
-.goo-sat[data-sat="hidden"]{
-    width:0px;height:36px;border-radius:18px;
-    opacity:0;transform:scale(.6);margin-left:-8px}
-body.audio-playing .goo-sat[data-sat="hidden"]{
-    transform:translateX(-46px) scale(.35)}
 /* ===== 1:1 demo 灵动岛架构 (1c 石墨分体) =====
    外壳（流形变）+ 内层（淡入淡出）双层独立动画
    状态切换由 JS 同步 3 步完成：remove active → 改 inline style → add active */
@@ -353,7 +311,7 @@ body.audio-playing .goo-sat[data-sat="hidden"]{
     position:relative;pointer-events:auto;cursor:pointer;overflow:hidden;
     flex-shrink:0;
     width:146px;height:36px;border-radius:18px;
-    background-color:transparent;
+    background-color:#000;
     border:none;
     box-shadow:none;
     display:flex;align-items:center;justify-content:center;
@@ -631,7 +589,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     position:relative;pointer-events:none;cursor:pointer;overflow:hidden;
     flex-shrink:0;box-sizing:border-box;
     width:0px;height:36px;border-radius:18px;
-    background-color:transparent;
+    background-color:#000;
     border:none;
     box-shadow:none;
     opacity:0;transform:scale(.6);margin-left:-8px;
@@ -775,9 +733,6 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-content.sat-collapsed{
     width:0px!important;opacity:0!important;transform:scale(.6)!important;
     pointer-events:none!important;border-width:0!important}
-/* Gooey main blob collapses with main island */
-.goo-main.is-collapsed{
-    width:0px!important;opacity:0!important;transform:scale(.6)!important}
 
 /* 封面入场动画 */
 @keyframes coverIn{0%{opacity:0;transform:scale(.7) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
@@ -927,14 +882,6 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .island-sat .sat-card-scrub-wrap{margin-top:11px}
     .island-sat .sat-card-ctrls{gap:28px;margin-top:6px}
 
-    /* ===== Gooey blobs mobile ===== */
-    .goo-main{width:132px;height:34px;border-radius:17px}
-    .goo-sat{height:34px;border-radius:17px}
-    .goo-sat[data-sat="hidden"]{height:34px;border-radius:17px}
-    .goo-sat[data-sat="pill"]{width:80px;height:34px;border-radius:17px}
-    .goo-sat[data-sat="icon"]{width:34px;height:34px;border-radius:17px}
-    .goo-sat[data-sat="open"]{width:352px;height:144px;border-radius:30px}
-
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
     .social-grid{justify-content:center}
@@ -963,7 +910,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* ===== 移动端性能优化 ===== */
 @media (max-width:768px){
     /* 1. 关闭 backdrop-filter：背后是动态 canvas，每帧重模糊是移动端最大瓶颈 */
-    .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:transparent}
+    .island-content{backdrop-filter:none;-webkit-backdrop-filter:none}
     /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
     .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
     /* 3. 关闭卡片 backdrop-filter：背后动态 canvas 每帧重模糊，移动端瓶颈；改用更不透明的背景兜底 */

@@ -3,8 +3,6 @@
 
     const island      = document.querySelector('.island-content');
     const satIsland   = document.querySelector('.island-sat');
-    const gooMain     = document.getElementById('goo-main');
-    const gooSat      = document.getElementById('goo-sat');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -237,12 +235,10 @@
     }
 
     let prevSatMode = 'hidden';
-    let gooeyTimer = null;
 
     function updateSatellite() {
         if (!satIsland) return;
         const mode = getSatMode();
-        const prevMode = prevSatMode;
         satIsland.setAttribute('data-sat', mode);
 
         // Toggle active layer in satellite
@@ -256,63 +252,14 @@
             if (satPill) satPill.classList.add('active-sat-content');
         }
 
-        // Collapse/restore main island + gooey main blob
+        // Collapse/restore main island when satellite opens
         if (mode === 'open') {
             island.classList.add('sat-collapsed');
-            if (gooMain) gooMain.classList.add('is-collapsed');
         } else {
             island.classList.remove('sat-collapsed');
-            if (gooMain) gooMain.classList.remove('is-collapsed');
         }
 
-        // Sync gooey satellite blob state
-        syncGooeySat(mode);
-
-        // Apple liquid bridge: only during split/merge transition (mode change)
-        if (mode !== prevMode) {
-            triggerGooey();
-        }
         prevSatMode = mode;
-    }
-
-    // Briefly activate gooey filter for liquid metaball bridge effect
-    function triggerGooey() {
-        const layer = document.getElementById('island-gooey');
-        if (!layer) return;
-        clearTimeout(gooeyTimer);
-        layer.classList.add('gooey-active');
-        // Short burst: just enough for the split/merge visual (~300ms)
-        gooeyTimer = setTimeout(() => {
-            layer.classList.remove('gooey-active');
-        }, 300);
-    }
-
-    // ===== Apple Liquid Island: sync gooey blob dimensions =====
-    function syncGooeyMain() {
-        if (!gooMain || !island) return;
-        const w = island.style.width || '146px';
-        const h = island.style.height || '36px';
-        const r = island.style.borderRadius || '18px';
-        gooMain.style.width = w;
-        gooMain.style.height = h;
-        gooMain.style.borderRadius = r;
-    }
-
-    function syncGooeySat(mode) {
-        if (!gooSat || !satIsland) return;
-        gooSat.setAttribute('data-sat', mode);
-        const w = satIsland.style.width || (mode === 'pill' ? '86px' : mode === 'icon' ? '36px' : mode === 'open' ? '392px' : '0px');
-        const h = satIsland.style.height || (mode === 'open' ? '156px' : '36px');
-        const r = satIsland.style.borderRadius || (mode === 'open' ? '32px' : '18px');
-        const ml = satIsland.style.marginLeft || (mode === 'hidden' || mode === 'open' ? '-8px' : '0px');
-        const op = mode === 'hidden' ? '0' : '1';
-        const tf = mode === 'hidden' ? 'scale(.6)' : 'none';
-        gooSat.style.width = w;
-        gooSat.style.height = h;
-        gooSat.style.borderRadius = r;
-        gooSat.style.marginLeft = ml;
-        gooSat.style.opacity = op;
-        gooSat.style.transform = tf;
     }
 
     function openSatellite() {
@@ -329,13 +276,11 @@
                 island.style.width = layout.width;
                 island.style.height = layout.height;
                 island.style.borderRadius = layout.radius;
-                island.style.backgroundColor = 'transparent';
             }
             island.classList.remove('island-state-default','island-state-preview','island-state-music-bar','island-state-nav','island-state-music-card','island-state-confirm','island-state-email','island-state-toast','island-state-autoplay','island-state-greet','island-state-hint');
             island.setAttribute('data-state', 'default');
             island.classList.add('island-state-default');
             if (STATE_CONTENTS['default']) STATE_CONTENTS['default'].classList.add('active-content');
-            syncGooeyMain();
         }
         updateSatellite();
     }
@@ -368,17 +313,13 @@
             // Step 1: 隐藏旧内容（fade-out 0.2s）
             if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
-            // Step 2: 改变外壳物理属性（Apple: pure black #000, gooey layer provides shape）
+            // Step 2: 改变外壳物理属性（Apple: pure black #000）
             const layout = getLayout(target);
             if (layout) {
                 island.style.width      = layout.width;
                 island.style.height     = layout.height;
                 island.style.borderRadius = layout.radius;
-                // Apple version: background transparent, gooey layer provides shape
-                island.style.backgroundColor = 'transparent';
             }
-            // Sync gooey main blob to match new dimensions
-            syncGooeyMain();
             // 同步清理残留的 vs-* class（兼容老 CSS）
             island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
             // 清理所有 island-state-* class，避免状态切换后累积冲突
