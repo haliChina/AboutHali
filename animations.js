@@ -236,9 +236,13 @@
         return 'pill';
     }
 
+    let prevSatMode = 'hidden';
+    let gooeyTimer = null;
+
     function updateSatellite() {
         if (!satIsland) return;
         const mode = getSatMode();
+        const prevMode = prevSatMode;
         satIsland.setAttribute('data-sat', mode);
 
         // Toggle active layer in satellite
@@ -261,6 +265,24 @@
 
         // Sync gooey satellite blob state
         syncGooeySat(mode);
+
+        // Apple liquid bridge: only during split/merge transition (mode change)
+        if (mode !== prevMode) {
+            triggerGooey();
+        }
+        prevSatMode = mode;
+    }
+
+    // Briefly activate gooey filter for liquid metaball bridge effect
+    function triggerGooey() {
+        const layer = document.getElementById('island-gooey');
+        if (!layer) return;
+        clearTimeout(gooeyTimer);
+        layer.classList.add('gooey-active');
+        // Remove after transition completes (~650ms = 55s CSS transition + buffer)
+        gooeyTimer = setTimeout(() => {
+            layer.classList.remove('gooey-active');
+        }, 650);
     }
 
     // ===== Apple Liquid Island: sync gooey blob dimensions =====

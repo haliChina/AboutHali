@@ -303,12 +303,17 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .dynamic-island{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
 
-/* ===== Apple Liquid Island: Gooey metaball shape layer ===== */
+/* ===== Apple Liquid Island: Gooey metaball shape layer =====
+   常驻: 两个独立黑色 blob (无滤镜, 无桥接)
+   过渡: .gooey-active 时启用 SVG goo 滤镜, blob 间出现液态粘连 */
 .island-gooey{
     position:absolute;inset:0;z-index:0;
-    display:flex;justify-content:center;align-items:flex-start;gap:8px;
-    filter:url(#goo);
-    pointer-events:none}
+    display:flex;justify-content:center;align-items:flex-start;gap:2px;
+    filter:none;
+    pointer-events:none;
+    transition:filter .15s ease}
+.island-gooey.gooey-active{
+    filter:url(#goo)}
 .goo-blob{
     background:#000;
     flex-shrink:0;

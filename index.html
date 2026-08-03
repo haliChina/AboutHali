@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=76">
+    <link rel="stylesheet" href="style.css?v=78">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
@@ -32,19 +32,11 @@
     <!-- ===== SVG Gooey Filter (Apple Dynamic Island liquid metaball effect) ===== -->
     <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
         <defs>
-            <filter id="goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-                <feColorMatrix in="blur" mode="matrix"
-                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
-                    result="goo"/>
-                <feBlend in="SourceGraphic" in2="goo"/>
-            </filter>
-            <filter id="goo-strong">
+            <filter id="goo" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
                 <feColorMatrix in="blur" mode="matrix"
-                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"
                     result="goo"/>
-                <feBlend in="SourceGraphic" in2="goo"/>
             </filter>
         </defs>
     </svg>
@@ -480,7 +472,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
     <script src="shader.js?v=6" defer></script>
-    <script src="animations.js?v=30" defer></script>
+    <script src="animations.js?v=31" defer></script>
     <script src="ripple.js?v=2" defer></script>
     <script src="fps.js?v=1" defer></script>
     
