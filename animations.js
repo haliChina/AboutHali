@@ -1163,6 +1163,13 @@
     // 'off'    → 用户曾拒绝并不再提示，静默不播
     // 'ask'    → 默认 / 仍未表态，弹小型 Toast 询问
     function handlePostIntro() {
+        // 1:1 demo: 入场后 ~900ms 自动显示问候 (はじめまして · 欢迎来访), 2.3s 后自动消失
+        setTimeout(function () {
+            if (getCurrentState() === 'default' && !hovering && !userScrolling) {
+                showGreet();
+            }
+        }, 900);
+
         const pref = getAutoplayPref();
         if (pref === 'enabled') {
             beginMusic();
