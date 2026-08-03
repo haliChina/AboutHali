@@ -23,11 +23,31 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=75">
+    <link rel="stylesheet" href="style.css?v=76">
 </head>
 <body class="intro-lock">
     <!-- ===== FPS Counter ===== -->
     <div id="fpsCounter" data-level="good">-- FPS</div>
+
+    <!-- ===== SVG Gooey Filter (Apple Dynamic Island liquid metaball effect) ===== -->
+    <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+                    result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+            </filter>
+            <filter id="goo-strong">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"
+                    result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+            </filter>
+        </defs>
+    </svg>
 
     <!-- ===== Intro animation ===== -->
     <div class="intro" id="intro">
@@ -48,6 +68,11 @@
 
     <!-- ===== Dynamic Island ===== -->
     <div class="dynamic-island">
+        <!-- Gooey liquid shape layer (Apple metaball effect) -->
+        <div class="island-gooey" id="island-gooey">
+            <div class="goo-blob goo-main" id="goo-main"></div>
+            <div class="goo-blob goo-sat" id="goo-sat"></div>
+        </div>
         <div class="island-content island-state-default" id="island" data-state="default">
             <div class="island-specular"></div>
 
@@ -455,7 +480,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
     <script src="shader.js?v=6" defer></script>
-    <script src="animations.js?v=29" defer></script>
+    <script src="animations.js?v=30" defer></script>
     <script src="ripple.js?v=2" defer></script>
     <script src="fps.js?v=1" defer></script>
     

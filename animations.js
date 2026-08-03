@@ -3,6 +3,8 @@
 
     const island      = document.querySelector('.island-content');
     const satIsland   = document.querySelector('.island-sat');
+    const gooMain     = document.getElementById('goo-main');
+    const gooSat      = document.getElementById('goo-sat');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -256,6 +258,37 @@
         } else {
             island.classList.remove('sat-collapsed');
         }
+
+        // Sync gooey satellite blob state
+        syncGooeySat(mode);
+    }
+
+    // ===== Apple Liquid Island: sync gooey blob dimensions =====
+    function syncGooeyMain() {
+        if (!gooMain || !island) return;
+        const w = island.style.width || '146px';
+        const h = island.style.height || '36px';
+        const r = island.style.borderRadius || '18px';
+        gooMain.style.width = w;
+        gooMain.style.height = h;
+        gooMain.style.borderRadius = r;
+    }
+
+    function syncGooeySat(mode) {
+        if (!gooSat || !satIsland) return;
+        gooSat.setAttribute('data-sat', mode);
+        const w = satIsland.style.width || (mode === 'pill' ? '86px' : mode === 'icon' ? '36px' : mode === 'open' ? '392px' : '0px');
+        const h = satIsland.style.height || (mode === 'open' ? '156px' : '36px');
+        const r = satIsland.style.borderRadius || (mode === 'open' ? '32px' : '18px');
+        const ml = satIsland.style.marginLeft || (mode === 'hidden' || mode === 'open' ? '-8px' : '0px');
+        const op = mode === 'hidden' ? '0' : '1';
+        const tf = mode === 'hidden' ? 'scale(.6)' : 'none';
+        gooSat.style.width = w;
+        gooSat.style.height = h;
+        gooSat.style.borderRadius = r;
+        gooSat.style.marginLeft = ml;
+        gooSat.style.opacity = op;
+        gooSat.style.transform = tf;
     }
 
     function openSatellite() {
@@ -296,14 +329,17 @@
             // Step 1: 隐藏旧内容（fade-out 0.2s）
             if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
-            // Step 2: 改变外壳物理属性（1:1 demo: .55s 弹性回弹, bg 统一 #0c0c12）
+            // Step 2: 改变外壳物理属性（Apple: pure black #000, gooey layer provides shape）
             const layout = getLayout(target);
             if (layout) {
                 island.style.width      = layout.width;
                 island.style.height     = layout.height;
                 island.style.borderRadius = layout.radius;
-                island.style.backgroundColor = layout.bg;
+                // Apple version: background transparent, gooey layer provides shape
+                island.style.backgroundColor = 'transparent';
             }
+            // Sync gooey main blob to match new dimensions
+            syncGooeyMain();
             // 同步清理残留的 vs-* class（兼容老 CSS）
             island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
             // 清理所有 island-state-* class，避免状态切换后累积冲突
