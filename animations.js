@@ -3,6 +3,8 @@
 
     const island      = document.querySelector('.island-content');
     const satIsland   = document.querySelector('.island-sat');
+    const gooMain     = document.getElementById('goo-main');
+    const gooSat      = document.getElementById('goo-sat');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
     const progressBar = document.querySelector('.scroll-progress-bar');
     const confirmSite        = document.querySelector('.confirm-site');
@@ -235,10 +237,12 @@
     }
 
     let prevSatMode = 'hidden';
+    let gooeyTimer = null;
 
     function updateSatellite() {
         if (!satIsland) return;
         const mode = getSatMode();
+        const prevMode = prevSatMode;
         satIsland.setAttribute('data-sat', mode);
 
         // Toggle active layer in satellite
@@ -259,7 +263,63 @@
             island.classList.remove('sat-collapsed');
         }
 
+        // Trigger liquid bridge effect only during mode change (split/merge)
+        if (mode !== prevMode) {
+            triggerGooey(mode);
+        }
         prevSatMode = mode;
+    }
+
+    // ===== Gooey liquid bridge: brief overlay during split/merge =====
+    // 原理: 同步 blob 到岛当前尺寸 → 下一帧激活 SVG goo 滤镜 → 250ms 后关闭
+    // blob 尺寸由 JS inline style 直接设定 (无 CSS 过渡), 避免橄榄球畸变
+    function triggerGooey(satMode) {
+        const layer = document.getElementById('island-gooey');
+        if (!layer) return;
+
+        // Sync blobs to current island dimensions BEFORE showing
+        syncGooeyMain();
+        syncGooeySat(satMode);
+
+        // Force layout so blobs are at correct size before filter activates
+        void layer.offsetWidth;
+
+        // Activate in next frame to ensure blobs have settled
+        requestAnimationFrame(function () {
+            layer.classList.add('gooey-active');
+            clearTimeout(gooeyTimer);
+            gooeyTimer = setTimeout(function () {
+                layer.classList.remove('gooey-active');
+            }, 250);
+        });
+    }
+
+    function syncGooeyMain() {
+        if (!gooMain || !island) return;
+        var w = island.style.width || '146px';
+        var h = island.style.height || '36px';
+        var r = island.style.borderRadius || '18px';
+        gooMain.style.width = w;
+        gooMain.style.height = h;
+        gooMain.style.borderRadius = r;
+    }
+
+    function syncGooeySat(mode) {
+        if (!gooSat) return;
+        var dims = {
+            hidden: { w: '0px', h: '36px', r: '18px', op: '0' },
+            pill:   { w: '86px', h: '36px', r: '18px', op: '1' },
+            icon:   { w: '36px', h: '36px', r: '18px', op: '1' },
+            open:   { w: '392px', h: '156px', r: '32px', op: '1' }
+        };
+        var d = dims[mode] || dims.hidden;
+        var w = satIsland ? (satIsland.style.width || d.w) : d.w;
+        var h = satIsland ? (satIsland.style.height || d.h) : d.h;
+        var r = satIsland ? (satIsland.style.borderRadius || d.r) : d.r;
+        gooSat.style.width = w;
+        gooSat.style.height = h;
+        gooSat.style.borderRadius = r;
+        gooSat.style.opacity = d.op;
     }
 
     function openSatellite() {

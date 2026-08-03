@@ -303,6 +303,25 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .dynamic-island{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;align-items:flex-start;gap:8px;width:100vw;pointer-events:none}
 
+/* ===== Gooey overlay: liquid metaball bridge during split/merge =====
+   原理: 两个黑色 blob 放在岛后面 (z-index:0), 岛本身 background:#000 盖住 blob,
+   只有两岛之间的 gap 区域露出 blob 的液态桥接。
+   默认 opacity:0 不可见; .gooey-active 时 opacity:1 + SVG goo 滤镜, 持续 ~250ms。
+   blob 尺寸无 CSS 过渡 (JS 直接设 inline style), 避免过渡中产生橄榄球畸变。 */
+.island-gooey{
+    position:absolute;inset:0;z-index:0;
+    display:flex;justify-content:center;align-items:flex-start;gap:8px;
+    filter:none;opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease}
+.island-gooey.gooey-active{
+    opacity:1;filter:url(#goo)}
+.goo-blob{
+    background:#000;flex-shrink:0;box-sizing:border-box;
+    transition:opacity .2s ease}
+.goo-main{width:146px;height:36px;border-radius:18px;opacity:1}
+.goo-sat{width:0;height:36px;border-radius:18px;opacity:0}
+
 /* ===== 1:1 demo 灵动岛架构 (1c 石墨分体) =====
    外壳（流形变）+ 内层（淡入淡出）双层独立动画
    状态切换由 JS 同步 3 步完成：remove active → 改 inline style → add active */
@@ -881,6 +900,10 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .island-sat .sat-card .mc-artist{font-size:11px}
     .island-sat .sat-card-scrub-wrap{margin-top:11px}
     .island-sat .sat-card-ctrls{gap:28px;margin-top:6px}
+
+    /* Gooey blobs mobile sizes */
+    .goo-main{width:132px;height:34px;border-radius:17px}
+    .goo-sat{height:34px;border-radius:17px}
 
     .home-inner{align-items:center;text-align:center}
     .typewriter{justify-content:center}
