@@ -643,12 +643,12 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* 卫星岛封面: 圆形 25x25, 无阴影 */
 .island-sat .ib-cover{width:22px;height:22px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.5);animation:coverIn .5s cubic-bezier(.34,1.2,.4,1)}
 
-/* pill 模式内容: pad=(h-2-cover)/2=3px 确保左间距==上下有效间距 (1:1 demo satL1) */
-.island-sat .sat-pill{justify-content:flex-start;gap:8px;padding:0 3px;box-sizing:border-box;
+/* pill 模式内容: cover+EQ 居中排列, 左右间距对称 */
+.island-sat .sat-pill{justify-content:center;gap:7px;padding:0;box-sizing:border-box;
     transition:opacity .15s ease,transform .28s cubic-bezier(.4,0,.7,1),filter .15s ease,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill.active-sat-content{
     transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
-.island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;align-items:center;justify-content:center}
+.island-sat .sat-pill .island-eq{align-items:center;justify-content:center}
 .island-sat .sat-pill .island-eq i{width:2px}
 /* sat-pill/sat-card 可见性由 active-sat-content class 控制 (opacity+transform+filter),
    不使用 display:none 切换, 避免 open 时浏览器重新布局 sat-card 内容导致卡顿 (1:1 demo satLayer) */
@@ -662,7 +662,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .sat-card-inner{
     width:100%;height:100%;
     display:flex;flex-direction:column;
-    padding:16px 18px 13px;box-sizing:border-box}
+    padding:18px 18px 13px;box-sizing:border-box}
 
 /* 顶行: cover + info + EQ (1:1 demo row1: gap:12px) */
 .island-sat .sat-card-top{
@@ -870,10 +870,10 @@ body.audio-playing .island-sat[data-sat="hidden"]{
     .island-sat[data-sat="hidden"]{height:34px;border-radius:17px}
     .island-sat[data-sat="pill"]{width:80px;height:34px;border-radius:17px}
     .island-sat[data-sat="icon"]{width:34px;height:34px;border-radius:17px}
-    .island-sat[data-sat="open"]{width:352px;height:138px;border-radius:30px}
+    .island-sat[data-sat="open"]{width:352px;height:144px;border-radius:30px}
     .island-sat .ib-cover{width:20px;height:20px;border-radius:5px}
-    .island-sat .sat-pill{padding:0 3px}
-    .island-sat .sat-card-inner{padding:14px 16px 12px}
+    .island-sat .sat-pill{padding:0}
+    .island-sat .sat-card-inner{padding:16px 16px 12px}
     .island-sat .sat-card .mc-title{font-size:14px}
     .island-sat .sat-card .mc-artist{font-size:11px}
     .island-sat .sat-card-scrub-wrap{margin-top:11px}
