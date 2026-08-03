@@ -389,23 +389,26 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 body.audio-playing .ic-play{display:none}
 body.audio-playing .ic-pause{display:inline}
 
-.island-eq{display:flex;align-items:flex-end;gap:2.5px;height:15px;flex-shrink:0}
-.island-eq i{width:3px;height:28%;border-radius:2px;background:linear-gradient(var(--accent-3),var(--accent-2))}
+.island-eq{display:flex;align-items:flex-end;gap:2px;height:15px;flex-shrink:0}
+.island-eq i{width:2px;height:28%;border-radius:2px;background:linear-gradient(var(--accent-3),var(--accent-2))}
 .island-eq i:nth-child(1){height:42%}
 .island-eq i:nth-child(2){height:76%}
 .island-eq i:nth-child(3){height:34%}
 .island-eq i:nth-child(4){height:58%}
+.island-eq i:nth-child(5){height:66%}
+.island-eq i:nth-child(6){height:40%}
 body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out infinite}
 body.audio-playing .island-eq i:nth-child(2){animation:eqBarB .93s ease-in-out infinite}
 body.audio-playing .island-eq i:nth-child(3){animation:eqBarC .81s ease-in-out infinite}
 body.audio-playing .island-eq i:nth-child(4){animation:eqBarD 1.05s ease-in-out infinite}
-/* 5-bar EQ (satellite pill mode) */
-.island-eq-5 i:nth-child(5){height:66%}
-body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out .12s infinite}
+body.audio-playing .island-eq i:nth-child(5){animation:eqBarE .87s ease-in-out .12s infinite}
+body.audio-playing .island-eq i:nth-child(6){animation:eqBarF .79s ease-in-out .06s infinite}
 @keyframes eqBarA{0%,100%{height:34%}34%{height:92%}68%{height:48%}}
 @keyframes eqBarB{0%,100%{height:70%}28%{height:38%}74%{height:100%}}
 @keyframes eqBarC{0%,100%{height:26%}45%{height:82%}78%{height:36%}}
 @keyframes eqBarD{0%,100%{height:56%}38%{height:30%}72%{height:88%}}
+@keyframes eqBarE{0%,100%{height:44%}32%{height:90%}66%{height:52%}}
+@keyframes eqBarF{0%,100%{height:60%}36%{height:28%}70%{height:78%}}
 
 /* E: music-bar (192x36, padding 0 10px, cover 22x22 r6) */
 .island-music-bar{justify-content:space-between;padding:0 10px}
@@ -430,7 +433,7 @@ body.audio-playing .island-eq-5 i:nth-child(5){animation:eqBarB .87s ease-in-out
 /* EQ: 16px height, 3px bars (1:1 demo eqBig) */
 .island-music-card .mc-top-row .island-eq{
     height:16px;flex-shrink:0;view-transition-name:music-eq}
-.island-music-card .mc-top-row .island-eq i{width:3px}
+.island-music-card .mc-top-row .island-eq i{width:2px}
 /* 进度条: margin-top 12px, 14px 点击区, 4px 内轨 (1:1 demo seek) */
 .island-music-card .mc-scrub-wrap{
     margin-top:12px;height:14px;display:flex;align-items:center;cursor:pointer;width:100%}
@@ -646,7 +649,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 .island-sat .sat-pill.active-sat-content{
     transition:opacity .3s ease .12s,transform .5s cubic-bezier(.34,1.2,.4,1) .08s,filter .3s ease .12s,width .55s cubic-bezier(.34,1.2,.4,1),padding .55s cubic-bezier(.34,1.2,.4,1)}
 .island-sat .sat-pill .island-eq{margin:0 auto;flex:1 1 auto;align-items:center;justify-content:center}
-.island-sat .sat-pill .island-eq i{width:3.5px}
+.island-sat .sat-pill .island-eq i{width:2.5px}
 /* sat-pill/sat-card 可见性由 active-sat-content class 控制 (opacity+transform+filter),
    不使用 display:none 切换, 避免 open 时浏览器重新布局 sat-card 内容导致卡顿 (1:1 demo satLayer) */
 
@@ -685,7 +688,7 @@ body.audio-playing .island-sat[data-sat="hidden"]{
 /* EQ: 16px height, 3px bars (1:1 demo eqBig: mkEq(id,16,3)) */
 .island-sat .sat-card-eq{
     height:16px;position:relative;right:auto;top:auto;margin:0;flex-shrink:0}
-.island-sat .sat-card-eq i{width:3px}
+.island-sat .sat-card-eq i{width:2px}
 
 /* 进度条: margin-top:12px, 14px 点击区, 4px 内轨 (1:1 demo seek) */
 .island-sat .sat-card-scrub-wrap{
