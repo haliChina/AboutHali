@@ -633,6 +633,11 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 /* Hint visibility is state-driven so reduced-motion/rapid scrolling cannot strand it transparent. */
 .island-content[data-state="hint"] .island-hint{opacity:1;pointer-events:auto}
 
+/* Mobile: move the FPS counter off the top-center island (top-left overlaps it). */
+@media (max-width:768px){
+    #fpsCounter{top:auto;left:auto;bottom:10px;right:10px}
+}
+
 /* Toast prompt text matches the latest demo scale (was .95rem ≈ 15.2px). */
 .island-toast{font-size:12.5px;letter-spacing:.2px}
 .island-toast-icon{width:18px;height:18px;font-size:11px}
