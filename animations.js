@@ -3,7 +3,11 @@
 
     const island      = document.querySelector('.island-content');
     const navBtns     = Array.from(document.querySelectorAll('.island-nav-btn'));
-    const progressBar = document.querySelector('.scroll-progress-bar');
+    const progressBar = document.querySelector('.nav-ring-value');
+    const previewSection = document.querySelector('.preview-section');
+    const previewPct = document.querySelector('.preview-pct');
+    const previewDots = Array.from(document.querySelectorAll('.preview-dots i'));
+    const idleClock = document.querySelector('.island-idle-clock');
     const confirmSite        = document.querySelector('.confirm-site');
     const confirmHost        = document.querySelector('.island-confirm-host');
     const confirmIconBox     = document.querySelector('.island-confirm-icon');
@@ -17,11 +21,14 @@
     const spSection   = document.querySelector('.sp-section');
 
     const audio    = document.getElementById('np-audio');
-    const toggles  = Array.from(document.querySelectorAll('.np-toggle,.mc-toggle'));
+    const toggles  = Array.from(document.querySelectorAll('.np-toggle,.mc-toggle,.sat-toggle'));
+    const satellite = document.getElementById('musicSatellite');
     const npScrub  = document.querySelector('.np-scrub');
     const mcScrub  = document.querySelector('.mc-scrub');
+    const satScrub = document.querySelector('.sat-scrub');
     const npCur = document.querySelector('.np-cur'), npDur = document.querySelector('.np-dur');
-    const mcCur = document.querySelector('.mc-cur'), mcDur = document.querySelector('.mc-dur');
+    const mcCur = document.querySelector('.mc-cur'), mcRem = document.querySelector('.mc-rem');
+    const satCur = document.querySelector('.sat-cur'), satRem = document.querySelector('.sat-rem');
     const plEl  = document.getElementById('np-playlist');
 
     function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
@@ -96,8 +103,8 @@
             audio.load();
         }
         setText('.np-title', s.name); setText('.np-artist', s.artist);
-        setText('.mc-title', s.name); setText('.mc-artist', s.artist);
-        setSrc('.np-cover', s.cover); setCoverAnimated('.mc-cover', s.cover); setCoverAnimated('.ib-cover', s.cover);
+        setText('.mc-title,.sat-title', s.name); setText('.mc-artist,.sat-artist', s.artist);
+        setSrc('.np-cover', s.cover); setCoverAnimated('.mc-cover,.sat-card-cover', s.cover); setCoverAnimated('.ib-cover,.sat-cover', s.cover);
         markActive();
         updateProgress();
         if (autoplay && audio) {
@@ -109,18 +116,19 @@
             };
             audio.addEventListener('canplay', onReady);
             audio.addEventListener('loadedmetadata', onReady);
-            // 兜底：5s 后若仍未触发，主动尝试一次
+            // 兜底：5s 后若仍未触发，主动尝试一次（仅限从未成功播放的场景，
+            // 用户手动暂停后不得自动恢复——用 !musicActive 区分）
             setTimeout(() => {
                 audio.removeEventListener('canplay', onReady);
                 audio.removeEventListener('loadedmetadata', onReady);
-                if (audio.paused) audio.play().catch(() => {});
+                if (audio.paused && !musicActive) audio.play().catch(() => {});
             }, 5000);
         }
     }
 
     let audioUnlockArmed = false;
     function isIslandControl(target) {
-        return target.closest('.island-content, .island-mini-btn, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
+        return target.closest('.island-content, .music-satellite, .island-mini-btn, .island-transport, .island-nav-btn, .island-btn, .island-email-copy, .mc-scrub, .sat-scrub, .np-scrub, .np-action-btn, .np-song-item, .social-btn, .explore-btn');
     }
     function armAudioUnlock() {
         if (audioUnlockArmed || !audio) return;
@@ -141,41 +149,47 @@
         armAudioUnlock();
     }
 
-    // ===== Dynamic Island: 1:1 抄袭 Gemini3.5 的 switchIsland 实现 =====
-    // 核心三步同步（同帧内完成）：
-    //   Step 1. 移除旧内容 .active-content（立即开始 fade-out 0.2s）
-    //   Step 2. 改外壳 inline style（width/height/radius/bgColor，0.6s 弹性回弹）
-    //   Step 3. 写入新 data-state + 添加新内容 .active-content（0.4s + 0.15s 延迟 fade-in）
-    // 关键点：状态由 data-state 单值持有，inner layer 的 active-content 切换 100% 决定显示。
-    // 这样即使 100ms 内连点 5 次切换也不会卡，每步都会被浏览器合并到同一渲染帧。
+    // ===== Dynamic Island state controller =====
+    // Shell geometry and active content change in the same frame so rapid state
+    // switches remain coherent without coupling page features to animation code.
 
     let musicActive = false;
     let pendingHref = null;
-    let collapseTimer = null, toastTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null;
+    let collapseTimer = null, toastTimer = null, hintTimer = null, scrollEndTimer = null, idleTimer = null, confirmTimer = null, indicatorRealignTimer = null, greetTimer = null;
+    let suppressOutsideClickUntil = 0;
     const CONFIRM_AUTO_MS = 8000;
     const ISLAND_TRANSITION_MS = 600; // 与 .island-content 的 width/height 过渡时长一致
     let hovering = false, userScrolling = false, scrubbing = false;
     const mouse = { x: -1, y: -1 };
 
-    // ===== 状态布局映射表（与 Gemini switchIsland 一致） =====
-    const STATE_LAYOUTS = {
-        'default':     { width: '236px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'music-bar':   { width: '212px', height: '40px',  radius: '22px', bg: 'rgba(12,12,16,.86)' },
-        'nav':         { width: '520px', height: '88px',  radius: '28px', bg: 'rgba(12,12,16,.86)' },
-        'music-card':  { width: '560px', height: '146px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'confirm':     { width: '440px', height: '156px', radius: '32px', bg: 'rgba(12,12,16,.86)' },
-        'email':       { width: '384px', height: '124px', radius: '30px', bg: 'rgba(12,12,16,.86)' },
-        'toast':       { width: '236px', height: '50px',  radius: '25px', bg: 'rgba(12,12,16,.86)' },
-        'autoplay':    { width: '300px', height: '104px', radius: '24px', bg: 'rgba(12,12,16,1)' }
+    // ===== Dynamic Island state layouts: graphite desktop + compact mobile =====
+    const STATE_LAYOUTS_DESKTOP = {
+        'default':{width:'134px',height:'36px',radius:'18px'},'preview':{width:'224px',height:'36px',radius:'18px'},'hint':{width:'228px',height:'36px',radius:'18px'},'greet':{width:'244px',height:'36px',radius:'18px'},'music-bar':{width:'192px',height:'36px',radius:'18px'},
+        'nav':{width:'408px',height:'56px',radius:'28px'},'music-card':{width:'392px',height:'184px',radius:'32px'},
+        'confirm':{width:'344px',height:'130px',radius:'28px'},'email':{width:'312px',height:'132px',radius:'28px'},
+        'toast':{width:'228px',height:'42px',radius:'21px'},'autoplay':{width:'312px',height:'106px',radius:'26px'}
     };
-    // ===== 状态内容映射表（与 Gemini stateContents 一致） =====
+    const STATE_LAYOUTS_MOBILE = {
+        'default':{width:'124px',height:'34px',radius:'17px'},'preview':{width:'212px',height:'34px',radius:'17px'},'hint':{width:'214px',height:'34px',radius:'17px'},'greet':{width:'228px',height:'34px',radius:'17px'},'music-bar':{width:'176px',height:'34px',radius:'17px'},
+        'nav':{width:'320px',height:'52px',radius:'26px'},'music-card':{width:'352px',height:'174px',radius:'30px'},
+        'confirm':{width:'330px',height:'128px',radius:'26px'},'email':{width:'300px',height:'126px',radius:'26px'},
+        'toast':{width:'212px',height:'40px',radius:'20px'},'autoplay':{width:'300px',height:'104px',radius:'24px'}
+    };
+    function getStateLayout(target) {
+        const table = matchMedia('(max-width:768px)').matches ? STATE_LAYOUTS_MOBILE : STATE_LAYOUTS_DESKTOP;
+        return table[target];
+    }
+    // ===== State content registry =====
     const STATE_CONTENTS = {
         'default':    island.querySelector('.island-default'),
+        'preview':    island.querySelector('.island-preview'),
         'music-bar':  island.querySelector('.island-music-bar'),
         'nav':        island.querySelector('.island-nav'),
         'music-card': island.querySelector('.island-music-card'),
         'confirm':    island.querySelector('.island-confirm'),
         'email':      island.querySelector('.island-email'),
+        'hint':       island.querySelector('.island-hint'),
+        'greet':      island.querySelector('.island-greet'),
         'toast':      island.querySelector('.island-toast'),
         'autoplay':   island.querySelector('.island-autoplay')
     };
@@ -183,7 +197,19 @@
     function getCurrentState() {
         return island.getAttribute('data-state') || 'default';
     }
-    // ===== 与 Gemini switchIsland 1:1 一致的切换 =====
+
+    function baseSatelliteMode(state) {
+        if (!musicActive || !satellite) return 'hidden';
+        if (state === 'default' || state === 'music-bar' || state === 'music-card') return 'hidden';
+        return state === 'nav' || state === 'confirm' || state === 'email' || state === 'autoplay' ? 'icon' : 'pill';
+    }
+    function syncSatellite(state, force) {
+        if (!satellite) return;
+        // force=true 时强制按主岛状态重算（副岛不再有独立 open 模式）
+        if (!force && satellite.dataset.mode === 'open') return;
+        satellite.dataset.mode = baseSatelliteMode(state || getCurrentState());
+    }
+    // Apply shell geometry and active layer atomically.
     function setState(target, opts) {
         opts = opts || {};
         const current = getCurrentState();
@@ -199,12 +225,12 @@
             if (STATE_CONTENTS[current]) STATE_CONTENTS[current].classList.remove('active-content');
 
             // Step 2: 改变外壳物理属性（弹性 0.6s, bg 0.4s）
-            const layout = STATE_LAYOUTS[target];
+            const layout = getStateLayout(target);
             if (layout) {
                 island.style.width      = layout.width;
                 island.style.height     = layout.height;
                 island.style.borderRadius = layout.radius;
-                island.style.backgroundColor = layout.bg;
+                island.style.backgroundColor = '#0c0c12';
             }
             // 同步清理残留的 vs-* class（兼容老 CSS）
             island.classList.remove('vs-default', 'vs-music-bar', 'vs-nav', 'vs-music-card', 'vs-confirm', 'vs-email', 'vs-toast');
@@ -222,6 +248,7 @@
 
             // Step 3: 显示新内容（fade-in 0.4s + 0.15s 延迟）
             if (STATE_CONTENTS[target]) STATE_CONTENTS[target].classList.add('active-content');
+            syncSatellite(target);
         };
 
         if (useVT) {
@@ -238,7 +265,7 @@
         }
 
         // 指示器在外壳过渡结束后再定位(过渡中 getBoundingClientRect 会读到裁剪过的错误尺寸)
-        if (target === 'nav' || target === 'music-card' || target === 'music-bar') {
+        if (target === 'nav' || target === 'preview' || target === 'music-card' || target === 'music-bar') {
             clearTimeout(indicatorRealignTimer);
             indicatorRealignTimer = setTimeout(repositionIndicator, ISLAND_TRANSITION_MS + 20);
         }
@@ -254,7 +281,7 @@
 
     function isLocked() {
         const s = getCurrentState();
-        return s === 'confirm' || s === 'email' || s === 'toast' || s === 'autoplay';
+        return s === 'confirm' || s === 'email' || s === 'hint' || s === 'toast' || s === 'autoplay' || s === 'greet';
     }
     function pointInIsland() {
         const r = island.getBoundingClientRect();
@@ -288,23 +315,65 @@
         }, 1300);
     }
 
-    // ===== 自动播放提示（小型 Toast：开启/稍后 + 不再提示） =====
+    // 强制层重新播放入场过渡：内联样式先落到基础态（模糊+缩放+透明），
+    // 强制 reflow 后再清除内联样式，让 CSS transition 从基础态过渡到激活态。
+    // （classList remove→re-add 在同一帧内会被浏览器合并，无法重触发过渡）
+    function playLayerEntrance(layer) {
+        if (!layer) return;
+        layer.style.transition = 'none';
+        layer.style.opacity = '0';
+        layer.style.transform = 'scale(.92) translateY(6px)';
+        layer.style.filter = 'blur(8px)';
+        void layer.offsetWidth;
+        layer.style.transition = '';
+        layer.style.opacity = '';
+        layer.style.transform = '';
+        layer.style.filter = '';
+    }
+
+    function showSectionHint() {
+        if (!STATE_CONTENTS.hint || (isLocked() && getCurrentState() !== 'hint')) return;
+        clearTimeout(collapseTimer);
+        clearTimeout(hintTimer);
+        const hintSection = document.querySelector('.hint-section');
+        if (hintSection) hintSection.textContent = SECTION_NAMES[lastSpIdx < 0 ? 0 : lastSpIdx];
+        const hintLayer = STATE_CONTENTS['hint'];
+        if (getCurrentState() === 'hint') {
+            // 连续跨越区块时 hint 层已 active，setState early-return：用内联样式强制重播放入
+            playLayerEntrance(hintLayer);
+        } else {
+            setState('hint');
+            playLayerEntrance(hintLayer);
+        }
+        hintTimer = setTimeout(() => setState(musicActive ? 'music-bar' : 'default'), 1700);
+    }
+
+    // ===== 欢迎岛（demo greet 状态）：开场后短暂显示"はじめまして · 欢迎来访" =====
+    function showGreet(after) {
+        if (!STATE_CONTENTS.greet || isLocked()) { if (after) after(); return; }
+        clearTimeout(greetTimer);
+        setState('greet');
+        greetTimer = setTimeout(() => {
+            setState(musicActive ? 'music-bar' : 'default');
+            if (after) after();
+        }, 2300);
+    }
+
+    // ===== Autoplay request =====
+    // 与原始版本一致：偏好只存 cookie（1 年），值 'ask'|'enabled'|'off'
     const AUTOPLAY_COOKIE = 'autoplayPref';
-    // 值：'ask' (默认，未表态) | 'enabled' (用户允许自动播放) | 'off' (用户拒绝并选择不再提示)
     function getAutoplayPref() {
         const v = getCookie(AUTOPLAY_COOKIE);
         return v === 'enabled' || v === 'off' ? v : 'ask';
     }
     function setAutoplayPref(v) { setCookie(AUTOPLAY_COOKIE, v, 31536000); } // 1 年
     function showAutoplayPrompt() {
-        const cb = document.getElementById('autoplay-no-ask');
-        if (cb) cb.checked = false;
+        const noAsk = document.getElementById('autoplay-no-ask');
+        if (noAsk) noAsk.checked = false;
+        suppressOutsideClickUntil = performance.now() + 700;
         setState('autoplay');
     }
-    function dismissAutoplayPrompt() {
-        // 直接退出 autoplay 态：若音乐已开始播放就回 music-bar，否则回 default
-        setState(musicActive ? 'music-bar' : 'default');
-    }
+    function dismissAutoplayPrompt() { setState(musicActive ? 'music-bar' : 'default'); }
     function acceptAutoplay() {
         const noAsk = !!(document.getElementById('autoplay-no-ask') && document.getElementById('autoplay-no-ask').checked);
         if (noAsk) setAutoplayPref('enabled');
@@ -350,6 +419,9 @@
             }
         }
         setState('confirm');
+        // 连续点击不同联系方式时 confirm 层可能已处于 active，setState 会 early-return
+        // （只更新文字无动效）：用内联样式强制重播放入场过渡
+        playLayerEntrance(STATE_CONTENTS['confirm']);
         if (confirmCountdownBar) {
             confirmCountdownBar.style.transition = 'none';
             confirmCountdownBar.style.width = '100%';
@@ -411,21 +483,24 @@
         if (!audio) return;
         const d = audio.duration || 0, c = audio.currentTime || 0;
         const pct = d ? (c / d * 100) : 0;
-        const cTxt = fmt(c), dTxt = fmt(d);
+        const cTxt = fmt(c), dTxt = fmt(d), remTxt = '−' + fmt(Math.max(0, d - c));
         if (cTxt !== lastNpCurTxt) {
             lastNpCurTxt = cTxt;
             if (npCur) npCur.textContent = cTxt;
             if (mcCur) mcCur.textContent = cTxt;
+            if (satCur) satCur.textContent = cTxt;
         }
         if (dTxt !== lastNpDurTxt) {
             lastNpDurTxt = dTxt;
             if (npDur) npDur.textContent = dTxt;
-            if (mcDur) mcDur.textContent = dTxt;
+            if (mcRem) mcRem.textContent = remTxt;
+            if (satRem) satRem.textContent = remTxt;
         }
         if (!scrubbing) {
             const v = pct * 10;
             if (npScrub) { npScrub.value = v; fillScrub(npScrub, pct); }
             if (mcScrub) { mcScrub.value = v; fillScrub(mcScrub, pct); }
+            if (satScrub) { satScrub.value = v; fillScrub(satScrub, pct); }
         }
     }
     function togglePlay() {
@@ -434,10 +509,10 @@
         else audio.pause();
     }
     toggles.forEach(b => b.addEventListener('click', e => { e.stopPropagation(); togglePlay(); }));
-    document.querySelectorAll('.np-prev,.mc-prev').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx - 1, true); }));
-    document.querySelectorAll('.np-next,.mc-next').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx + 1, true); }));
+    document.querySelectorAll('.np-prev,.mc-prev,.sat-prev').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx - 1, true); }));
+    document.querySelectorAll('.np-next,.mc-next,.sat-next').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); loadSong(curIdx + 1, true); }));
 
-    [npScrub, mcScrub].forEach(sc => {
+    [npScrub, mcScrub, satScrub].forEach(sc => {
         if (!sc) return;
         sc.addEventListener('input', () => {
             scrubbing = true;
@@ -445,6 +520,7 @@
             fillScrub(sc, pct);
             if (npScrub && npScrub !== sc) { npScrub.value = sc.value; fillScrub(npScrub, pct); }
             if (mcScrub && mcScrub !== sc) { mcScrub.value = sc.value; fillScrub(mcScrub, pct); }
+            if (satScrub && satScrub !== sc) { satScrub.value = sc.value; fillScrub(satScrub, pct); }
         });
         const commit = () => { if (audio && audio.duration) audio.currentTime = (sc.value / 1000) * audio.duration; scrubbing = false; };
         sc.addEventListener('change', commit);
@@ -476,11 +552,13 @@
             // 如果当前是 default 状态，切换到 music-bar 显示正在播放
             if (getCurrentState() === 'default') setState('music-bar');
             else island.classList.remove('idle');
+            syncSatellite();
             if (first && !hovering) showToast('success', 'QQ音乐 · 播放中', '♪');
         });
         audio.addEventListener('pause', () => {
             document.body.classList.remove('audio-playing');
             if (getCurrentState() === 'music-bar') setState('default');
+            syncSatellite();
         });
         audio.addEventListener('ended', () => loadSong(curIdx + 1, true));
         audio.addEventListener('loadedmetadata', updateProgress);
@@ -541,6 +619,7 @@
             if (sectionOffsets[i] - 120 <= y) idx = i;
         }
         if (idx !== lastSpIdx) {
+            const previousIdx = lastSpIdx;
             lastSpIdx = idx;
             for (let i = 0; i < navBtns.length; i++) {
                 const b = navBtns[i];
@@ -552,6 +631,12 @@
                 }
             }
             if (spSection) spSection.textContent = SECTION_NAMES[idx];
+            if (previewSection) previewSection.textContent = SECTION_NAMES[idx];
+            previewDots.forEach((dot, i) => dot.classList.toggle('active', i === idx));
+            if (previousIdx >= 0 && !navJump) {
+                clearTimeout(scrollEndTimer);
+                showSectionHint();
+            }
         }
     }
 
@@ -567,17 +652,27 @@
     function updateScrollProgress(y) {
         const pct = scrollMax > 0 ? (y / scrollMax) * 100 : 0;
         const clamped = pct > 100 ? 100 : (pct < 0 ? 0 : pct);
-        const barTxt = clamped.toFixed(2) + '%';
-        if (barTxt !== lastSpBarPctTxt) {
-            lastSpBarPctTxt = barTxt;
-            if (progressBar) progressBar.style.width = barTxt;
+        const dash = (53.407 * clamped / 100).toFixed(2);
+        if (dash !== lastSpBarPctTxt) {
+            lastSpBarPctTxt = dash;
+            if (progressBar) progressBar.style.strokeDasharray = dash + ' 53.41';
         }
         const pctTxt = Math.round(clamped) + '%';
         if (pctTxt !== lastSpPctTxt) {
             lastSpPctTxt = pctTxt;
             if (spPct) spPct.textContent = pctTxt;
+            if (previewPct) previewPct.textContent = pctTxt;
         }
     }
+    function updateIdleClock() {
+        if (!idleClock) return;
+        const d = new Date();
+        idleClock.textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ' · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    }
+    updateIdleClock();
+    setInterval(updateIdleClock, 10000);
+    setInterval(() => island.classList.toggle('show-idle-time'), 4200);
+
     const explore = document.querySelector('.explore-btn');
     if (explore) explore.addEventListener('click', () => document.querySelector('#github').scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
@@ -603,13 +698,18 @@
     document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
     function hoverExpand() {
-        if (isLocked()) return;
-        if (musicActive) setState('music-card');
-        else setState('nav');
+        if (isLocked() || isTouchDevice) return;
+        const cur = getCurrentState();
+        if (cur === 'default') setState('preview');
+        else if (cur === 'music-bar' && musicActive) setState('music-card');
         updateScrollProgress(window.scrollY || document.documentElement.scrollTop || 0);
     }
     island.addEventListener('mouseenter', () => { hovering = true; clearTimeout(collapseTimer); hoverExpand(); });
-    island.addEventListener('mouseleave', () => { hovering = false; if (!userScrolling && !scrubbing) scheduleCollapse(); });
+    island.addEventListener('mouseleave', () => {
+        hovering = false;
+        if (getCurrentState() === 'preview') setState('default');
+        else if (!userScrolling && !scrubbing) scheduleCollapse();
+    });
     // ===== Mouse tracking: rAF-throttled, skipped on touch devices =====
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     let mouseMovePending = false;
@@ -624,10 +724,24 @@
     document.addEventListener('keydown', armIdle);
     document.addEventListener('touchstart', armIdle, { passive: true });
 
+
+    if (satellite) {
+        // 右侧小岛只是音乐卡片的入口：点击时由主岛区域展示播放卡（music-card），
+        // 副岛自身随主岛状态机隐藏/显示，不关闭主岛也不用 display:none 让位。
+        satellite.addEventListener('click', e => {
+            if (e.target.closest('.island-transport,.sat-scrub')) return;
+            e.stopPropagation();
+            if (!musicActive) return;
+            const cur = getCurrentState();
+            if (cur === 'music-card') setState('music-bar');
+            else setState('music-card');
+        });
+    }
+
     island.addEventListener('click', e => {
         if (e.target.closest('.island-mini-btn,.island-nav-btn,.island-btn,.island-email-copy,.mc-scrub')) return;
         const cur = getCurrentState();
-        if (cur === 'default' || cur === 'music-bar') {
+        if (cur === 'default' || cur === 'preview' || cur === 'music-bar') {
             if (musicActive && e.target.closest('.island-music-bar')) setState('music-card');
             else setState('nav');
         }
@@ -646,12 +760,13 @@
         const cur = getCurrentState();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; showToast('error', '已取消'); island.classList.remove('idle'); }
         else if (cur === 'email') { setState('default'); island.classList.remove('idle'); }
-        else if (cur === 'default' || cur === 'music-bar' || cur === 'music-card') { setState('nav'); island.classList.remove('idle'); }
+        else if (cur === 'hint' || cur === 'autoplay' || cur === 'toast') { /* transient state owns the island */ }
+        else if (cur === 'default' || cur === 'preview' || cur === 'music-bar' || cur === 'music-card') { setState('nav'); island.classList.remove('idle'); }
         clearTimeout(scrollEndTimer);
         scrollEndTimer = setTimeout(() => {
             userScrolling = false;
             armIdle();
-            if (!hovering && !scrubbing && !pointInIsland()) scheduleCollapse(700);
+            if (!hovering && !scrubbing && !pointInIsland() && getCurrentState() !== 'hint') scheduleCollapse(700);
         }, 220);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -662,7 +777,8 @@
     }, { passive: true });
 
     document.addEventListener('click', e => {
-        if (island.contains(e.target) || e.target.closest('.social-btn')) return;
+        if (performance.now() < suppressOutsideClickUntil) return;
+        if (island.contains(e.target) || (satellite && satellite.contains(e.target)) || e.target.closest('.social-btn')) return;
         const cur = getCurrentState();
         if (cur === 'confirm') { clearConfirmTimer(); pendingHref = null; }
         if (cur !== 'default' && cur !== 'music-bar' && cur !== 'toast') setState('default');
@@ -672,26 +788,31 @@
     function revealIsland() {
         if (islandRevealed) return;
         islandRevealed = true;
-        // 入场动画:scale(.6) -> 1.08 -> 1 的弹性放大,结束后自动移除 class 释放 will-change
+        const clearEntrance = () => island.classList.remove('island-entrance');
+        island.addEventListener('animationend', clearEntrance, { once: true });
         island.classList.add('island-entrance');
-        island.addEventListener('animationend', function h() {
-            island.classList.remove('island-entrance');
-            island.removeEventListener('animationend', h);
-        });
-        // island 默认已可见（CSS 移除 opacity:0），只需启动 idle 计时器
+        // Reduced-motion can finish before animationend is observable.
+        setTimeout(clearEntrance, 850);
         armIdle();
+    }
+    function hasSeenIntro() {
+        try { return localStorage.getItem('introShown') === '1' || getCookie('introShown') === '1'; }
+        catch (_) { return getCookie('introShown') === '1'; }
+    }
+    function rememberIntro() {
+        try { localStorage.setItem('introShown', '1'); } catch (_) {}
+        setCookie('introShown', '1', 31536000);
     }
     function runIntro() {
         const intro = document.getElementById('intro');
         if (!intro) { document.body.classList.remove('intro-lock'); revealIsland(); handlePostIntro(); return; }
-        if (getCookie('introShown')) {
+        if (hasSeenIntro()) {
             intro.remove();
             document.body.classList.remove('intro-lock');
             revealIsland();
             handlePostIntro();
             return;
         }
-        setCookie('introShown', '1', 86400);
         const prefix = intro.querySelector('.intro-prefix');
         const first  = intro.querySelector('.intro-first');
         const rest   = intro.querySelector('.intro-rest');
@@ -707,13 +828,21 @@
         function finish() {
             if (done) return;
             done = true;
+            intro.removeEventListener('click', skipIntro);
+            window.removeEventListener('keydown', skipIntro);
+            window.removeEventListener('wheel', skipIntro);
+            window.removeEventListener('touchstart', skipIntro);
+            rememberIntro();
             if (raf) cancelAnimationFrame(raf);
             intro.classList.add('done');
             intro.style.transition = 'opacity .45s ease';
             intro.style.opacity = '0';
-            setTimeout(() => { if (intro.parentNode) intro.remove(); document.body.classList.remove('intro-lock'); }, 470);
+        setTimeout(() => {
+            if (intro.parentNode) intro.remove();
+            document.body.classList.remove('intro-lock');
             revealIsland();
             handlePostIntro();
+        }, 470);
         }
         function frame(now) {
             const e = now - t0;
@@ -746,28 +875,34 @@
         }
         raf = requestAnimationFrame(frame);
 
-        function skipAndPlay() { finish(); }
-        intro.addEventListener('click', skipAndPlay);
-        window.addEventListener('keydown', skipAndPlay, { once: true });
-        window.addEventListener('wheel', skipAndPlay, { once: true, passive: true });
-        window.addEventListener('touchstart', skipAndPlay, { once: true, passive: true });
+        function skipIntro(e) {
+            if (e && e.type === 'touchstart') e.preventDefault();
+            if (e) e.stopPropagation();
+            rememberIntro();
+            suppressOutsideClickUntil = performance.now() + 700;
+            finish();
+        }
+        intro.addEventListener('click', skipIntro);
+        window.addEventListener('keydown', skipIntro, { once: true });
+        window.addEventListener('wheel', skipIntro, { once: true, passive: false });
+        window.addEventListener('touchstart', skipIntro, { once: true, passive: false });
             setTimeout(finish, 6000);
     }
 
-    // ===== 启动动画结束后的处理：自动播放策略 =====
-    // 'enabled' → 用户曾勾选"不再提示 + 开启"，尝试直接播放（浏览器策略限制时降级为首次手势解锁）
-    // 'off'    → 用户曾拒绝并不再提示，静默不播
-    // 'ask'    → 默认 / 仍未表态，弹小型 Toast 询问
+    // ===== Intro completion autoplay policy（与原版一致，无回落提示） =====
+    // 'enabled' → 用户勾选过"不再提示 + 开启"：尝试自动播放，被浏览器拦截时
+    //             静默降级为首次手势解锁（armAudioUnlock）
+    // 'off'     → 用户勾选过"不再提示 + 稍后"：静默不播
+    // 'ask'     → 默认 / 未表态：展示请求岛询问
     function handlePostIntro() {
         const pref = getAutoplayPref();
+        // 欢迎岛每次开场后先显示（2.3s）；未表态（ask）时欢迎结束再弹播放确认岛
+        showGreet(() => {
+            if (pref === 'ask' && getCurrentState() === 'default') showAutoplayPrompt();
+        });
         if (pref === 'enabled') {
             beginMusic();
             armAudioUnlock();
-        } else if (pref === 'off') {
-            // 用户已明确拒绝且不再提示 → 静默不播
-        } else {
-            // 首次访问或仍需询问 → 展示小型 Toast
-            showAutoplayPrompt();
         }
     }
 
