@@ -600,7 +600,7 @@
                     navBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     moveIndicatorTo(btn);
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    el.scrollIntoView({ behavior: smoothBehavior(), block: 'start' });
                     setTimeout(() => { navJump = false; }, 800);
                 }
             }
@@ -674,7 +674,9 @@
     setInterval(() => island.classList.toggle('show-idle-time'), 4200);
 
     const explore = document.querySelector('.explore-btn');
-    if (explore) explore.addEventListener('click', () => document.querySelector('#github').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    /* MWG accessibility: reduced-motion 用户跳过平滑滚动 */
+    const smoothBehavior = () => matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    if (explore) explore.addEventListener('click', () => document.querySelector('#github').scrollIntoView({ behavior: smoothBehavior(), block: 'start' }));
 
     const twEl = document.querySelector('.typewriter-text');
     const phrases = ['今後也請多多指教。', '願你的明天比今天滿溢更多的幸福與笑容。', '世界由無數的言語構成。','所謂人生，就是自己筆下的故事。', '幸福的活下去吧！', "人在孤獨中降生，在孤獨中死去。", 'Welcome To Real Me!', '這個世界，總有一天也會微笑。', 'userhali.com', 'Hali'];
@@ -1048,7 +1050,17 @@
             }
         }
     }
-    loadProjects();
+    /* MWG defer-work-until-scroll-ends: 项目数据推迟到 Projects 区接近视口再拉取，
+       避免与首屏（shader/字体/头像）抢带宽；无 IO 支持或已滚过则立即加载。 */
+    const projectsSection = document.getElementById('project');
+    if (projectsSection && 'IntersectionObserver' in window) {
+        const projObs = new IntersectionObserver((entries) => {
+            if (entries.some(en => en.isIntersecting)) { projObs.disconnect(); loadProjects(); }
+        }, { rootMargin: '600px 0px' });
+        projObs.observe(projectsSection);
+    } else {
+        loadProjects();
+    }
 
     // ===== GitHub Stats / Top Languages 加载失败时的本地兜底卡片 =====
     // 用 inline SVG 替代原图，保持布局占位并提供"加载失败"提示与重试入口
