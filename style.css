@@ -52,7 +52,7 @@ body::before{
 }
 
 .bg{position:fixed;inset:0;z-index:-10;overflow:hidden;background:#0a0a10}
-#sakura-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(1.2px) brightness(.82) saturate(.92)}
+#sakura-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(.7px) brightness(.82) saturate(.92)}
 .bg-scrim{position:absolute;inset:0;pointer-events:none;
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E") 0 0/200px 200px,
@@ -163,9 +163,9 @@ body.intro-lock{overflow:hidden}
 @keyframes hintFloat{0%,100%{opacity:.4;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,8px)}}
 
 .card{width:100%;max-width:880px;
-    background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
+    background:linear-gradient(160deg,rgba(28,24,36,.78),rgba(16,14,22,.88));
     border:1px solid var(--line);border-radius:26px;
-    backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);overflow:hidden;
+    overflow:hidden;
     box-shadow:0 30px 70px -30px rgba(0,0,0,.8),0 0 60px -20px rgba(255,143,182,.04);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
 .card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),0 0 80px -20px rgba(255,143,182,.08)}
 .card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--line);
@@ -277,10 +277,10 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
 .projects-retry{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:14px;border:1px solid var(--line);color:var(--text);background:var(--glass-strong);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .projects-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);border-color:var(--accent)}
-.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
+.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.80),rgba(16,14,22,.90));
     border:1px solid rgba(255,255,255,.12);padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;
     transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);
-    position:relative;overflow:hidden;backdrop-filter:blur(10px) saturate(125%);-webkit-backdrop-filter:blur(10px) saturate(125%);
+    position:relative;overflow:hidden;
     box-shadow:0 8px 24px -16px rgba(0,0,0,.6)}
 .proj-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
 .proj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:opacity .35s var(--ease)}
@@ -542,7 +542,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
     .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
     /* 3. 关闭卡片 backdrop-filter：背后动态 canvas 每帧重模糊，移动端瓶颈；改用更不透明的背景兜底 */
-    .card,.proj-card{backdrop-filter:none;-webkit-backdrop-filter:none;
+    .card,.proj-card{
         background:linear-gradient(160deg,rgba(28,24,36,.82),rgba(16,14,22,.9))}
     /* 4. content-visibility 已提升为全端规则（见文件上方 MWG 注释处），此处不再重复 */
     /* 5. 投影与滤镜降级：阴影在移动端吃 GPU */

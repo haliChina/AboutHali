@@ -47,33 +47,20 @@ vec4 sakura(vec2 uv, vec2 id, float blur){
     uv *= mix(0.75,1.3,rnd.y);
     uv.x += sin(time*rnd.z*0.3)*0.6;
     uv.y += sin(time*rnd.w*0.45)*0.4;
-    float angle = atan(uv.y,uv.x) + rnd.x*421.47 + iTime*mix(-0.6,0.6,rnd.x);
-    float dist = length(uv);
+    /* 近似极角，避开昂贵 atan；花瓣用 5 瓣正弦。 */
+    float dist2 = dot(uv,uv);
+    float dist = sqrt(dist2);
+    float angle = uv.x / max(dist, 1e-4);
+    angle = angle + rnd.x*6.2832 + iTime*mix(-0.6,0.6,rnd.x);
     float petal = 1.0 - abs(sin(angle*2.5));
-    float sqPetal = petal*petal;
-    petal = mix(petal,sqPetal,0.7);
-    float petal2 = 1.0 - abs(sin(angle*2.5+1.5));
-    petal += petal2*0.2;
+    petal = mix(petal, petal*petal, 0.7);
     float sakuraDist = dist + petal*0.25;
-    float shadowblur = 0.3;
-    float shadow = S(0.5+shadowblur,0.5-shadowblur,sakuraDist)*0.4;
+    float shadow = S(0.8,0.2,sakuraDist)*0.4;
     float sakuraMask = S(0.5+blur,0.5-blur,sakuraDist);
-    vec3 sakuraCol = vec3(1.0,0.6,0.7);
-    sakuraCol += (0.5-dist)*0.2;
-    vec3 outlineCol = vec3(1.0,0.3,0.3);
-    float outlineMask = S(0.5-blur,0.5,sakuraDist+0.045);
-    float polarSpace = angle*1.9098+0.5;
-    float polarPistil = fract(polarSpace)-0.5;
-    outlineMask += S(0.035+blur,0.035-blur,dist);
-    float petalBlur = blur*2.0;
-    float pistilMask = S(0.12+blur,0.12,dist)*S(0.05,0.05+blur,dist);
-    float barW = 0.2 - dist*0.7;
-    float pistilBar = S(-barW,-barW+petalBlur,polarPistil)*S(barW+petalBlur,barW,polarPistil);
-    float pistilDotLen = length(vec2(polarPistil*0.10,dist)-vec2(0,0.16))*9.0;
-    float pistilDot = S(0.1+petalBlur,0.1-petalBlur,pistilDotLen);
-    outlineMask += pistilMask*pistilBar + pistilDot;
-    sakuraCol = mix(sakuraCol,outlineCol,sat(outlineMask)*0.5);
-    sakuraCol = mix(vec3(0.4,0.4,0.8)*shadow,sakuraCol,sakuraMask);
+    vec3 sakuraCol = vec3(1.0,0.6,0.7) + (0.5-dist)*0.2;
+    float outlineMask = S(0.5-blur,0.5,sakuraDist+0.045) + S(0.035+blur,0.035-blur,dist);
+    sakuraCol = mix(sakuraCol, vec3(1.0,0.3,0.3), sat(outlineMask)*0.5);
+    sakuraCol = mix(vec3(0.4,0.4,0.8)*shadow, sakuraCol, sakuraMask);
     sakuraMask = sat(sakuraMask+shadow);
     return vec4(sakuraCol,sakuraMask);
 }
@@ -84,14 +71,12 @@ vec4 premulMix(vec4 src, vec4 dst){vec4 res;res.rgb=premulMix(src,dst.rgb);res.a
 vec4 layer(vec2 uv, float blur){
     vec2 cellUV = fract(uv)-0.5;
     vec2 cellId = floor(uv);
-    vec4 accum = vec4(0.0);
-    for(float y=-1.0;y<=1.0;y++){
-        for(float x=-1.0;x<=1.0;x++){
-            vec2 offset = vec2(x,y);
-            vec4 s = sakura(cellUV-offset, cellId+offset, blur);
-            accum = premulMix(s, accum);
-        }
-    }
+    /* 十字 5 邻域：比 3×3 少 4 次 sakura()，接缝处仍够盖住。 */
+    vec4 accum = sakura(cellUV, cellId, blur);
+    accum = premulMix(sakura(cellUV-vec2(1.0,0.0), cellId+vec2(1.0,0.0), blur), accum);
+    accum = premulMix(sakura(cellUV-vec2(-1.0,0.0), cellId+vec2(-1.0,0.0), blur), accum);
+    accum = premulMix(sakura(cellUV-vec2(0.0,1.0), cellId+vec2(0.0,1.0), blur), accum);
+    accum = premulMix(sakura(cellUV-vec2(0.0,-1.0), cellId+vec2(0.0,-1.0), blur), accum);
     return accum;
 }
 
@@ -119,9 +104,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     vec4 layer1 = layer(uv, 0.015+blur);
     vec4 layer2 = layer(uv*1.4+vec2(124.5,89.30), 0.05+blur);
     layer2.rgb *= mix(0.7,0.95,screenY);
-    vec4 layer3 = layer(uv*2.3+vec2(463.5,-987.30), 0.08+blur);
-    layer3.rgb *= mix(0.55,0.85,screenY);
-    col = premulMix(layer3, col);
     col = premulMix(layer2, col);
     col = premulMix(layer1, col);
     col += -0.15;
@@ -401,7 +383,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     /* MWG efficient-background-processing / performance: 保守上限已捕获静态低帧率会话
        （页面有常驻 FPS 计数器），故 render scale 只做安全静态分配，不引入动态调参。 */
-    const RENDER_SCALE = isMobile ? 0.45 : (dpr > 1.5 ? 0.55 : 0.7);
+    const RENDER_SCALE = isMobile ? 0.28 : (dpr > 1.5 ? 0.36 : 0.44);
 
     let lastResW = 0, lastResH = 0;
     function resize() {
@@ -423,20 +405,36 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         requestAnimationFrame(() => { resizePending = false; resize(); });
     }, { passive: true });
 
-    // ===== Frame rate control: cap at ~45fps on mobile for battery =====
     const TARGET_FPS = isMobile ? 30 : 60;
-    const FRAME_INTERVAL = 1000 / TARGET_FPS;
+    let frameInterval = 1000 / TARGET_FPS;
     let lastFrameTime = 0;
+    let scrolling = false;
+    let scrollIdleTimer = 0;
+    window.addEventListener('scroll', function () {
+        scrolling = true;
+        clearTimeout(scrollIdleTimer);
+        scrollIdleTimer = setTimeout(function () { scrolling = false; }, 180);
+    }, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) scrolling = false;
+    });
 
     const start = performance.now() - 1200;
     let raf = null, running = false;
 
+    let fluidIdle = 0;
     function stepFluid() {
         if (!fluid) return;
         const speed = Math.hypot(pointer.vx, pointer.vy);
         const strength = pointer.active && pointer.inside
             ? Math.min(0.42, speed * 2.4)
             : 0;
+        if (strength <= 0 && speed < 0.0004) {
+            fluidIdle++;
+            if (fluidIdle > 18 && (framesDrawn & 1)) return;
+        } else {
+            fluidIdle = 0;
+        }
         const aspect = (window.innerWidth || 1) / (window.innerHeight || 1);
         gl.bindFramebuffer(gl.FRAMEBUFFER, fluid.write.fbo);
         gl.viewport(0, 0, fluid.size, fluid.size);
@@ -485,9 +483,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     let framesDrawn = 0;
     function frame(now) {
         raf = requestAnimationFrame(frame);
+        const interval = scrolling ? 1000 / 30 : frameInterval;
         const elapsed = now - lastFrameTime;
-        if (elapsed < FRAME_INTERVAL) return;
-        lastFrameTime = now - (elapsed % FRAME_INTERVAL);
+        if (elapsed < interval) return;
+        lastFrameTime = now - (elapsed % interval);
         resize();
         stepFluid();
         drawSakura(now);
