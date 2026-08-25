@@ -41,9 +41,10 @@ default
 
 - 桌面端目标 60 FPS，移动端目标 30 FPS
 - 移动端和高 DPI 设备降低渲染分辨率
+- 桌面细指针 hover 下，鼠标划过会在 256² 高度场上溅起水流并折射樱花 UV
+- 移动端、触屏、`prefers-reduced-motion` 不启用流体；后者只渲染静态帧
 - 页面隐藏时暂停渲染
 - 低电量且未充电时尝试暂停
-- `prefers-reduced-motion` 下只渲染静态帧
 - WebGL 不可用或着色器失败时隐藏 Canvas
 
 ### 项目列表
@@ -59,7 +60,7 @@ GET https://api.github.com/users/haliChina/repos?sort=pushed&per_page=100
 ## 功能
 
 - 跳过式入场动画
-- WebGL 樱花背景与实时 FPS 指示
+- WebGL 樱花背景、桌面鼠标流体扭曲与实时 FPS 指示
 - 滚动联动导航和进度状态
 - Dynamic Island 多状态切换
 - 远程音乐播放、切歌与进度拖动
@@ -121,8 +122,7 @@ AboutHali/
 ├── index.html       # 页面结构、SEO 与外部资源
 ├── style.css        # 视觉系统与响应式布局
 ├── animations.js   # Island、音乐、滚动和项目列表
-├── shader.js       # WebGL 樱花着色器
-├── ripple.js       # 点击反馈
+├── shader.js       # WebGL 樱花着色器 + 桌面流体扭曲
 ├── fps.js          # FPS 指示
 ├── 404.html        # 自定义错误页
 ├── manifest.json   # Web App Manifest
@@ -136,7 +136,7 @@ AboutHali/
 | 标题、介绍、社交链接 | `index.html` |
 | 颜色、岛体和卡片视觉 | `style.css` |
 | Island 状态与音乐列表 | `animations.js` |
-| 樱花密度、速度和颜色 | `shader.js` |
+| 樱花密度、速度、颜色与流体扭曲 | `shader.js` |
 | 图标 | `icons/contact/` |
 | 部署与缓存策略 | `vercel.json` |
 

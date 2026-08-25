@@ -33,6 +33,17 @@ body{
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
 }
+/* 当前 HTML 没有这条链接。旧缓存若仍带 3D 版 skip-link，默认藏到屏外，只在键盘聚焦时出现。 */
+.skip-link{
+    position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;
+    clip:rect(0,0,0,0)
+}
+.skip-link:focus,.skip-link:focus-visible{
+    position:fixed;left:.6rem;top:.6rem;width:auto;height:auto;clip:auto;
+    z-index:1000001;padding:.7rem 1rem;border-radius:10px;
+    color:#1a0610;background:var(--accent-2);font-weight:700;
+    outline:2px solid #fff;outline-offset:3px
+}
 body::before{
     content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
     background:
@@ -483,40 +494,6 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 /* ===== 岛入场动画(intro 结束后首次出现) ===== */
 @keyframes islandEntrance{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 .island-entrance{animation:islandEntrance .75s var(--spring);transform-origin:center top}
-
-/* ===== 鼠标点击水波纹(ripple.js) =====
-   - 径向渐变环带:波峰高光(白)+波谷(粉渐隐),有体积感不是细线
-   - scale 放大让环带自然变宽,符合水波色散物理
-   - 一个延迟次波,不是多个独立圆环
-   - pointer-events:none,不拦截任何点击 / 滚动 / 关键逻辑 */
-.click-ripple{
-    position:fixed;width:80px;height:80px;
-    transform:translate(-50%,-50%) scale(0);
-    border-radius:50%;pointer-events:none;opacity:0;
-    background:radial-gradient(circle,
-        transparent 0,
-        transparent 42%,
-        rgba(255,107,157,.18) 45%,
-        rgba(255,200,220,.6) 49%,
-        rgba(255,255,255,.85) 50%,
-        rgba(255,200,220,.6) 51%,
-        rgba(255,107,157,.18) 55%,
-        transparent 58%,
-        transparent 100%);
-    animation:rippleWave .9s cubic-bezier(.1,.7,.2,1) forwards;
-    will-change:transform,opacity;
-    filter:blur(.4px)
-}
-.click-ripple--echo{
-    animation-delay:.14s;
-    animation-duration:1s;
-    opacity:.6
-}
-@keyframes rippleWave{
-    0%  {transform:translate(-50%,-50%) scale(0);  opacity:0}
-    18% {opacity:1}
-    100%{transform:translate(-50%,-50%) scale(3);  opacity:0}
-}
 
 /* ===== FPS 实时显示(左上角) =====
    - 半透明毛玻璃背景,固定位置,点击穿透
