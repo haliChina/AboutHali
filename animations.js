@@ -842,6 +842,7 @@
         setTimeout(() => {
             if (intro.parentNode) intro.remove();
             document.body.classList.remove('intro-lock');
+            document.dispatchEvent(new CustomEvent('intro-done'));
             revealIsland();
             handlePostIntro();
         }, 470);

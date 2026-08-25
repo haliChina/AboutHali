@@ -14,10 +14,8 @@
         !isMobile && window.matchMedia('(hover: hover) and (pointer: fine)').matches
     ));
 
-    // ===== Hardware acceleration hints =====
-    canvas.style.willChange = 'contents';
-    canvas.style.transform = 'translateZ(0)';
-    canvas.style.backfaceVisibility = 'hidden';
+    /* 不要 will-change/translateZ/backface：WebView 会把 canvas 抬成独立合成层，
+       层内首帧 WebGL 往往不刷新，看起来像开场几秒背景冻住。 */
 
     // Reduce filter blur on mobile — full blur(2px) is a major GPU cost
     if (isMobile) canvas.style.filter = 'blur(1px) brightness(.85) saturate(.95)';
@@ -29,7 +27,6 @@
         stencil: false,
         premultipliedAlpha: false,
         preserveDrawingBuffer: false,
-        desynchronized: true,        // 解耦渲染线程
         powerPreference: 'high-performance',  // 优先高性能 GPU
         failIfMajorPerformanceCaveat: false
     };
@@ -112,8 +109,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     }
     vec2 uv = sampleUV - 0.5;
     uv.x *= iResolution.x/iResolution.y;
-    uv.y += iTime*0.1;
-    uv.x -= iTime*0.03 + sin(iTime)*0.1;
+    uv.y += iTime*0.18;
+    uv.x -= iTime*0.06 + sin(iTime)*0.1;
     uv *= 4.3;
     float screenY = sampleUV.y;
     vec3 col = vec3(1.0,0.7529,0.8235);
@@ -344,7 +341,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         };
     }
 
-    if (enableFluid) {
+    /* 256² half-float FBO + 二次 compile 会卡主线程 1–3s。
+       先只跑樱花；第一次指针移动或数秒后再建流体，避免开场冻住。 */
+    let fluidAttempted = false;
+    function attachFluid() {
+        if (fluidAttempted || !enableFluid) return;
+        fluidAttempted = true;
         try { fluid = initFluid(); } catch (_) { fluid = null; }
     }
 
@@ -357,7 +359,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         return { x: clientX / w, y: 1 - clientY / h };
     }
 
-    if (fluid) {
+    if (enableFluid) {
         const onMove = function (e) {
             if (!forceFluid && e.pointerType && e.pointerType !== 'mouse') return;
             const now = performance.now();
@@ -389,8 +391,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
             pointer.vy = 0;
             lastPtr.t = 0;
         };
-        window.addEventListener('pointermove', onMove, { passive: true });
-        window.addEventListener('pointerdown', onMove, { passive: true });
+        window.addEventListener('pointermove', function (e) { attachFluid(); onMove(e); }, { passive: true });
+        window.addEventListener('pointerdown', function (e) { attachFluid(); onMove(e); }, { passive: true });
         document.addEventListener('pointerleave', onLeave, { passive: true });
         window.addEventListener('blur', onLeave, { passive: true });
     }
@@ -426,7 +428,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     const FRAME_INTERVAL = 1000 / TARGET_FPS;
     let lastFrameTime = 0;
 
-    const start = performance.now();
+    const start = performance.now() - 1200;
     let raf = null, running = false;
 
     function stepFluid() {
@@ -480,6 +482,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
+    let framesDrawn = 0;
     function frame(now) {
         raf = requestAnimationFrame(frame);
         const elapsed = now - lastFrameTime;
@@ -488,23 +491,21 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         resize();
         stepFluid();
         drawSakura(now);
+        framesDrawn++;
+        canvas.dataset.frames = String(framesDrawn);
+        canvas.dataset.time = ((now - start) / 1000).toFixed(2);
     }
     function play() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
     function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = null; }
 
-    // Pause when tab hidden or when backgrounded
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else play(); });
-
-    // Pause when battery low (if Battery API available)
-    if (navigator.getBattery) {
-        navigator.getBattery().then(battery => {
-            if (battery.level < 0.15 && !battery.charging) stop();
-            battery.addEventListener('levelchange', () => {
-                if (battery.level < 0.15 && !battery.charging) stop();
-                else if (!document.hidden) play();
-            });
-        }).catch(() => {});
+    function kick() {
+        lastFrameTime = 0;
+        play();
     }
+
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else kick(); });
+    window.addEventListener('pageshow', kick);
+    document.addEventListener('intro-done', kick);
 
     // Respect reduced motion preference
     if (reducedMotion) {
@@ -514,5 +515,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         return;
     }
 
-    play();
+    resize();
+    drawSakura(start);
+    kick();
+    setTimeout(attachFluid, 2800);
 })();
