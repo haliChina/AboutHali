@@ -401,7 +401,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     /* MWG efficient-background-processing / performance: 保守上限已捕获静态低帧率会话
        （页面有常驻 FPS 计数器），故 render scale 只做安全静态分配，不引入动态调参。 */
-    const RENDER_SCALE = isMobile ? 0.28 : (dpr > 1.5 ? 0.36 : 0.44);
+    const RENDER_SCALE = isMobile ? 0.45 : (dpr > 1.5 ? 0.55 : 0.7);
 
     let lastResW = 0, lastResH = 0;
     function resize() {
