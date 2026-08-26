@@ -40,7 +40,7 @@ default
 `shader.js` 使用 WebGL fragment shader 生成多层樱花粒子：
 
 - 桌面端目标 60 FPS，滚动中降到 30；移动端目标 30 FPS
-- 两层樱花 + 3×3 邻域（对角接缝必须采到）；backing store 按 DPR 缩小
+- 三层樱花 + 3×3 邻域；花瓣用 `atan`（`x/r` 近似会拉成 8 字）；backing store 按 DPR 缩小
 - 桌面细指针 hover 下，鼠标划过会在 256² 高度场上溅起水流并折射樱花 UV；流体空闲隔帧更新
 - 移动端、触屏、`prefers-reduced-motion` 不启用流体；后者只渲染静态帧
 - 页面隐藏时暂停渲染
