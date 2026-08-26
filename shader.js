@@ -33,6 +33,56 @@
     const gl = canvas.getContext('webgl', glOpts) || canvas.getContext('experimental-webgl', glOpts);
     if (!gl) { canvas.style.display = 'none'; return; }
 
+    function shortGpuName(renderer) {
+        const s = String(renderer || '');
+        const hit = s.match(/Mali-[\w.-]+/i)
+            || s.match(/Adreno[^,)]*/i)
+            || s.match(/Apple M\d+[^\s,]*/i)
+            || s.match(/Apple[\w\s]*GPU/i)
+            || s.match(/GeForce[\w\s-]+/i)
+            || s.match(/Radeon[\w\s-]+/i)
+            || s.match(/Intel[\w\s]+Graphics[\w\s]*/i)
+            || s.match(/SwiftShader|llvmpipe|Direct3D/i);
+        let out = (hit ? hit[0] : s).replace(/\(TM\)|\(R\)|ANGLE |OpenGL ES [\d.]+ ?/gi, '').trim();
+        if (out.length > 22) out = out.slice(0, 20) + '…';
+        return out || 'GPU';
+    }
+    function classifyGpu(renderer, vendor, maxTex) {
+        const r = (renderer + ' ' + vendor).toLowerCase();
+        const force = /(?:\?|&)gpu=(high|mid|low)(?:&|$)/.test(location.search) && location.search.match(/gpu=(high|mid|low)/);
+        if (force) return force[1];
+        if (/swiftshader|llvmpipe|softpipe|microsoft basic render|\bwarp\b|google swiftshader/.test(r)) return 'low';
+        if (maxTex && maxTex < 4096) return 'low';
+        if (/immortalis|mali-g9|mali-g7[1-9]|adreno \(tm\) [78]|adreno [78]\d{2}|geforce rtx|geforce gtx 1[6-9]|geforce gtx [2-9]|radeon rx|radeon pro|apple m[1-9]|apple gpu/.test(r)) return 'high';
+        if (/mali-g5|mali-g6|adreno \(tm\) 6|adreno 6\d{2}|iris xe|uhd graphics 7|intel iris/.test(r)) return 'mid';
+        if (/mali-t|mali-4|adreno \(tm\) [1-5]|adreno [1-5]\d{2}|powervr|intel hd|uhd graphics [56]|intel\(r\) hd/.test(r)) return 'low';
+        if (isMobile) return 'mid';
+        if (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4) return 'low';
+        return 'mid';
+    }
+    const gpuInfo = (function () {
+        let vendor = '';
+        let renderer = '';
+        let maxTex = 0;
+        try {
+            vendor = gl.getParameter(gl.VENDOR) || '';
+            renderer = gl.getParameter(gl.RENDERER) || '';
+            const ext = gl.getExtension('WEBGL_debug_renderer_info');
+            if (ext) {
+                vendor = gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) || vendor;
+                renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || renderer;
+            }
+            maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 0;
+        } catch (_) {}
+        const tier = classifyGpu(renderer, vendor, maxTex);
+        const short = shortGpuName(renderer);
+        canvas.dataset.gpu = short;
+        canvas.dataset.gpuFull = renderer;
+        canvas.dataset.tier = tier;
+        try { window.__sakuraGpu = { vendor: vendor, renderer: renderer, tier: tier, maxTex: maxTex }; } catch (_) {}
+        return { vendor: vendor, renderer: renderer, tier: tier, short: short, maxTex: maxTex };
+    })();
+
     const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
 
     const SHADER = `
@@ -305,7 +355,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     function initFluid() {
         const simProg = createProgram(VERT, SIM_FRAG, 'fluid');
         if (!simProg) return null;
-        const SIM = 256;
+        const SIM = gpuInfo.tier === 'high' ? 256 : (gpuInfo.tier === 'mid' ? 192 : 128);
         let fmt = null, a = null, b = null;
         const formats = listHeightFormats();
         for (let i = 0; i < formats.length; i++) {
@@ -397,11 +447,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         window.addEventListener('blur', onLeave, { passive: true });
     }
 
-    // ===== Adaptive render scale: lower on high-DPI / mobile for performance =====
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    /* MWG efficient-background-processing / performance: 保守上限已捕获静态低帧率会话
-       （页面有常驻 FPS 计数器），故 render scale 只做安全静态分配，不引入动态调参。 */
-    const RENDER_SCALE = isMobile ? 0.45 : (dpr > 1.5 ? 0.55 : 0.7);
+    /* 分辨率跟 GPU 档，不跟屏宽。high 保持原清晰度，mid/low 只缩 backing store。 */
+    const RENDER_SCALE = (function () {
+        if (gpuInfo.tier === 'high') return isMobile ? 0.5 : (dpr > 1.5 ? 0.6 : 0.75);
+        if (gpuInfo.tier === 'low') return isMobile ? 0.32 : (dpr > 1.5 ? 0.4 : 0.48);
+        return isMobile ? 0.45 : (dpr > 1.5 ? 0.55 : 0.7);
+    })();
 
     let lastResW = 0, lastResH = 0;
     function resize() {
@@ -423,7 +475,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         requestAnimationFrame(() => { resizePending = false; resize(); });
     }, { passive: true });
 
-    const TARGET_FPS = isMobile ? 30 : 60;
+    const TARGET_FPS = gpuInfo.tier === 'low' ? 30 : (isMobile ? 30 : 60);
     let frameInterval = 1000 / TARGET_FPS;
     let lastFrameTime = 0;
     let scrolling = false;

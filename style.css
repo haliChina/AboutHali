@@ -506,7 +506,8 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     pointer-events:none;user-select:none;letter-spacing:.4px;
     transition:color .25s ease,background .25s ease;
-    text-shadow:0 1px 2px rgba(0,0,0,.4)
+    text-shadow:0 1px 2px rgba(0,0,0,.4);
+    white-space:pre-line;line-height:1.35;max-width:min(52vw,220px)
 }
 #fpsCounter[data-level="good"]{color:#4ade80}
 #fpsCounter[data-level="ok"]{color:#fbbf24}
