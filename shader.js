@@ -71,12 +71,14 @@ vec4 premulMix(vec4 src, vec4 dst){vec4 res;res.rgb=premulMix(src,dst.rgb);res.a
 vec4 layer(vec2 uv, float blur){
     vec2 cellUV = fract(uv)-0.5;
     vec2 cellId = floor(uv);
-    /* 十字 5 邻域：比 3×3 少 4 次 sakura()，接缝处仍够盖住。 */
-    vec4 accum = sakura(cellUV, cellId, blur);
-    accum = premulMix(sakura(cellUV-vec2(1.0,0.0), cellId+vec2(1.0,0.0), blur), accum);
-    accum = premulMix(sakura(cellUV-vec2(-1.0,0.0), cellId+vec2(-1.0,0.0), blur), accum);
-    accum = premulMix(sakura(cellUV-vec2(0.0,1.0), cellId+vec2(0.0,1.0), blur), accum);
-    accum = premulMix(sakura(cellUV-vec2(0.0,-1.0), cellId+vec2(0.0,-1.0), blur), accum);
+    /* 必须 3×3：花瓣半径 > 0.5 格，十字邻域会在对角切成方块。 */
+    vec4 accum = vec4(0.0);
+    for(float y=-1.0;y<=1.0;y++){
+        for(float x=-1.0;x<=1.0;x++){
+            vec2 offset = vec2(x,y);
+            accum = premulMix(sakura(cellUV-offset, cellId+offset, blur), accum);
+        }
+    }
     return accum;
 }
 
