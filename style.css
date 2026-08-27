@@ -712,18 +712,50 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 
 @media (max-width:768px){
     .page{padding-bottom:max(90px, env(safe-area-inset-bottom, 0px))}
-    .orbit-pin{height:auto;min-height:100svh;position:relative;overflow:visible;perspective:none}
-    .orbit-track{height:auto}
-    .orbit-ring{transform:none!important;animation:none!important;height:auto}
-    .orbit-face{position:relative;inset:auto;transform:none!important;backface-visibility:visible;overflow:visible;height:auto}
-    .orbit-face--from{display:flex}
+    .orbit-track,
+    .orbit-pin,
+    .orbit-stage,
+    .orbit-ring{
+        position:relative;inset:auto;height:auto;width:auto;
+        overflow:visible;perspective:none;transform:none!important;
+        transform-style:flat;animation:none!important;
+        min-height:0;
+    }
+    .orbit-face,
+    .orbit-face.is-active,
+    .orbit-face.is-near,
+    .orbit-face.is-parked{
+        position:relative;inset:auto;width:auto;height:auto;
+        transform:none!important;backface-visibility:visible;
+        overflow:visible;opacity:1;visibility:visible;pointer-events:auto;
+        z-index:auto;display:flex;
+    }
     .orbit-snap-end{display:none;height:0}
+    #github.orbit-face,
+    #netease.orbit-face,
+    .orbit-face.page{
+        min-height:0;height:auto;padding-top:72px;padding-bottom:max(90px, env(safe-area-inset-bottom, 0px));
+    }
 }
 
 @media (prefers-reduced-motion: reduce){
-    .orbit-ring{animation:none!important;transform:none!important}
-    .orbit-face{position:relative;inset:auto;transform:none!important;backface-visibility:visible;height:auto}
-    .orbit-face--from{display:flex}
-    .orbit-track,.orbit-pin{height:auto;position:relative;overflow:visible;perspective:none}
+    .orbit-track,
+    .orbit-pin,
+    .orbit-stage,
+    .orbit-ring{
+        position:relative;inset:auto;height:auto;width:auto;
+        overflow:visible;perspective:none;transform:none!important;
+        transform-style:flat;animation:none!important;
+        min-height:0;
+    }
+    .orbit-face,
+    .orbit-face.is-active,
+    .orbit-face.is-near,
+    .orbit-face.is-parked{
+        position:relative;inset:auto;width:auto;height:auto;
+        transform:none!important;backface-visibility:visible;
+        overflow:visible;opacity:1;visibility:visible;pointer-events:auto;
+        z-index:auto;display:flex;
+    }
     .orbit-snap-end{display:none;height:0}
 }
