@@ -685,8 +685,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     min-height:0;
     padding:max(72px, env(safe-area-inset-top, 0px)) 22px max(28px, env(safe-area-inset-bottom, 0px));
     overflow:auto;
-    overscroll-behavior-y:auto;
-    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:none;
     opacity:.16;
     visibility:hidden;
     pointer-events:none;

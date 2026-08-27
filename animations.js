@@ -1236,41 +1236,19 @@
             const vh = window.innerHeight || 1;
             return rect.top <= 1 && rect.bottom > vh + 1;
         }
-        function activeFace() {
-            return progressFromScroll() > 0.5 ? toFace : fromFace;
-        }
-        function faceCanScroll(face, dy) {
-            if (!face) return false;
-            const max = face.scrollHeight - face.clientHeight;
-            if (max <= 2) return false;
-            if (dy > 0) return face.scrollTop < max - 2;
-            if (dy < 0) return face.scrollTop > 2;
-            return false;
-        }
         function routeWheel(e) {
             if (navJump || e.ctrlKey) return;
             if (!pinIsStuck()) return;
-            const dy = e.deltaY;
-            const face = activeFace();
-            if (!face || !dy) return;
-            if (!faceCanScroll(face, dy)) return;
             e.preventDefault();
-            face.scrollTop += dy;
+            document.documentElement.scrollTop += e.deltaY;
         }
         window.addEventListener('wheel', routeWheel, { passive: false, capture: true });
-
-        let lastFace = null;
         let raf = 0;
         function paint() {
             raf = 0;
             const p = progressFromScroll();
             ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
             setFaceState(p);
-            const face = p > 0.5 ? toFace : fromFace;
-            if (face && face !== lastFace) {
-                if (lastFace) lastFace.scrollTop = 0;
-                lastFace = face;
-            }
         }
         window.addEventListener('scroll', function () {
             if (!raf) raf = requestAnimationFrame(paint);
