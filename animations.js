@@ -1010,7 +1010,7 @@
         if (!grid) return;
         if (!projects.length){ grid.innerHTML = '<div class="projects-loading">暂无公开项目</div>'; return; }
         console.log('[Projects] Rendering', projects.length, 'projects');
-        grid.innerHTML = projects.map(r => {
+        grid.innerHTML = projects.map((r, i) => {
             const lang = r.language ? '<span class="proj-lang"><i style="background:'+langColor(r.language)+'"></i>'+esc(r.language)+'</span>' : '';
             const stars = r.stars ? '<span>★ '+r.stars+'</span>' : '';
             const forks = r.forks ? '<span>⑂ '+r.forks+'</span>' : '';
@@ -1023,16 +1023,53 @@
             const nameLink = r.html_url
                 ? '<a class="proj-name" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.name)+'</a>'
                 : '<span class="proj-name">'+esc(r.name)+'</span>';
-            return '<div class="proj-card">'+
+            return '<div class="proj-card" data-i="'+i+'">'+
                 '<div class="proj-head">'+nameLink+sourceTag+'</div>'+
                 (r.description ? '<p class="proj-desc">'+esc(r.description)+'</p>' : '')+
                 '<div class="proj-meta">'+lang+'<div class="proj-stats">'+stars+forks+'</div>'+updated+'</div>'+
                 '<div class="proj-links">'+homepage+sourceLink+'</div></div>';
         }).join('');
+        layoutProjectColumns(grid);
+        lastProjCols = projectColumnCount(grid);
         requestAnimationFrame(function () {
             requestAnimationFrame(function () { enhanceProjectCards(grid); });
         });
     }
+
+    function projectColumnCount(grid) {
+        const wrap = grid.closest('.projects-wrap') || grid;
+        const n = parseInt(getComputedStyle(wrap).getPropertyValue('--proj-cols'), 10);
+        return n >= 1 ? n : 1;
+    }
+    function layoutProjectColumns(grid) {
+        const cards = Array.from(grid.querySelectorAll('.proj-card')).sort(function (a, b) {
+            return (+a.dataset.i || 0) - (+b.dataset.i || 0);
+        });
+        if (!cards.length) return;
+        const cols = projectColumnCount(grid);
+        grid.querySelectorAll('.proj-col').forEach(function (col) { col.remove(); });
+        if (cols <= 1) {
+            cards.forEach(function (card) { grid.appendChild(card); });
+            return;
+        }
+        const buckets = [];
+        for (let i = 0; i < cols; i++) {
+            const col = document.createElement('div');
+            col.className = 'proj-col';
+            grid.appendChild(col);
+            buckets.push(col);
+        }
+        cards.forEach(function (card, i) { buckets[i % cols].appendChild(card); });
+    }
+    let lastProjCols = 0;
+    window.addEventListener('resize', function () {
+        const grid = document.getElementById('projects-grid');
+        if (!grid || !grid.querySelector('.proj-card')) return;
+        const n = projectColumnCount(grid);
+        if (n === lastProjCols) return;
+        lastProjCols = n;
+        layoutProjectColumns(grid);
+    }, { passive: true });
 
     function enhanceProjectCards(grid) {
         grid.querySelectorAll('.proj-card').forEach(function (card) {

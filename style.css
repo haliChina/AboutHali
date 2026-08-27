@@ -270,10 +270,12 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .np-song-item .nm{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .np-song-item .ar{color:var(--text-faint);font-size:.74rem;flex-shrink:0;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.projects-wrap{width:100%;max-width:1080px}
-.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
-.projects-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-dim);font-size:.95rem}
-.projects-error{grid-column:1/-1;text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.projects-wrap{width:100%;max-width:1080px;--proj-cols:3}
+/* 桌面三列 flex：卡按 0,1,2,0,1,2… 轮流入列，短卡高度只跟自己走。手机不拆列。 */
+.projects-grid{display:flex;gap:22px;align-items:flex-start}
+.projects-grid .proj-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:22px}
+.projects-loading{flex:1 1 100%;text-align:center;padding:60px 20px;color:var(--text-dim);font-size:.95rem}
+.projects-error{flex:1 1 100%;text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
 .projects-retry{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:14px;border:1px solid var(--line);color:var(--text);background:var(--glass-strong);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .projects-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);border-color:var(--accent)}
@@ -519,7 +521,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 #fpsCounter[data-level="bad"]{color:#f87171}
 
 @media (max-width:1024px){
-    .card{max-width:680px}.projects-wrap{max-width:880px}.projects-grid{grid-template-columns:repeat(2,1fr)}.page{padding-left:18px;padding-right:18px}
+    .card{max-width:680px}.projects-wrap{max-width:880px;--proj-cols:2}.page{padding-left:18px;padding-right:18px}
 }
 @media (max-width:768px){
     .dynamic-island{top:14px}.island-cluster{gap:8px}
@@ -527,7 +529,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .island-nav{padding-inline:10px}.nav-buttons{gap:2px}.island-nav-btn{padding:5px 10px;font-size:12px}
     .island-music-card{padding:14px 16px 12px}.mc-cover,.sat-card-cover{width:58px;height:58px;border-radius:14px}.mc-title,.sat-title{font-size:16px}.mc-artist,.sat-artist{font-size:12px}
     .music-satellite[data-mode="pill"]{width:66px;height:34px;border-radius:17px}.music-satellite[data-mode="icon"]{width:34px;height:34px;border-radius:17px}.music-satellite[data-mode="open"]{width:min(352px,calc(100vw - 28px));height:174px;border-radius:30px}.satellite-card{padding:14px 16px 12px}
-    .island-transport{width:48px}.mc-ctrls,.sat-ctrls{gap:10px}.home-inner{align-items:center;text-align:center}.typewriter{justify-content:center}.social-grid{justify-content:center}.projects-grid{grid-template-columns:1fr;gap:18px}.proj-card{padding:20px 18px}
+    .island-transport{width:48px}.mc-ctrls,.sat-ctrls{gap:10px}.home-inner{align-items:center;text-align:center}.typewriter{justify-content:center}.social-grid{justify-content:center}.projects-wrap{--proj-cols:1}.projects-grid{flex-direction:column;gap:18px}.proj-card{padding:20px 18px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 @media (max-width:400px){.mc-progress-row,.sat-progress-row{grid-template-columns:30px minmax(0,1fr) 35px;column-gap:7px}}
