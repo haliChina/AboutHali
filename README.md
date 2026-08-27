@@ -62,6 +62,9 @@ GET https://api.github.com/users/haliChina/repos?sort=pushed&per_page=100
 - 跳过式入场动画
 - WebGL 樱花背景、桌面鼠标流体扭曲与实时 FPS 指示
 - 滚动联动导航和进度状态
+- GitHub → QQ 桌面竖轴环绕切场（`rotateY` 180° + proximity snap）；hero / Projects 仍是普通文档流
+- 项目卡简介限 3 行，过长才出现「展开」；网格不再把短卡撑到同行高度
+- 移动端 / `prefers-reduced-motion` 关掉环绕与 snap，避免卡片内滑和页面滚打架
 - Dynamic Island 多状态切换
 - 远程音乐播放、切歌与进度拖动
 - 外部链接目标确认和 8 秒倒计时

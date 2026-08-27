@@ -588,6 +588,16 @@
         indicator.style.transition = '';
     }
 
+    function scrollToHash(target) {
+        const orbitEnd = document.getElementById('orbit-qq');
+        const orbitPin = document.querySelector('.orbit-pin');
+        let el = document.querySelector(target);
+        if (target === '#netease' && orbitEnd && orbitEnd.getBoundingClientRect().height > 8) el = orbitEnd;
+        else if (target === '#netease' && orbitPin) el = orbitPin;
+        if (!el) return;
+        const y = el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+        window.scrollTo({ top: y, behavior: smoothBehavior() });
+    }
     navBtns.forEach(btn => {
         btn.addEventListener('click', e => {
             const target = btn.getAttribute('href');
@@ -600,7 +610,7 @@
                     navBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     moveIndicatorTo(btn);
-                    el.scrollIntoView({ behavior: smoothBehavior(), block: 'start' });
+                    scrollToHash(target);
                     setTimeout(() => { navJump = false; }, 800);
                 }
             }
@@ -608,8 +618,16 @@
     });
     let sectionOffsets = [];
     let scrollMax = 0, lastSpIdx = -1, lastSpPctTxt = '', lastSpBarPctTxt = '';
+    function pageY(el) {
+        return el ? (el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0)) : 0;
+    }
     function recomputeLayoutMetrics() {
-        sectionOffsets = sections.map(s => s ? s.offsetTop : 0);
+        const orbitEnd = document.getElementById('orbit-qq');
+        sectionOffsets = sections.map((s, i) => {
+            if (!s) return 0;
+            if (i === 2 && orbitEnd && orbitEnd.offsetHeight > 8) return pageY(orbitEnd);
+            return pageY(s);
+        });
         scrollMax = document.documentElement.scrollHeight - window.innerHeight;
     }
     function updateScrollSpy(y) {
@@ -1011,6 +1029,28 @@
                 '<div class="proj-meta">'+lang+'<div class="proj-stats">'+stars+forks+'</div>'+updated+'</div>'+
                 '<div class="proj-links">'+homepage+sourceLink+'</div></div>';
         }).join('');
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () { enhanceProjectCards(grid); });
+        });
+    }
+
+    function enhanceProjectCards(grid) {
+        grid.querySelectorAll('.proj-card').forEach(function (card) {
+            const desc = card.querySelector('.proj-desc');
+            if (!desc) return;
+            if (desc.scrollHeight <= desc.clientHeight + 2) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'proj-more';
+            btn.setAttribute('aria-expanded', 'false');
+            btn.textContent = '展开简介';
+            desc.insertAdjacentElement('afterend', btn);
+            btn.addEventListener('click', function () {
+                const open = card.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                btn.textContent = open ? '收起简介' : '展开简介';
+            });
+        });
     }
 
     function showProjectsError(msg){
@@ -1093,5 +1133,85 @@
 
     if (document.readyState === 'complete') runIntro();
     else window.addEventListener('load', runIntro);
+
+    (function setupOrbit() {
+        const track = document.getElementById('orbit-track');
+        const ring = document.getElementById('orbit-ring');
+        const fromFace = track && track.querySelector('.orbit-face--from');
+        const toFace = document.getElementById('netease');
+        if (!track || !ring || !toFace) return;
+
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const mobile = matchMedia('(max-width: 768px)').matches;
+        const cssOrbit = CSS.supports('(animation-timeline: view()) and (animation-range: 0% 100%)');
+
+        function setFaceState(progress) {
+            const onQq = progress > 0.5;
+            if (fromFace) {
+                fromFace.toggleAttribute('inert', onQq);
+                fromFace.setAttribute('aria-hidden', 'true');
+            }
+            toFace.toggleAttribute('inert', !onQq);
+            if (onQq) toFace.removeAttribute('aria-hidden');
+            else toFace.setAttribute('aria-hidden', 'true');
+        }
+
+        if (reduced || mobile) {
+            setFaceState(1);
+            toFace.removeAttribute('inert');
+            toFace.removeAttribute('aria-hidden');
+            return;
+        }
+
+        document.documentElement.classList.add('orbit-snap');
+
+        function progressFromScroll() {
+            const rect = track.getBoundingClientRect();
+            const vh = window.innerHeight || 1;
+            const travel = Math.max(1, track.offsetHeight - vh);
+            return Math.max(0, Math.min(1, -rect.top / travel));
+        }
+
+        let snapTimer = 0;
+        function armOrbitSnap() {
+            clearTimeout(snapTimer);
+            snapTimer = setTimeout(function () {
+                if (navJump) return;
+                const p = progressFromScroll();
+                if (p <= 0.12 || p >= 0.88) return;
+                const endEl = document.getElementById('orbit-qq');
+                const yNow = window.scrollY || document.documentElement.scrollTop || 0;
+                const target = p < 0.5 ? pageY(track) : pageY(endEl);
+                if (!isFinite(target) || Math.abs(yNow - target) < 10) return;
+                window.scrollTo({ top: target, behavior: 'smooth' });
+            }, 170);
+        }
+        window.addEventListener('scroll', armOrbitSnap, { passive: true });
+
+        if (!cssOrbit) {
+            let raf = 0;
+            function paint() {
+                raf = 0;
+                const p = progressFromScroll();
+                ring.style.transform = 'rotateY(' + (-180 * p).toFixed(2) + 'deg)';
+                setFaceState(p);
+            }
+            function onScroll() {
+                if (!raf) raf = requestAnimationFrame(paint);
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            paint();
+        } else {
+            let raf = 0;
+            function sync() {
+                raf = 0;
+                setFaceState(progressFromScroll());
+            }
+            window.addEventListener('scroll', function () {
+                if (!raf) raf = requestAnimationFrame(sync);
+            }, { passive: true });
+            sync();
+        }
+    })();
 
 })();
