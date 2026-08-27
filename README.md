@@ -62,7 +62,7 @@ GET https://api.github.com/users/haliChina/repos?sort=pushed&per_page=100
 - 跳过式入场动画
 - WebGL 樱花背景、桌面鼠标流体扭曲与实时 FPS 指示
 - 滚动联动导航和进度状态
-- GitHub → QQ 桌面圆柱环绕（两面 `translateZ(半径)`，差 90°；滚动 `rotateY` 0→-90）。只有一份真 GitHub，没有鬼卡。hero / Projects 仍是普通文档流
+- GitHub → QQ 桌面圆柱环绕（两面 `translateZ(半径)`，差 90°）。当前面内部先吃滚轮，到边再 `rotateY` 0→-90。只有一份真 GitHub。hero / Projects 仍是普通文档流
 - 项目卡简介限 3 行，过长才出现「展开」。桌面按 0,1,2 轮流入三列，短卡高度只跟自己走；手机仍单列
 - 移动端 / `prefers-reduced-motion` 关掉环绕与 snap，避免卡片内滑和页面滚打架
 - Dynamic Island 多状态切换

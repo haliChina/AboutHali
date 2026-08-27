@@ -22,7 +22,7 @@
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;timeline-scope:--orbit}
+html{scroll-behavior:smooth}
 body{
     margin:0;padding:0;
     min-height:100vh;
@@ -529,7 +529,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .island-nav{padding-inline:10px}.nav-buttons{gap:2px}.island-nav-btn{padding:5px 10px;font-size:12px}
     .island-music-card{padding:14px 16px 12px}.mc-cover,.sat-card-cover{width:58px;height:58px;border-radius:14px}.mc-title,.sat-title{font-size:16px}.mc-artist,.sat-artist{font-size:12px}
     .music-satellite[data-mode="pill"]{width:66px;height:34px;border-radius:17px}.music-satellite[data-mode="icon"]{width:34px;height:34px;border-radius:17px}.music-satellite[data-mode="open"]{width:min(352px,calc(100vw - 28px));height:174px;border-radius:30px}.satellite-card{padding:14px 16px 12px}
-    .island-transport{width:48px}.mc-ctrls,.sat-ctrls{gap:10px}.home-inner{align-items:center;text-align:center}.typewriter{justify-content:center}.social-grid{justify-content:center}.projects-wrap{--proj-cols:1}.projects-grid{flex-direction:column;gap:18px}.proj-card{padding:20px 18px}
+    .island-transport{width:48px}.mc-ctrls,.sat-ctrls{gap:10px}.home-inner{align-items:center;text-align:center}.typewriter{justify-content:center}.social-grid{justify-content:center}.projects-wrap{--proj-cols:1}.projects-grid{flex-direction:column;align-items:stretch;gap:18px;width:100%}.proj-card{padding:20px 18px;width:100%;align-self:stretch}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 @media (max-width:400px){.mc-progress-row,.sat-progress-row{grid-template-columns:30px minmax(0,1fr) 35px;column-gap:7px}}
@@ -644,14 +644,12 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .greet-jp{font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap}
 .greet-cn{font-size:12px;color:rgba(255,255,255,.85);white-space:nowrap}
 
-/* ===== GitHub → QQ 竖轴环绕：文档流 200vh，舞台 sticky 钉一屏，ring 绕 Y 转 180deg ===== */
+/* ===== GitHub → QQ 圆柱：文档流 200vh，sticky 钉一屏。面内先滚，到边再 rotateY 0→-90 ===== */
 .orbit-track{
     position:relative;
     height:200vh;
     height:200dvh;
     scroll-margin-top:0;
-    view-timeline-name: --orbit;
-    view-timeline-axis: block;
 }
 .orbit-snap-end{
     height:100vh;height:100dvh;
@@ -682,15 +680,16 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .orbit-face{
     position:absolute;inset:0;
     display:flex;align-items:flex-start;justify-content:center;
-    backface-visibility:visible;
-    -webkit-backface-visibility:visible;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
     min-height:0;padding:72px 0 28px;
     overflow:auto;
-    overscroll-behavior:contain;
+    overscroll-behavior-y:auto;
     -webkit-overflow-scrolling:touch;
 }
 .orbit-face--from{transform:rotateY(0deg) translateZ(var(--orbit-r))}
 .orbit-face--to{transform:rotateY(90deg) translateZ(var(--orbit-r))}
+.orbit-face.is-parked{visibility:hidden;pointer-events:none}
 .orbit-face .card{width:100%;max-width:880px;margin:0 auto}
 .orbit-track .page,
 .orbit-face.page,
@@ -705,15 +704,6 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 /* 200vh 轨道在 100vh 视口里永远走不到 entry 100%，CSS view-timeline 会冻在 0°。
    旋转改由 JS 按轨道滚动进度写 rotateY。 */
 
-html.orbit-snap{
-    scroll-snap-type:y proximity;
-}
-html.orbit-snap .orbit-track,
-html.orbit-snap .orbit-snap-end{
-    scroll-snap-align:start;
-    scroll-snap-stop:always;
-}
-
 @media (max-width:768px){
     .page{padding-bottom:max(90px, env(safe-area-inset-bottom, 0px))}
     .orbit-pin{height:auto;min-height:100svh;position:relative;overflow:visible;perspective:none}
@@ -722,7 +712,6 @@ html.orbit-snap .orbit-snap-end{
     .orbit-face{position:relative;inset:auto;transform:none!important;backface-visibility:visible;overflow:visible;height:auto}
     .orbit-face--from{display:flex}
     .orbit-snap-end{display:none;height:0}
-    html.orbit-snap{scroll-snap-type:none}
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -731,5 +720,4 @@ html.orbit-snap .orbit-snap-end{
     .orbit-face--from{display:flex}
     .orbit-track,.orbit-pin{height:auto;position:relative;overflow:visible;perspective:none}
     .orbit-snap-end{display:none;height:0}
-    html.orbit-snap{scroll-snap-type:none}
 }

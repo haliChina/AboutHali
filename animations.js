@@ -1183,12 +1183,15 @@
 
         function setFaceState(progress) {
             const onQq = progress > 0.5;
+            const turning = progress > 0.08 && progress < 0.92;
             if (fromFace) {
                 fromFace.toggleAttribute('inert', onQq);
+                fromFace.classList.toggle('is-parked', !turning && onQq);
                 if (onQq) fromFace.setAttribute('aria-hidden', 'true');
                 else fromFace.removeAttribute('aria-hidden');
             }
             toFace.toggleAttribute('inert', !onQq);
+            toFace.classList.toggle('is-parked', !turning && !onQq);
             if (onQq) toFace.removeAttribute('aria-hidden');
             else toFace.setAttribute('aria-hidden', 'true');
         }
@@ -1197,13 +1200,13 @@
             if (fromFace) {
                 fromFace.removeAttribute('inert');
                 fromFace.removeAttribute('aria-hidden');
+                fromFace.classList.remove('is-parked');
             }
             toFace.removeAttribute('inert');
             toFace.removeAttribute('aria-hidden');
+            toFace.classList.remove('is-parked');
             return;
         }
-
-        document.documentElement.classList.add('orbit-snap');
 
         function progressFromScroll() {
             const rect = track.getBoundingClientRect();
@@ -1211,29 +1214,46 @@
             const travel = Math.max(1, track.offsetHeight - vh);
             return Math.max(0, Math.min(1, -rect.top / travel));
         }
-
-        let snapTimer = 0;
-        function armOrbitSnap() {
-            clearTimeout(snapTimer);
-            snapTimer = setTimeout(function () {
-                if (navJump) return;
-                const p = progressFromScroll();
-                if (p <= 0.12 || p >= 0.88) return;
-                const endEl = document.getElementById('orbit-qq');
-                const yNow = window.scrollY || document.documentElement.scrollTop || 0;
-                const target = p < 0.5 ? pageY(track) : pageY(endEl);
-                if (!isFinite(target) || Math.abs(yNow - target) < 10) return;
-                window.scrollTo({ top: target, behavior: 'smooth' });
-            }, 170);
+        function pinIsStuck() {
+            const rect = track.getBoundingClientRect();
+            const vh = window.innerHeight || 1;
+            return rect.top <= 1 && rect.bottom > vh + 1;
         }
-        window.addEventListener('scroll', armOrbitSnap, { passive: true });
+        function activeFace() {
+            return progressFromScroll() > 0.5 ? toFace : fromFace;
+        }
+        function faceCanScroll(face, dy) {
+            if (!face) return false;
+            const max = face.scrollHeight - face.clientHeight;
+            if (max <= 2) return false;
+            if (dy > 0) return face.scrollTop < max - 2;
+            if (dy < 0) return face.scrollTop > 2;
+            return false;
+        }
+        function routeWheel(e) {
+            if (navJump || e.ctrlKey) return;
+            if (!pinIsStuck()) return;
+            const dy = e.deltaY;
+            const face = activeFace();
+            if (!face || !dy) return;
+            if (!faceCanScroll(face, dy)) return;
+            e.preventDefault();
+            face.scrollTop += dy;
+        }
+        window.addEventListener('wheel', routeWheel, { passive: false, capture: true });
 
+        let lastFace = null;
         let raf = 0;
         function paint() {
             raf = 0;
             const p = progressFromScroll();
             ring.style.transform = 'rotateY(' + (-90 * p).toFixed(2) + 'deg) translateZ(calc(var(--orbit-r) * -1))';
             setFaceState(p);
+            const face = p > 0.5 ? toFace : fromFace;
+            if (face && face !== lastFace) {
+                if (lastFace) lastFace.scrollTop = 0;
+                lastFace = face;
+            }
         }
         window.addEventListener('scroll', function () {
             if (!raf) raf = requestAnimationFrame(paint);
