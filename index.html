@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=99">
+    <link rel="stylesheet" href="style.css?v=101">
     <script>
         /* 清掉本机 8765 / 旧预览残留的 Service Worker，避免 3D 版 skip-link 继续盖在流体页上 */
         if ('serviceWorker' in navigator) {
@@ -201,8 +201,12 @@
         </div>
     </section>
 
-    <!-- ===== GitHub ===== -->
-    <section id="github" class="page section">
+    <!-- ===== GitHub ↔ QQ：圆柱环绕（一份真 GitHub，没有鬼卡） ===== -->
+    <div class="orbit-track" id="orbit-track">
+        <div class="orbit-pin">
+            <div class="orbit-stage">
+                <div class="orbit-ring" id="orbit-ring">
+    <section id="github" class="page section orbit-face orbit-face--from" data-face="github">
         <div class="card reveal">
             <div class="card-header">
                 <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@16.23.0/icons/github.svg" alt="GitHub" class="card-logo gh-logo">
@@ -287,19 +291,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== GitHub → QQ：竖轴环绕切场（hero / Projects 不进环） ===== -->
-    <div class="orbit-track" id="orbit-track">
-        <div class="orbit-pin">
-            <div class="orbit-stage">
-                <div class="orbit-ring" id="orbit-ring">
-                    <section class="orbit-face orbit-face--from" data-face="github" aria-hidden="true">
-                        <div class="orbit-ghost-card">
-                            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@16.23.0/icons/github.svg" alt="" class="card-logo gh-logo" width="30" height="30">
-                            <h2>GitHub · Coding</h2>
-                            <p>UserHali <span>@haliChina</span></p>
-                        </div>
-                    </section>
                     <section id="netease" class="page section orbit-face orbit-face--to" data-face="qq">
                         <div class="card reveal">
             <div class="card-header">
@@ -387,7 +378,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
 
     <script src="shader.js?v=13" defer></script>
-    <script src="animations.js?v=52" defer></script>
+    <script src="animations.js?v=54" defer></script>
     <script src="fps.js?v=1" defer></script>
     
     <!-- Vercel Web Analytics -->

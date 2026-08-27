@@ -1180,13 +1180,13 @@
 
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
         const mobile = matchMedia('(max-width: 768px)').matches;
-        const cssOrbit = CSS.supports('(animation-timeline: view()) and (animation-range: 0% 100%)');
 
         function setFaceState(progress) {
             const onQq = progress > 0.5;
             if (fromFace) {
                 fromFace.toggleAttribute('inert', onQq);
-                fromFace.setAttribute('aria-hidden', 'true');
+                if (onQq) fromFace.setAttribute('aria-hidden', 'true');
+                else fromFace.removeAttribute('aria-hidden');
             }
             toFace.toggleAttribute('inert', !onQq);
             if (onQq) toFace.removeAttribute('aria-hidden');
@@ -1194,7 +1194,10 @@
         }
 
         if (reduced || mobile) {
-            setFaceState(1);
+            if (fromFace) {
+                fromFace.removeAttribute('inert');
+                fromFace.removeAttribute('aria-hidden');
+            }
             toFace.removeAttribute('inert');
             toFace.removeAttribute('aria-hidden');
             return;
@@ -1225,30 +1228,17 @@
         }
         window.addEventListener('scroll', armOrbitSnap, { passive: true });
 
-        if (!cssOrbit) {
-            let raf = 0;
-            function paint() {
-                raf = 0;
-                const p = progressFromScroll();
-                ring.style.transform = 'rotateY(' + (-180 * p).toFixed(2) + 'deg)';
-                setFaceState(p);
-            }
-            function onScroll() {
-                if (!raf) raf = requestAnimationFrame(paint);
-            }
-            window.addEventListener('scroll', onScroll, { passive: true });
-            paint();
-        } else {
-            let raf = 0;
-            function sync() {
-                raf = 0;
-                setFaceState(progressFromScroll());
-            }
-            window.addEventListener('scroll', function () {
-                if (!raf) raf = requestAnimationFrame(sync);
-            }, { passive: true });
-            sync();
+        let raf = 0;
+        function paint() {
+            raf = 0;
+            const p = progressFromScroll();
+            ring.style.transform = 'rotateY(' + (-90 * p).toFixed(2) + 'deg) translateZ(calc(var(--orbit-r) * -1))';
+            setFaceState(p);
         }
+        window.addEventListener('scroll', function () {
+            if (!raf) raf = requestAnimationFrame(paint);
+        }, { passive: true });
+        paint();
     })();
 
 })();
