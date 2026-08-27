@@ -644,7 +644,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .greet-jp{font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap}
 .greet-cn{font-size:12px;color:rgba(255,255,255,.85);white-space:nowrap}
 
-/* ===== GitHub → QQ 圆柱：文档流 200vh，sticky 钉一屏。面内先滚，到边再 rotateY 0→-90 ===== */
+/* ===== GitHub → QQ：整屏面贴在圆柱上（半径 ~50vw），不是 880px 小方块的正/侧面 ===== */
 .orbit-track{
     position:relative;
     height:200vh;
@@ -659,47 +659,53 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     position:sticky;top:0;
     height:100vh;height:100dvh;
     overflow:hidden;
-    perspective:1800px;
-    perspective-origin:50% 50%;
+    perspective:2200px;
+    perspective-origin:50% 46%;
 }
 .orbit-stage{
-    height:100%;
-    display:flex;align-items:center;justify-content:center;
+    position:absolute;inset:0;
     transform-style:preserve-3d;
-    padding:0 22px;
+    padding:0;
 }
 .orbit-ring{
-    --orbit-r: min(420px, 38vw);
-    position:relative;
-    width:min(880px, 100%);
-    height:100%;
+    --orbit-r: 120vw;
+    --orbit-span: 45deg;
+    position:absolute;inset:0;
+    width:100%;height:100%;
     transform-style:preserve-3d;
-    transform:rotateY(0deg) translateZ(calc(var(--orbit-r) * -1));
+    transform:translateZ(calc(var(--orbit-r) * -1)) rotateY(0deg);
     will-change:transform;
 }
 .orbit-face{
     position:absolute;inset:0;
-    display:flex;align-items:flex-start;justify-content:center;
+    width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
-    min-height:0;padding:72px 0 28px;
+    min-height:0;
+    padding:max(72px, env(safe-area-inset-top, 0px)) 22px max(28px, env(safe-area-inset-bottom, 0px));
     overflow:auto;
     overscroll-behavior-y:auto;
     -webkit-overflow-scrolling:touch;
+    opacity:.16;
+    visibility:hidden;
+    pointer-events:none;
 }
 .orbit-face--from{transform:rotateY(0deg) translateZ(var(--orbit-r))}
-.orbit-face--to{transform:rotateY(90deg) translateZ(var(--orbit-r))}
-.orbit-face.is-parked{visibility:hidden;pointer-events:none}
-.orbit-face .card{width:100%;max-width:880px;margin:0 auto}
+.orbit-face--to{transform:rotateY(var(--orbit-span, 45deg)) translateZ(var(--orbit-r))}
+.orbit-face.is-near{visibility:visible;opacity:.48}
+.orbit-face.is-active{visibility:visible;opacity:1;z-index:2;pointer-events:auto}
+.orbit-face.is-parked{visibility:hidden;pointer-events:none;opacity:0}
+.orbit-face .card{width:100%;max-width:880px;margin:0 auto;flex:0 0 auto}
 .orbit-track .page,
 .orbit-face.page,
 #netease.orbit-face,
 #github.orbit-face{
     content-visibility:visible;contain-intrinsic-size:auto;
-    min-height:0;align-items:flex-start;
+    min-height:0;align-items:center;
 }
 #github.orbit-face,
-#netease.orbit-face{padding:72px 0 28px}
+#netease.orbit-face{padding:max(72px, env(safe-area-inset-top, 0px)) 22px max(28px, env(safe-area-inset-bottom, 0px))}
 
 /* 200vh 轨道在 100vh 视口里永远走不到 entry 100%，CSS view-timeline 会冻在 0°。
    旋转改由 JS 按轨道滚动进度写 rotateY。 */

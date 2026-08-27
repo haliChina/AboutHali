@@ -1183,14 +1183,18 @@
 
         function setFaceState(progress) {
             const onQq = progress > 0.5;
-            const turning = progress > 0.08 && progress < 0.92;
+            const turning = progress > 0.12 && progress < 0.88;
             if (fromFace) {
                 fromFace.toggleAttribute('inert', onQq);
+                fromFace.classList.toggle('is-active', !onQq);
+                fromFace.classList.toggle('is-near', turning && onQq);
                 fromFace.classList.toggle('is-parked', !turning && onQq);
                 if (onQq) fromFace.setAttribute('aria-hidden', 'true');
                 else fromFace.removeAttribute('aria-hidden');
             }
             toFace.toggleAttribute('inert', !onQq);
+            toFace.classList.toggle('is-active', onQq);
+            toFace.classList.toggle('is-near', turning && !onQq);
             toFace.classList.toggle('is-parked', !turning && !onQq);
             if (onQq) toFace.removeAttribute('aria-hidden');
             else toFace.setAttribute('aria-hidden', 'true');
@@ -1205,8 +1209,21 @@
             toFace.removeAttribute('inert');
             toFace.removeAttribute('aria-hidden');
             toFace.classList.remove('is-parked');
+            toFace.classList.remove('is-near');
+            if (fromFace) {
+                fromFace.classList.remove('is-near');
+                fromFace.classList.add('is-active');
+            }
+            toFace.classList.add('is-active');
             return;
         }
+
+        function syncRadius() {
+            const w = window.innerWidth || 1;
+            ring.style.setProperty('--orbit-r', Math.round(w * 1.2) + 'px');
+        }
+        syncRadius();
+        window.addEventListener('resize', syncRadius, { passive: true });
 
         function progressFromScroll() {
             const rect = track.getBoundingClientRect();
@@ -1247,7 +1264,7 @@
         function paint() {
             raf = 0;
             const p = progressFromScroll();
-            ring.style.transform = 'rotateY(' + (-90 * p).toFixed(2) + 'deg) translateZ(calc(var(--orbit-r) * -1))';
+            ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
             setFaceState(p);
             const face = p > 0.5 ? toFace : fromFace;
             if (face && face !== lastFace) {
