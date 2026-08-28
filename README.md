@@ -71,7 +71,7 @@ GET https://api.github.com/users/haliChina/repos?sort=pushed&per_page=100
 - 邮箱复制和 Toast 反馈
 - GitHub 项目列表与统计卡片
 - QQ 音乐资料及社交入口
-- Web App Manifest 和自定义 404
+- Web App Manifest 和自定义 404（夜樱坐标页：丢失路径 + 「不在」+ 回首页）
 - Vercel 缓存与基础安全响应头
 
 ## 本地预览

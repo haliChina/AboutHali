@@ -2,106 +2,176 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 · 迷失了</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>404 · 不在 · About Hali</title>
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#07070b">
+    <meta name="description" content="这条路径不在 About Hali 上。">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
         :root{
-            --accent:#ff8fb6;--accent-2:#ffc5d8;--accent-3:#ff6b9d;
+            --bg:#07070b;
+            --text:#fff8fc;
+            --text-dim:#f1bfd2;
+            --text-faint:#d885a2;
+            --accent:#ff8fb6;
+            --accent-2:#ffc5d8;
+            --line:rgba(255,255,255,.10);
             --ease:cubic-bezier(.22,.61,.36,1);
-            --spring:cubic-bezier(.34,1.45,.5,1);
+            --font-display:'Noto Serif JP','PingFang SC',serif;
+            --font-body:'Noto Sans JP','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;
+            --font-mono:'JetBrains Mono',ui-monospace,monospace;
         }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--text)}
         body{
-            min-height:100vh;display:flex;align-items:center;justify-content:center;
-            background:#07070b;color:#fff8fc;overflow:hidden;
-            font-family:'Noto Sans JP','PingFang SC',-apple-system,sans-serif;
-            position:relative;
+            min-height:100vh;min-height:100dvh;
+            font-family:var(--font-body);
+            -webkit-font-smoothing:antialiased;
+            overflow:hidden;
         }
-        /* 背景光晕 */
-        body::before{
-            content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+        .skip{
+            position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)
+        }
+        .skip:focus,.skip:focus-visible{
+            position:fixed;left:.6rem;top:.6rem;width:auto;height:auto;clip:auto;
+            z-index:20;padding:.7rem 1rem;border-radius:10px;
+            color:#1a0610;background:var(--accent-2);font-weight:700;
+            outline:2px solid #fff;outline-offset:3px
+        }
+        .bg{
+            position:fixed;inset:0;pointer-events:none;
             background:
-                radial-gradient(ellipse 60% 50% at 30% 40%,rgba(255,143,182,.08),transparent 60%),
-                radial-gradient(ellipse 50% 40% at 70% 60%,rgba(196,78,255,.06),transparent 60%);
+                radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,143,182,.07),transparent 60%),
+                radial-gradient(ellipse 45% 40% at 12% 88%,rgba(196,78,255,.05),transparent 55%),
+                radial-gradient(ellipse 40% 35% at 92% 18%,rgba(255,107,157,.05),transparent 50%),
+                var(--bg);
         }
-        /* 浮动光圈 */
-        .orb{position:fixed;border-radius:50%;filter:blur(60px);z-index:0;pointer-events:none;mix-blend-mode:screen}
-        .orb-1{width:400px;height:400px;background:radial-gradient(circle,rgba(255,143,182,.15),transparent 70%);top:-10%;left:-5%;animation:orbFloat1 14s ease-in-out infinite}
-        .orb-2{width:350px;height:350px;background:radial-gradient(circle,rgba(255,107,157,.12),transparent 70%);bottom:-10%;right:-5%;animation:orbFloat2 18s ease-in-out infinite}
-        @keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.1)}}
-        @keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-40px) scale(.9)}}
-
-        .wrap{position:relative;z-index:1;text-align:center;padding:20px;max-width:480px}
-        /* 404 大字 */
-        .code{
-            font-size:clamp(7rem,22vw,12rem);font-weight:900;line-height:.9;
-            background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 50%,#c44eff 100%);
-            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-            letter-spacing:-.04em;position:relative;display:inline-block;
-            animation:codeIn 1s var(--spring) both;
+        .grain{
+            position:fixed;inset:0;pointer-events:none;opacity:.22;mix-blend-mode:overlay;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
         }
-        .code::after{
-            content:'';position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
-            width:60%;height:2px;border-radius:2px;
-            background:linear-gradient(90deg,transparent,var(--accent),transparent);
-            opacity:.6;
+        .petals{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+        .petal{
+            position:absolute;top:-8%;
+            width:10px;height:14px;border-radius:70% 0 70% 0;
+            background:linear-gradient(135deg,rgba(255,197,216,.85),rgba(255,107,157,.35));
+            opacity:.55;
+            animation:fall linear infinite;
         }
-        @keyframes codeIn{0%{opacity:0;transform:scale(.7) translateY(20px)}100%{opacity:1;transform:none}}
-        /* 樱花图标 */
-        .icon{
-            font-size:2.5rem;margin-bottom:8px;display:inline-block;
-            animation:iconFloat 3s ease-in-out infinite;
+        .petal:nth-child(1){left:8%;animation-duration:14s;animation-delay:-2s}
+        .petal:nth-child(2){left:22%;width:7px;height:10px;animation-duration:18s;animation-delay:-7s;opacity:.35}
+        .petal:nth-child(3){left:41%;animation-duration:16s;animation-delay:-11s}
+        .petal:nth-child(4){left:63%;width:8px;height:12px;animation-duration:20s;animation-delay:-4s;opacity:.4}
+        .petal:nth-child(5){left:78%;animation-duration:15s;animation-delay:-9s}
+        .petal:nth-child(6){left:91%;width:6px;height:9px;animation-duration:22s;animation-delay:-13s;opacity:.3}
+        @keyframes fall{
+            0%{transform:translate3d(0,-10vh,0) rotate(12deg)}
+            100%{transform:translate3d(-40px,110vh,0) rotate(240deg)}
         }
-        @keyframes iconFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(8deg)}}
-        /* 标题 */
-        .title{
-            font-size:1.3rem;font-weight:700;margin:24px 0 8px;
-            animation:textIn .8s var(--ease) .2s both;
+        .frame{
+            position:relative;z-index:1;
+            min-height:100vh;min-height:100dvh;
+            display:grid;
+            grid-template-rows:auto 1fr auto;
+            padding:max(28px, env(safe-area-inset-top)) 28px max(28px, env(safe-area-inset-bottom));
         }
-        .desc{
-            color:#d885a2;font-size:.95rem;line-height:1.7;margin-bottom:32px;
-            animation:textIn .8s var(--ease) .35s both;
+        header,footer{
+            display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+            font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+            color:var(--text-faint);
         }
-        @keyframes textIn{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:none}}
-        /* 按钮 */
-        .btn{
-            display:inline-flex;align-items:center;gap:8px;
-            padding:14px 32px;border-radius:16px;
-            background:linear-gradient(120deg,var(--accent),var(--accent-3));
-            color:#1a0610;font-weight:700;text-decoration:none;font-size:.95rem;
-            transition:transform .35s var(--spring),box-shadow .35s var(--ease);
-            box-shadow:0 8px 24px -8px rgba(255,143,182,.4);
-            animation:textIn .8s var(--ease) .5s both;
+        header a,footer a{
+            color:var(--accent-2);text-decoration:none;letter-spacing:.14em;
         }
-        .btn:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 16px 40px -8px rgba(255,143,182,.6)}
-        .btn:active{transform:translateY(-1px) scale(1.02)}
-        .btn svg{width:18px;height:18px}
-        /* 装饰线 */
-        .deco{
-            position:fixed;z-index:0;pointer-events:none;opacity:.15;
+        header a:hover,footer a:hover{color:#fff}
+        header a:focus-visible,footer a:focus-visible,.home:focus-visible{
+            outline:2px solid var(--accent-2);outline-offset:4px;border-radius:4px
         }
-        .deco-tl{top:20px;left:20px;width:60px;height:60px;
-            border-top:2px solid var(--accent);border-left:2px solid var(--accent);border-radius:8px 0 0 0}
-        .deco-br{bottom:20px;right:20px;width:60px;height:60px;
-            border-bottom:2px solid var(--accent);border-right:2px solid var(--accent);border-radius:0 0 8px 0}
+        .stage{
+            display:grid;align-content:center;
+            max-width:920px;width:min(100%,920px);margin:0 auto;
+            padding:48px 0;
+        }
+        .kicker{
+            font-family:var(--font-mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+            color:var(--accent);margin:0 0 18px;
+        }
+        .word{
+            font-family:var(--font-display);font-weight:900;
+            font-size:clamp(5.4rem,18vw,11rem);
+            line-height:.82;letter-spacing:-.06em;margin:0;
+            color:var(--text);
+        }
+        .word em{
+            font-style:normal;color:transparent;
+            -webkit-text-stroke:1px rgba(255,143,182,.55);
+        }
+        .rule{
+            width:min(220px,40vw);height:2px;margin:28px 0 22px;border:0;
+            background:linear-gradient(90deg,var(--accent),transparent);
+        }
+        .path{
+            font-family:var(--font-mono);font-size:clamp(.78rem,2.2vw,.95rem);
+            color:var(--text-dim);word-break:break-all;margin:0 0 28px;
+        }
+        .path span{color:var(--text-faint)}
+        .home{
+            display:inline-flex;align-items:center;gap:10px;
+            color:var(--text);text-decoration:none;
+            font-family:var(--font-display);font-weight:700;font-size:1.05rem;
+            border-bottom:1px solid rgba(255,143,182,.45);padding-bottom:4px;
+        }
+        .home:hover{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+        .home svg{width:16px;height:16px}
+        @media (prefers-reduced-motion: reduce){
+            .petal{animation:none;opacity:.2;top:18%}
+        }
+        @media (max-width:640px){
+            .frame{padding:max(22px, env(safe-area-inset-top)) 18px max(22px, env(safe-area-inset-bottom))}
+            header,footer{flex-wrap:wrap;gap:8px}
+            .word{font-size:clamp(4.2rem,28vw,7.2rem)}
+        }
     </style>
 </head>
 <body>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="deco deco-tl"></div>
-    <div class="deco deco-br"></div>
-    <div class="wrap">
-        <div class="icon">🌸</div>
-        <div class="code">404</div>
-        <h1 class="title">迷失在樱花中</h1>
-        <p class="desc">你寻找的页面不存在，可能已被移动或删除。<br>不如回到起点，重新出发。</p>
-        <a href="/" class="btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            返回首页
-        </a>
+    <a class="skip" href="#home">跳到返回首页</a>
+    <div class="bg" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="petals" aria-hidden="true">
+        <i class="petal"></i><i class="petal"></i><i class="petal"></i>
+        <i class="petal"></i><i class="petal"></i><i class="petal"></i>
     </div>
+    <div class="frame">
+        <header>
+            <span>About Hali</span>
+            <span>HTTP 404</span>
+        </header>
+        <main class="stage">
+            <p class="kicker">Not on this map</p>
+            <h1 class="word">不<em>在</em></h1>
+            <hr class="rule">
+            <p class="path"><span>PATH</span> <code id="lost">/</code></p>
+            <a class="home" id="home" href="/">
+                回到起点
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+        </main>
+        <footer>
+            <span>userhali.com</span>
+            <a href="/">index</a>
+        </footer>
+    </div>
+    <script>
+        (function () {
+            var el = document.getElementById('lost');
+            if (!el) return;
+            var path = location.pathname + location.search;
+            el.textContent = path || '/';
+        })();
+    </script>
 </body>
 </html>
