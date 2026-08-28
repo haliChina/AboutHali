@@ -525,7 +525,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 }
 @media (max-width:768px){
     .dynamic-island{top:14px}.island-cluster{gap:8px}
-    .page{padding:110px 16px 70px}.card-body{padding:22px 18px}.netease-body{gap:22px}.gh-profile{justify-content:center;text-align:center}.netease-player{flex-direction:column;align-items:center;text-align:center;max-width:100%;gap:14px}.np-cover-wrap{width:110px;height:110px}
+    .page{padding:110px 16px 70px}.card-body{padding:22px 18px}.netease-body{gap:22px}.gh-profile{justify-content:center;text-align:center}.netease-player{flex-direction:column;align-items:center;max-width:100%;gap:14px}.np-cover-wrap{width:110px;height:110px}
     .island-nav{padding-inline:10px}.nav-buttons{gap:2px}.island-nav-btn{padding:5px 10px;font-size:12px}
     .island-music-card{padding:14px 16px 12px}.mc-cover,.sat-card-cover{width:58px;height:58px;border-radius:14px}.mc-title,.sat-title{font-size:16px}.mc-artist,.sat-artist{font-size:12px}
     .music-satellite[data-mode="pill"]{width:66px;height:34px;border-radius:17px}.music-satellite[data-mode="icon"]{width:34px;height:34px;border-radius:17px}.music-satellite[data-mode="open"]{width:min(352px,calc(100vw - 28px));height:174px;border-radius:30px}.satellite-card{padding:14px 16px 12px}
@@ -539,6 +539,15 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .netease-player .np-song{text-align:left;align-self:stretch;width:100%;display:flex;flex-direction:column;gap:2px;min-width:0}
 .netease-player .np-title{display:block;text-align:left;min-width:0;word-break:break-word;overflow-wrap:anywhere}
 .netease-player .np-artist{display:block;text-align:right;min-width:0;word-break:break-word;overflow-wrap:anywhere}
+.netease-player .np-playlist,
+.netease-player .np-song-item{text-align:left}
+.netease-player .np-song-item .idx{text-align:left}
+@media (max-width:768px){
+    .netease-player .np-playlist,
+    .netease-player .np-song-item{width:100%;text-align:left}
+    .netease-player .np-song-item .nm{text-align:left}
+    .netease-player .np-song-item .ar{text-align:right}
+}
 
 /* ===== 远距视口外的 section 跳过渲染（MWG defer-rendering-heavy-content，全端生效） ===== */
 .page{content-visibility:auto;contain-intrinsic-size:auto none auto 100vh}
