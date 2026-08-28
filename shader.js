@@ -35,6 +35,10 @@
 
     const VERT = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
 
+    /* Sakura fragment: "Sakura Bliss" by Philippe Desgranges
+       https://www.shadertoy.com/view/mtKGRh
+       CC BY-NC-SA 3.0 Unported. N14() credited there to Martijn Steinrucken (BigWings).
+       Fluid / iHeight / iWarp path below is local. NC-SA is not AGPL-compatible. */
     const SHADER = `
 #define S(a,b,c) smoothstep(a,b,c)
 #define sat(a) clamp(a,0.0,1.0)

@@ -37,8 +37,9 @@ default
 
 ### WebGL 樱花背景
 
-`shader.js` 使用 WebGL fragment shader 生成多层樱花粒子：
+`shader.js` 使用 WebGL fragment shader 生成多层樱花粒子。樱花造型来自 Philippe Desgranges 的 [*Sakura Bliss*](https://www.shadertoy.com/view/mtKGRh)（CC BY-NC-SA 3.0 Unported；其中 `N14()` 原作注明借自 Martijn Steinrucken / BigWings）。本地加了流体高度场折射。**CC BY-NC-SA 与仓库 AGPLv3 不兼容**（NC 禁止商业使用，SA 要求衍生作保持相同条款）；整站 AGPL 不能覆盖这块 GLSL。处理：换许可/换 shader/向作者要例外，在此之前按原作 NC-SA 约束这块代码。
 
+其余运行时约定：
 - 桌面端目标 60 FPS，移动端目标 30 FPS
 - 移动端和高 DPI 设备降低渲染分辨率
 - 桌面细指针 hover 下，鼠标划过会在 256² 高度场上溅起水流并折射樱花 UV
@@ -146,3 +147,5 @@ AboutHali/
 ## License
 
 仓库根目录的 [`LICENSE`](./LICENSE) 为 GNU Affero General Public License v3.0。`package.json` 的 `license` 字段为 `AGPL-3.0-only`。网络部署修改版须提供对应源码。
+
+樱花 fragment（`shader.js` 内嵌 GLSL，来自 [Sakura Bliss](https://www.shadertoy.com/view/mtKGRh)）单独适用 CC BY-NC-SA 3.0 Unported，**不能**按 AGPL 再许可。整仓 AGPL 不覆盖这块。
