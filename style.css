@@ -305,10 +305,10 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .proj-time{margin-left:auto}
 .proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
 .proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 18px;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;
-    border:1px solid var(--line);color:var(--text);transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
+    border:1px solid var(--line);color:var(--text);transition:transform .25s var(--spring),border-color .25s var(--ease),filter .25s var(--ease),box-shadow .25s var(--ease)}
 .proj-link:hover{background:var(--glass-strong);transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
 .proj-link--primary{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent;box-shadow:0 6px 18px -8px rgba(255,107,157,.55)}
-.proj-link--primary:hover{filter:brightness(1.08);box-shadow:0 10px 24px -8px rgba(255,107,157,.7)}
+.proj-link--primary:hover{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent;filter:brightness(1.08);box-shadow:0 10px 24px -8px rgba(255,107,159,.7)}
 .proj-source{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px;flex-shrink:0}
 .proj-source[src="github"],.proj-source:not([src="dns"]){background:rgba(255,255,255,.08);color:var(--text-dim)}
 .proj-card .proj-source{background:rgba(255,255,255,.08);color:var(--text-dim)}
