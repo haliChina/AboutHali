@@ -1236,16 +1236,13 @@
             const vh = window.innerHeight || 1;
             return rect.top <= 1 && rect.bottom > vh + 1;
         }
-        function routeWheel(e) {
-            if (navJump || e.ctrlKey) return;
-            if (!pinIsStuck()) return;
-            e.preventDefault();
-            document.documentElement.scrollTop += e.deltaY;
+        function syncScrollBehavior() {
+            document.documentElement.style.scrollBehavior = pinIsStuck() ? 'auto' : '';
         }
-        window.addEventListener('wheel', routeWheel, { passive: false, capture: true });
         let raf = 0;
         function paint() {
             raf = 0;
+            syncScrollBehavior();
             const p = progressFromScroll();
             ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
             setFaceState(p);
