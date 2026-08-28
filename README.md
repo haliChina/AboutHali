@@ -145,4 +145,4 @@ AboutHali/
 
 ## License
 
-仓库根目录的 [`LICENSE`](./LICENSE) 为 GNU General Public License v3.0。`package.json` 中的 `MIT` 字段与许可证文件不一致；分发和修改时应以实际许可证文件及权利人说明为准。
+仓库根目录的 [`LICENSE`](./LICENSE) 为 GNU Affero General Public License v3.0。`package.json` 的 `license` 字段为 `AGPL-3.0-only`。网络部署修改版须提供对应源码。
