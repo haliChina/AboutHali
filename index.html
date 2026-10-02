@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=112">
+    <link rel="stylesheet" href="style.css?v=116">
     <script>
         /* 清掉本机 8765 / 旧预览残留的 Service Worker，避免 3D 版 skip-link 继续盖在流体页上 */
         if ('serviceWorker' in navigator) {
@@ -229,6 +229,13 @@
                          onerror="this.replaceWith(window.__ghStatsFallback('Top Languages'))">
                 </div>
 
+                <div class="section-label section-label-left">贡献活动 · Contributions</div>
+                <div class="gh-activity-wrap">
+                    <div id="gh-activity" data-user="haliChina">
+                        <div class="gha-loading">加载贡献图…</div>
+                    </div>
+                </div>
+
                 <div class="section-label section-label-left">技能栈 · Skills</div>
                 <div class="skill-grid">
                     <div class="skill" style="--brand:#f7df1e">
@@ -375,11 +382,12 @@
         </div>
     </section>
 
-    <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved</footer>
+    <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved · <a href="https://rareui.com" target="_blank" rel="noopener" class="footer-credit">GitHub Activity by Rare UI</a></footer>
 
-    <script src="shader.js?v=13" defer></script>
-    <script src="animations.js?v=59" defer></script>
-    <script src="fps.js?v=1" defer></script>
+    <script src="shader.js?v=14" defer></script>
+    <script src="animations.js?v=60" defer></script>
+    <script src="github-activity.js?v=6" defer></script>
+    <script src="fps.js?v=2" defer></script>
     
     <!-- Vercel Web Analytics -->
     <script>

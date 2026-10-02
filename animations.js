@@ -571,6 +571,50 @@
     const indicator = document.getElementById('indicator');
     let navJump = false;
 
+    /* ===== rAF 平滑滚动（替代 CSS scroll-behavior:smooth）=====
+       原生 CSS 平滑滚动与 orbit pin 的每帧 scrollBehavior 改写互斥，
+       会被 Chromium 中途取消，造成「滚到一半停住」。这里用 rAF 自己插值，
+       orbit 的 rotateY 仍由 scroll 事件驱动，整条链路只有一个滚动写入者。
+       - 支持中途人为介入（wheel/touch/键盘）时立即让出控制权；
+       - prefers-reduced-motion / perf-lite 下退化为瞬时跳转。 */
+    let smoothRaf = 0;
+    function cancelSmoothScroll() {
+        if (smoothRaf) { cancelAnimationFrame(smoothRaf); smoothRaf = 0; }
+    }
+    function smoothScrollTo(targetY, duration) {
+        cancelSmoothScroll();
+        const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const dest = Math.max(0, Math.min(targetY, maxY));
+        const lite = matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                     document.documentElement.classList.contains('perf-lite');
+        const startY = window.scrollY || document.documentElement.scrollTop || 0;
+        const dist = dest - startY;
+        if (lite || Math.abs(dist) < 2) { window.scrollTo(0, dest); return; }
+        // 距离自适应时长：长距离更久，封顶 900ms
+        const dur = duration || Math.min(900, Math.max(360, Math.abs(dist) * 0.5));
+        const t0 = performance.now();
+        const ease = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2); // easeInOutCubic
+        let interrupted = false;
+        const giveUp = () => { interrupted = true; };
+        // 用户主动滚动则放弃程序化动画
+        window.addEventListener('wheel', giveUp, { passive: true, once: true });
+        window.addEventListener('touchstart', giveUp, { passive: true, once: true });
+        window.addEventListener('keydown', giveUp, { once: true });
+        function step(now) {
+            if (interrupted) { smoothRaf = 0; cleanup(); return; }
+            const p = Math.min(1, (now - t0) / dur);
+            window.scrollTo(0, Math.round(startY + dist * ease(p)));
+            if (p < 1) { smoothRaf = requestAnimationFrame(step); }
+            else { smoothRaf = 0; cleanup(); }
+        }
+        function cleanup() {
+            window.removeEventListener('wheel', giveUp);
+            window.removeEventListener('touchstart', giveUp);
+            window.removeEventListener('keydown', giveUp);
+        }
+        smoothRaf = requestAnimationFrame(step);
+    }
+
     function moveIndicatorTo(btn) {
         if (!pillNav || !indicator || !btn) return;
         const navRect = pillNav.getBoundingClientRect();
@@ -596,7 +640,7 @@
         else if (target === '#netease' && orbitPin) el = orbitPin;
         if (!el) return;
         const y = el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
-        window.scrollTo({ top: y, behavior: smoothBehavior() });
+        smoothScrollTo(y);
     }
     navBtns.forEach(btn => {
         btn.addEventListener('click', e => {
@@ -692,9 +736,13 @@
     setInterval(() => island.classList.toggle('show-idle-time'), 4200);
 
     const explore = document.querySelector('.explore-btn');
-    /* MWG accessibility: reduced-motion 用户跳过平滑滚动 */
-    const smoothBehavior = () => matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    if (explore) explore.addEventListener('click', () => document.querySelector('#github').scrollIntoView({ behavior: smoothBehavior(), block: 'start' }));
+    /* 统一走 rAF 平滑滚动（见 smoothScrollTo），避免 CSS smooth 被 orbit 取消 */
+    if (explore) explore.addEventListener('click', () => {
+        const gh = document.querySelector('#github');
+        if (!gh) return;
+        const y = gh.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+        smoothScrollTo(y);
+    });
 
     const twEl = document.querySelector('.typewriter-text');
     const phrases = ['今後也請多多指教。', '願你的明天比今天滿溢更多的幸福與笑容。', '世界由無數的言語構成。','所謂人生，就是自己筆下的故事。', '幸福的活下去吧！', "人在孤獨中降生，在孤獨中死去。", 'Welcome To Real Me!', '這個世界，總有一天也會微笑。', 'userhali.com', 'Hali'];
@@ -1198,6 +1246,12 @@
             toFace.classList.toggle('is-parked', !turning && !onQq);
             if (onQq) toFace.removeAttribute('aria-hidden');
             else toFace.setAttribute('aria-hidden', 'true');
+
+            /* 面完全停靠(隐藏)时把它的内部滚动位复位到顶，
+               下次转回来总是从头像/标题开始，而不是停在上次读到的半截。
+               只在 parked(opacity:0) 时做，避免旋转中(near, 半透明可见)内容跳动。 */
+            if (fromFace && !turning && onQq && fromFace.scrollTop) fromFace.scrollTop = 0;
+            if (!turning && !onQq && toFace.scrollTop) toFace.scrollTop = 0;
         }
 
         if (reduced || mobile) {
@@ -1231,18 +1285,9 @@
             const travel = Math.max(1, track.offsetHeight - vh);
             return Math.max(0, Math.min(1, -rect.top / travel));
         }
-        function pinIsStuck() {
-            const rect = track.getBoundingClientRect();
-            const vh = window.innerHeight || 1;
-            return rect.top <= 1 && rect.bottom > vh + 1;
-        }
-        function syncScrollBehavior() {
-            document.documentElement.style.scrollBehavior = pinIsStuck() ? 'auto' : '';
-        }
         let raf = 0;
         function paint() {
             raf = 0;
-            syncScrollBehavior();
             const p = progressFromScroll();
             ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
             setFaceState(p);

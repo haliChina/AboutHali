@@ -507,9 +507,20 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         play();
     }
 
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else kick(); });
-    window.addEventListener('pageshow', kick);
-    document.addEventListener('intro-done', kick);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (!perfLite) kick(); });
+    window.addEventListener('pageshow', () => { if (!perfLite) kick(); });
+    document.addEventListener('intro-done', () => { if (!perfLite) kick(); });
+
+    /* FPS 守卫联动：perf-lite 时彻底停渲染循环省电；恢复时重新起循环。
+       背景由 CSS 的 html.perf-lite #sakura-canvas{display:none} 接管隐藏。 */
+    let perfLite = false;
+    document.addEventListener('perf-mode', (e) => {
+        const lite = !!(e.detail && e.detail.lite);
+        if (lite === perfLite) return;
+        perfLite = lite;
+        if (lite) { stop(); }
+        else if (!document.hidden) { kick(); }
+    });
 
     // Respect reduced motion preference
     if (reducedMotion) {

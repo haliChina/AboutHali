@@ -22,7 +22,11 @@
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* 滚动平滑改由 JS rAF 实现（smoothScrollTo）。
+   不再用 CSS `scroll-behavior:smooth`：它与 orbit pin 每帧写
+   documentElement.style.scrollBehavior 冲突，会把 scrollTo 动画中途
+   取消，导致「滚到一半卡住、只能手动拖条/滚轮救」。见 animations.js。 */
+html{scroll-behavior:auto}
 body{
     margin:0;padding:0;
     min-height:100vh;
@@ -316,6 +320,8 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 
 .footer{text-align:center;padding:40px 20px;color:var(--text-faint);font-size:.85rem;letter-spacing:.5px;position:relative}
 .footer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.footer-credit{color:var(--text-faint);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.2);transition:color .25s var(--ease),border-color .25s var(--ease)}
+.footer-credit:hover{color:var(--accent-2);border-color:var(--accent-2)}
 
 .dynamic-island{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;justify-content:center;width:100vw;pointer-events:none}
 .island-cluster{display:flex;align-items:flex-start;justify-content:center;gap:8px;pointer-events:none}
@@ -690,6 +696,9 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     position:absolute;inset:0;
     width:100%;height:100%;
     display:flex;align-items:center;justify-content:center;
+    /* 卡片比视口高时（如 GitHub 面加了贡献图后），safe center 会自动退回顶对齐，
+       保证头像/身份信息永远不被裁掉，溢出留在底部，而内容能放下时仍居中更好看。 */
+    align-items:safe center;
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
     min-height:0;
@@ -705,6 +714,17 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .orbit-face.is-near{visibility:visible;opacity:.48}
 .orbit-face.is-active{visibility:visible;opacity:1;z-index:2;pointer-events:auto}
 .orbit-face.is-parked{visibility:hidden;pointer-events:none;opacity:0}
+/* 正对镜头的那一面若内容高于视口（GitHub 面叠加贡献图后会超高），
+   允许其内部纵向滚动，避免头像/技能被永久裁掉。滚到边界后，滚轮手势
+   经 scroll-chaining 自然冒泡到页面 → 推进轨道旋转，于是「读 GitHub →
+   继续下滑 → 翻到 QQ」是一条连贯链路。overscroll-behavior-y:auto 保留链式滚动。
+   旋转过程中的面不可滚（overflow:hidden 默认），避免歪斜滚动。 */
+.orbit-face.is-active{
+    overflow-y:auto;
+    overscroll-behavior-y:auto;
+    scrollbar-width:none;
+}
+.orbit-face.is-active::-webkit-scrollbar{width:0;height:0}
 .orbit-face .card{width:100%;max-width:880px;margin:0 auto;flex:0 0 auto}
 .orbit-track .page,
 .orbit-face.page,
@@ -768,3 +788,151 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     }
     .orbit-snap-end{display:none;height:0}
 }
+
+/* ===================================================================
+   GitHub Activity widget — 贡献热力图 + 活跃仓库面板
+   原生实现，蒸馏自 Rare UI <GitHubActivity>（致谢见页脚）
+   =================================================================== */
+.gh-activity-wrap{margin:30px 0 6px}
+#gh-activity{width:100%}
+.gha-loading{padding:40px 0;text-align:center;color:var(--text-faint);font-size:.86rem}
+.gha-card{
+    position:relative;width:100%;
+    border-radius:20px;
+    background:rgba(255,255,255,.028);
+    border:1px solid var(--line);
+    padding:18px 18px 20px;
+    overflow:hidden;
+}
+.gha-card.has-panel{padding-bottom:70px}
+.gha-heading{margin:0 0 14px;padding:0 2px;font-size:.98rem;font-weight:600;color:var(--text)}
+.gha-scroll{overflow:hidden;width:100%}
+.gha-grid{position:relative}
+.gha-months{display:flex;justify-content:flex-start}
+.gha-mo{flex:0 0 auto;font-size:10px;line-height:1;color:var(--text-faint);text-align:left}
+.gha-cols{display:flex;justify-content:flex-start}
+.gha-col{display:flex;flex-direction:column}
+.gha-cell{
+    flex:0 0 auto;border-radius:3px;display:block;
+    background:rgba(255,255,255,.055);
+    transition:transform .14s var(--ease),filter .14s var(--ease);
+    animation:ghaPop .22s var(--ease) backwards;
+}
+.gha-no-anim .gha-cell{animation:none}
+@keyframes ghaPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+.gha-cell[data-lvl="1"]{background:rgba(255,143,182,.30)}
+.gha-cell[data-lvl="2"]{background:rgba(255,143,182,.52)}
+.gha-cell[data-lvl="3"]{background:rgba(255,143,182,.76)}
+.gha-cell[data-lvl="4"]{background:var(--accent);box-shadow:0 0 7px -1px rgba(255,143,182,.55)}
+.gha-cell:hover{transform:scale(1.32);filter:brightness(1.18);cursor:default}
+
+/* 悬浮提示 */
+.gha-tip{
+    position:fixed;z-index:50;pointer-events:none;
+    transform:translate(-50%,calc(-100% - 8px));
+    background:var(--text);color:var(--bg);
+    font-size:11px;font-weight:600;line-height:1;
+    padding:6px 9px;border-radius:8px;white-space:nowrap;
+    box-shadow:0 6px 20px -6px rgba(0,0,0,.6);
+    opacity:0;transition:opacity .14s var(--ease);
+}
+
+/* 活跃仓库面板 —— 收起时只露头部，展开时盖住整张卡 */
+.gha-panel{
+    position:absolute;left:12px;right:12px;bottom:12px;top:calc(100% - 68px);
+    border-radius:16px;overflow:hidden;
+    background:rgba(14,12,20,.92);
+    border:1px solid var(--line);
+    backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);
+    box-shadow:0 18px 40px -18px rgba(0,0,0,.8);
+    transition:top .52s var(--spring);
+}
+.gha-panel[data-open="true"]{top:12px}
+.gha-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+.gha-panel-label{font-size:.85rem;color:var(--text-dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gha-panel-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+/* 收起态的权重分布条：宽度 ∝ 提交数，取代原版无意义的堆叠头像 */
+.gha-minibar{display:flex;align-items:center;gap:3px;width:64px;height:4px;flex-shrink:0}
+.gha-minibar i{
+    display:block;height:100%;border-radius:999px;min-width:3px;
+    background:linear-gradient(90deg,var(--accent-3),var(--accent));
+    animation:ghaBarIn .5s var(--ease) backwards;
+}
+.gha-minibar i:nth-child(2){animation-delay:.07s}
+.gha-minibar i:nth-child(3){animation-delay:.14s}
+@keyframes ghaBarIn{from{transform:scaleX(0);transform-origin:left}to{transform:none}}
+.gha-panel[data-open="true"] .gha-minibar{opacity:0;width:0;overflow:hidden;transition:opacity .2s var(--ease)}
+.gha-lang{
+    width:22px;height:22px;flex-shrink:0;
+    display:grid;place-items:center;
+}
+.gha-lang img{width:18px;height:18px;object-fit:contain;display:block}
+.gha-chevron{
+    width:28px;height:28px;flex-shrink:0;border:none;cursor:pointer;
+    border-radius:50%;background:var(--glass-strong);color:var(--accent-2);
+    display:grid;place-items:center;padding:0;
+    transition:background .25s var(--ease),transform .25s var(--spring);
+}
+.gha-chevron:hover{background:rgba(255,255,255,.14)}
+.gha-chevron svg{width:20px;height:20px;transition:transform .4s var(--spring)}
+.gha-panel[data-open="true"] .gha-chevron svg{transform:rotate(180deg)}
+.gha-repo-list{list-style:none;margin:0;padding:4px 6px 8px;opacity:0;transition:opacity .3s var(--ease) .08s}
+.gha-panel[data-open="true"] .gha-repo-list{opacity:1}
+.gha-repo{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:12px;text-decoration:none;color:var(--text);transition:background .22s var(--ease)}
+.gha-repo:hover{background:rgba(255,255,255,.06)}
+.gha-repo-name{flex:1 1 auto;min-width:0;font-size:.9rem;display:flex;align-items:baseline;gap:8px}
+/* 名字必须自己带 min-width:0 才能省略号截断。
+   flex 容器里的裸文本节点会变成匿名 item，拿不到这里的 ellipsis，
+   长仓库名会穿透出去压住右侧的提交数。 */
+.gha-repo-nametext{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gha-repo-lang{font-style:normal;font-size:.68rem;color:var(--text-faint);font-weight:500;flex:0 1 auto;white-space:nowrap}
+.gha-repo-count{flex-shrink:0;font-size:.9rem;font-weight:600;color:var(--accent-2);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:4px}
+.gha-repo-count em{font-style:normal;font-size:.68rem;color:var(--text-faint);font-weight:500}
+
+/* 加载失败兜底 */
+.gha-fail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px;text-align:center}
+.gha-fail-msg{font-size:.84rem;color:var(--text-faint);line-height:1.5;max-width:320px}
+.gha-fail-retry{padding:7px 18px;border-radius:12px;border:1px solid var(--line);background:var(--glass-strong);color:var(--text);font-size:.8rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),border-color .25s var(--ease)}
+.gha-fail-retry:hover{background:rgba(255,255,255,.12);border-color:var(--accent)}
+
+@media (max-width:768px){
+    .gha-card{padding:14px 12px 16px}
+    .gha-card.has-panel{padding-bottom:66px}
+    .gha-heading{font-size:.9rem}
+    /* 窄屏优先保证仓库名可读：语言标注让位，图标已足够表达语言 */
+    .gha-repo{gap:9px;padding:9px 8px}
+    .gha-repo-lang{display:none}
+    .gha-minibar{width:46px}
+}
+
+/* ===== 性能降级：perf-lite 关闭所有重动效（由 FPS 守卫注入） ===== */
+html.perf-lite #sakura-canvas{display:none!important}
+html.perf-lite .bg{background:
+    radial-gradient(135% 120% at 50% 0%,#1a1420 0%,#0c0a12 60%,#07070b 100%)!important}
+html.perf-lite .orbit-ring{will-change:auto!important}
+html.perf-lite *,
+html.perf-lite *::before,
+html.perf-lite *::after{
+    animation-duration:.001s!important;animation-iteration-count:1!important;
+    transition-duration:.08s!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html.perf-lite .island-eq,
+html.perf-lite .scroll-arrow,
+html.perf-lite .intro-skip{animation:none!important}
+.perf-toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    z-index:10000;max-width:88vw;
+    background:rgba(14,12,20,.94);border:1px solid var(--line);
+    color:var(--text);font-size:.8rem;line-height:1.4;
+    padding:11px 16px;border-radius:14px;
+    box-shadow:0 14px 36px -14px rgba(0,0,0,.8);
+    display:flex;align-items:center;gap:12px;
+    opacity:0;transition:opacity .3s ease,transform .3s var(--spring);pointer-events:auto;
+}
+.perf-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.perf-toast button{
+    flex-shrink:0;border:none;cursor:pointer;background:var(--glass-strong);color:var(--accent-2);
+    font-size:.76rem;font-weight:600;padding:5px 12px;border-radius:10px;transition:background .2s ease;
+}
+.perf-toast button:hover{background:rgba(255,255,255,.14)}
