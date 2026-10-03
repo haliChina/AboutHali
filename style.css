@@ -194,8 +194,23 @@ body.intro-lock{overflow:hidden}
 .gh-follow{display:inline-block;padding:8px 20px;border-radius:20px;border:1px solid var(--line);color:var(--text);text-decoration:none;font-weight:600;transition:background .3s var(--ease),transform .3s var(--spring)}
 .gh-follow:hover{background:var(--glass-strong);transform:translateY(-2px)}
 
-.gh-stats-wrap{display:flex;gap:16px;margin:28px 0 4px;flex-wrap:wrap;justify-content:center}
-.gh-stats-card{width:100%;max-width:380px;height:auto;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);padding:4px;object-fit:contain}
+/* align-items:flex-start 是关键修复。
+   默认 stretch 会把较矮的 stats 卡（自然高度 154px）拉伸到与 langs 卡
+   （204px）等高，SVG 内部文字随之被纵向压扁 —— 表现为 "Total Commits
+   (last year)" 与 "Contributed to (last year)" 文字重叠、末行被裁。
+   改回顶部对齐后两卡各自保持原生宽高比，不再变形。 */
+.gh-stats-wrap{display:flex;gap:16px;margin:28px 0 4px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+/* 卡片原始尺寸 467x195 / 300x165，必须按原生宽高比等比缩放。
+   之前只给 max-width:380px 而没锁 aspect-ratio，两张图被拉到不同高度，
+   stats 卡内 "Total Commits (last year)" 与 "Contributed to (last year)"
+   挤在一起、末行被裁（见附图）。 */
+.gh-stats-card{
+    width:100%;max-width:380px;height:auto;aspect-ratio:auto;
+    border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+    padding:4px;object-fit:contain;
+}
+/* 兜底卡片是 div，需显式撑满同一格位保持两列对齐 */
+.gh-stats-fallback{aspect-ratio:467/195;max-width:380px}
 /* GitHub Stats / Top Languages 加载失败时的兜底卡片 */
 .gh-stats-fallback{min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
     color:var(--text-dim);font-family:var(--font-body);padding:18px;text-align:center}
