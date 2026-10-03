@@ -37,6 +37,10 @@ jobs:
       - name: Refresh stats cards
         run: node scripts/gen-stats.mjs
 
+      - name: Refresh contributions data
+        # 贡献日历原先也是运行时境外依赖（jogruber.de），现改为构建期落盘
+        run: node scripts/gen-contributions.mjs
+
       - name: Validate generated SVGs
         # 生成脚本在失败时会 exit 0 并沿用旧产物（刻意不阻断构建），
         # 所以这里必须显式校验产物本身有效，否则一次静默失败会被当成
@@ -52,13 +56,28 @@ jobs:
             echo "OK $f ($(wc -c < "$f")B)"
           done
 
+      - name: Validate contributions JSON
+        # 同理：JSON 也可能被写坏，必须校验结构而非只看文件存在。
+        # 单独用 --check 不足以覆盖"days 被截断成几条"这类结构损坏。
+        run: |
+          set -euo pipefail
+          node scripts/gen-contributions.mjs --check
+          node -e "
+            const d = require('./assets/gh-contributions.json');
+            if (!Array.isArray(d.days) || d.days.length < 300) throw new Error('days 过少: ' + d.days.length);
+            if (typeof d.total !== 'number' || d.total <= 0) throw new Error('total 异常: ' + d.total);
+            const bad = d.days.find(x => !/^\d{4}-\d{2}-\d{2}\$/.test(x.date));
+            if (bad) throw new Error('日期格式异常: ' + JSON.stringify(bad));
+            console.log('OK gh-contributions.json —', d.days.length, 'days, total =', d.total, ', fetched', d.fetchedAt);
+          "
+
       - name: Commit if changed
         run: |
           # 逐个文件比对工作区与 HEAD，而不是 git diff --quiet：
           # 后者只反映已跟踪文件的修改，看不见「新增/被删除后重建」，
           # 首次运行或产物被误删后会误判为「无变化」而跳过提交。
           changed=0
-          for f in assets/gh-stats.svg assets/gh-langs.svg; do
+          for f in assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json; do
             if git diff --quiet -- "$f" && git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
               echo "  unchanged: $f"
             else
@@ -67,13 +86,13 @@ jobs:
             fi
           done
           if [ "$changed" -eq 0 ]; then
-            echo "统计卡无变化，无需提交。"
+            echo "统计卡与贡献数据均无变化，无需提交。"
             exit 0
           fi
           git config user.name  'haliChina'
           git config user.email '168755253+haliChina@users.noreply.github.com'
-          git add assets/gh-stats.svg assets/gh-langs.svg
-          git commit -m 'chore: refresh GitHub stats cards'
+          git add assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json
+          git commit -m 'chore: refresh GitHub stats cards and contributions data'
           # 用 GITHUB_TOKEN 推送。由 Actions 推送的提交默认不会再次触发
           # workflow，因此不存在无限循环。
           git push

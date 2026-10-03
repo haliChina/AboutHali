@@ -1139,9 +1139,8 @@
     }
 
     /* ===== 境外数据源提示 =====
-       本站项目列表实时取自 api.github.com，贡献日历取自
-       github-contributions-api.jogruber.de，两者均在境外，国内可能很慢或失败。
-       （GitHub 统计卡已改为构建期生成的本站静态资源，无运行时境外依赖。） */
+       本站项目列表与活跃仓库提交数实时取自 api.github.com，在境内可能很慢或失败。
+       （贡献日历与统计卡均已改为构建期生成的本站静态资源，无运行时境外依赖。） */
     const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
 
     function netTip(title, body, action){

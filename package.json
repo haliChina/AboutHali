@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
     "gen-stats": "node scripts/gen-stats.mjs",
-    "check-stats": "node scripts/gen-stats.mjs --check"
+    "check-stats": "node scripts/gen-stats.mjs --check",
+    "gen-contributions": "node scripts/gen-contributions.mjs",
+    "check-contributions": "node scripts/gen-contributions.mjs --check"
   },
   "dependencies": {
     "@vercel/analytics": "^1.4.1"

@@ -9,7 +9,7 @@
    语言取不到时自然退化为纯文字行。
 
    数据源：
-     - 贡献日历: github-contributions-api.jogruber.de/v4  (CORS *, 稳定)
+     - 贡献日历: assets/gh-contributions.json（本站构建期产物, Actions 每日刷新)
      - 活跃仓库: api.github.com/users/<u>/events/public  (PushEvent 提交数聚合)
      - 仓库元信息: api.github.com/users/<u>/repos (主语言，失败可缺省)
    Credit: Rare UI — https://rareui.com */
@@ -20,7 +20,6 @@
     if (!mount) return;
 
     const USER = mount.dataset.user || 'haliChina';
-    const CAL_API = 'https://github-contributions-api.jogruber.de/v4';
     const GH_API = 'https://api.github.com/users';
     const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons';
     const CACHE_KEY = 'gh_activity_cache_v6';
@@ -59,16 +58,19 @@
     }
 
     /* --- 数据获取 --- */
+    /* 贡献日历：读本站构建期生成的静态 JSON（assets/gh-contributions.json）。
+       原先直连 github-contributions-api.jogruber.de —— 第三方、境外、且实测会
+       间歇性抽风，是本站最后一个运行时境外依赖。热力图是历史记录而非实时数据，
+       由 GitHub Actions 每日重建，最长滞后 24h 完全可接受。 */
     async function fetchCalendar() {
-        const res = await fetch(CAL_API + '/' + USER + '?y=last');
+        const res = await fetch('assets/gh-contributions.json', { cache: 'no-cache' });
         if (!res.ok) throw new Error('calendar HTTP ' + res.status);
         const json = await res.json();
-        const days = (json && json.contributions) || [];
+        const days = (json && json.days) || [];
         if (!days.length) throw new Error('calendar empty');
         return {
-            total: (json.total && (json.total.lastYear ?? Object.values(json.total)[0])) ||
-                   days.reduce((s, d) => s + (d.count || 0), 0),
-            days: days.map(d => ({ date: d.date, count: d.count || 0, level: Math.min(4, Math.max(0, d.level || 0)) }))
+            total: Number(json.total) || days.reduce((s, d) => s + (d.count || 0), 0),
+            days: days.map(d => ({ date: d.date, count: d.count || 0, level: d.level || 0 }))
         };
     }
 
@@ -298,9 +300,10 @@
     }
 
     /* ===== 境外数据源提示 =====
-   贡献日历来自 github-contributions-api.jogruber.de（境外），活跃仓库来自
-   api.github.com。国内网络可能很慢或直接失败，加载前就讲清楚，免得被当成
-   站点坏了。 */
+       贡献日历已改为构建期生成的本站静态资源（assets/gh-contributions.json），
+       无运行时境外依赖；剩下唯一还会受境外网络影响的只有活跃仓库数据
+       （api.github.com）。国内网络可能很慢或失败，加载前就讲清楚，
+       免得被当成站点坏了。 */
     const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
     function netTip(title, body, action) {
         return '<div class="net-tip" role="note">' +
@@ -313,8 +316,9 @@
         '</div>';
     }
     const CN_ACTIVITY_TIP =
-        '贡献日历取自 <code>github-contributions-api.jogruber.de</code>，仓库活跃度取自 <code>api.github.com</code>，' +
-        '均在境外，国内网络访问可能较慢或失败。';
+        '贡献日历已改为本站静态资源，正常网络下无需等待；' +
+        '仅下方「活跃仓库」提交数实时取自 <code>api.github.com</code>，' +
+        '该域名在境内可能较慢或被阻断。';
 
     function loadingHTML() {
         return '<div class="gha-loading">' +
