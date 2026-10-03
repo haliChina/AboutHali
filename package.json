@@ -4,7 +4,9 @@
   "description": "Hali's personal portfolio website",
   "private": true,
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "echo \"No tests specified\" && exit 0",
+    "gen-stats": "node scripts/gen-stats.mjs",
+    "check-stats": "node scripts/gen-stats.mjs --check"
   },
   "dependencies": {
     "@vercel/analytics": "^1.4.1"

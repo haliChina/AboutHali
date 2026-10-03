@@ -1138,11 +1138,10 @@
         });
     }
 
-    /* ===== 海外数据源提示 =====
-       本站项目列表与 GitHub 统计卡都依赖境外服务：api.github.com 在部分国内
-       网络不可达或极慢；github-stats-extended.vercel.app 更甚——*.vercel.app
-       在中国大陆常被 DNS 污染，会直接解析失败。所以「加载中」必须告诉用户
-       为什么慢、以及慢是正常的，否则会被当成站点坏了。 */
+    /* ===== 境外数据源提示 =====
+       本站项目列表实时取自 api.github.com，贡献日历取自
+       github-contributions-api.jogruber.de，两者均在境外，国内可能很慢或失败。
+       （GitHub 统计卡已改为构建期生成的本站静态资源，无运行时境外依赖。） */
     const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
 
     function netTip(title, body, action){
@@ -1157,8 +1156,8 @@
     }
 
     const CN_PROJECT_TIP =
-        '项目数据实时取自 <code>api.github.com</code>，上方统计卡来自 <code>github-stats-extended.vercel.app</code>。' +
-        '两者均在境外，<code>*.vercel.app</code> 在中国大陆常被 DNS 污染，可能长时间无响应。';
+        '项目数据实时取自 <code>api.github.com</code>，该域名在境内可能较慢或被阻断。' +
+        '上方统计卡已改为本站静态资源，不再依赖境外服务，正常网络下无需等待。';
 
     function projectsLoading(){
         return '<div class="projects-loading" id="projects-loading">' +
@@ -1230,20 +1229,19 @@
         wrap.setAttribute('aria-label', label + ' 加载失败');
         wrap.innerHTML =
             '<div class="gh-fb-title">' + label + '</div>' +
-            '<div class="gh-fb-msg">统计图加载失败</div>' +
-            '<div class="gh-fb-note">该图由境外服务 <code>*.vercel.app</code> 生成，国内网络常因 DNS 污染无法访问；不代表数据或账号异常。</div>' +
+            '<div class="gh-fb-msg">统计图暂不可用</div>' +
+            '<div class="gh-fb-note">该图为构建期生成的静态资源。若你刚部署了新版本，可能是缓存未刷新，稍后重试即可。</div>' +
             '<button class="gh-fb-retry" type="button">重试</button>';
-        // 点击重试：把容器替换回 <img>，让浏览器重新发起请求
+        // 点击重试：把容器换回 <img>。指向本站静态资源（带 cache-busting），
+        // 不再引用已废弃的 *.vercel.app 上游。
         wrap.querySelector('.gh-fb-retry').addEventListener('click', () => {
             const img = document.createElement('img');
             img.className = 'gh-stats-card';
             img.alt = label;
             img.decoding = 'async';
             img.loading = 'lazy';
-            const base = 'https://github-stats-extended.vercel.app/api';
-            img.src = (label === 'Stats')
-                ? base + '?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true&_r=' + Date.now()
-                : base + '/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true&_r=' + Date.now();
+            img.src = (label === 'Stats' ? 'assets/gh-stats.svg' : 'assets/gh-langs.svg')
+                + '?_r=' + Date.now();
             img.onerror = function() { this.replaceWith(window.__ghStatsFallback(label)); };
             wrap.replaceWith(img);
         });

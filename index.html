@@ -20,10 +20,9 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://api.github.com" crossorigin>
     <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
-    <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=118">
+    <link rel="stylesheet" href="style.css?v=119">
     <script>
         /* 清掉本机 8765 / 旧预览残留的 Service Worker，避免 3D 版 skip-link 继续盖在流体页上 */
         if ('serviceWorker' in navigator) {
@@ -223,9 +222,9 @@
                 </div>
 
                 <div class="gh-stats-wrap">
-                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api?username=haliChina&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub Stats" decoding="async" loading="lazy"
+                    <img class="gh-stats-card" src="assets/gh-stats.svg" width="467" height="195" alt="GitHub Stats：累计星标、提交数、PR、Issue 等统计" decoding="async" loading="lazy"
                          onerror="this.replaceWith(window.__ghStatsFallback('Stats'))">
-                    <img class="gh-stats-card" src="https://github-stats-extended.vercel.app/api/top-langs/?username=haliChina&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" decoding="async" loading="lazy"
+                    <img class="gh-stats-card" src="assets/gh-langs.svg" width="300" height="165" alt="Top Languages：仓库语言构成" decoding="async" loading="lazy"
                          onerror="this.replaceWith(window.__ghStatsFallback('Top Languages'))">
                 </div>
 
@@ -393,7 +392,7 @@
                         <span class="net-tip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg></span>
                         <div class="net-tip-body">
                             <div class="net-tip-title">正在从 GitHub 拉取项目…</div>
-                            <div class="net-tip-text">项目数据实时取自 <code>api.github.com</code>，上方统计卡来自 <code>github-stats-extended.vercel.app</code>。两者均在境外，<code>*.vercel.app</code> 在中国大陆常被 DNS 污染，可能长时间无响应。</div>
+                            <div class="net-tip-text">项目数据实时取自 <code>api.github.com</code>，该域名在境内可能较慢或被阻断。上方统计卡已改为本站静态资源，正常网络下无需等待。</div>
                             <div class="net-tip-act">国内网络建议开启代理后重试，或稍后再来。</div>
                         </div>
                     </div>
@@ -405,7 +404,7 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved · <a href="https://rareui.com" target="_blank" rel="noopener" class="footer-credit">GitHub Activity by Rare UI</a></footer>
 
     <script src="shader.js?v=14" defer></script>
-    <script src="animations.js?v=61" defer></script>
+    <script src="animations.js?v=62" defer></script>
     <script src="github-activity.js?v=7" defer></script>
     <script src="fps.js?v=2" defer></script>
     
