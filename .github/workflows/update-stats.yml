@@ -1,0 +1,79 @@
+name: Update GitHub stats cards
+
+# 定期刷新统计卡产物。这两张卡是「构建期抓取 + 提交产物」的静态快照，
+# 本身不会自动更新；本 workflow 负责定期重抓并在内容变化时提交。
+#
+# 为什么不用实时图片 URL：原先直连 github-stats-extended.vercel.app，
+# 该域名落在 *.vercel.app 段内，中国大陆常遭 DNS 污染，境内访客必然看到破图。
+# 落盘成静态资源后由本站/GitHub 自身分发，问题消失；代价是需要定期刷新，
+# 由本 workflow 补上。
+on:
+  schedule:
+    # 每天 03:17 UTC（= 北京时间 11:17）。刻意避开整点：GitHub cron 在
+    # :00 排队最严重，容易被延迟甚至丢弃。
+    - cron: '17 3 * * *'
+  # 手动触发，方便随时刷新
+  workflow_dispatch:
+
+# 只需要写内容权限；不写 issues/PR，避免超出最小权限。
+permissions:
+  contents: write
+
+# 同一时间只跑一个，避免定时与手动触发叠加产生竞态提交。
+concurrency:
+  group: update-stats-cards
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refresh stats cards
+        run: node scripts/gen-stats.mjs
+
+      - name: Validate generated SVGs
+        # 生成脚本在失败时会 exit 0 并沿用旧产物（刻意不阻断构建），
+        # 所以这里必须显式校验产物本身有效，否则一次静默失败会被当成
+        # 「无变化」而无声结束。
+        run: |
+          set -euo pipefail
+          for f in assets/gh-stats.svg assets/gh-langs.svg; do
+            if [ ! -s "$f" ]; then
+              echo "::error::$f 缺失或为空"; exit 1
+            fi
+            head -c 200 "$f" | grep -q '<svg' || { echo "::error::$f 不是 SVG"; exit 1; }
+            tail -c 200 "$f" | grep -q '</svg>' || { echo "::error::$f 缺少结束标签"; exit 1; }
+            echo "OK $f ($(wc -c < "$f")B)"
+          done
+
+      - name: Commit if changed
+        run: |
+          # 逐个文件比对工作区与 HEAD，而不是 git diff --quiet：
+          # 后者只反映已跟踪文件的修改，看不见「新增/被删除后重建」，
+          # 首次运行或产物被误删后会误判为「无变化」而跳过提交。
+          changed=0
+          for f in assets/gh-stats.svg assets/gh-langs.svg; do
+            if git diff --quiet -- "$f" && git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              echo "  unchanged: $f"
+            else
+              echo "  changed:   $f"
+              changed=1
+            fi
+          done
+          if [ "$changed" -eq 0 ]; then
+            echo "统计卡无变化，无需提交。"
+            exit 0
+          fi
+          git config user.name  'haliChina'
+          git config user.email '168755253+haliChina@users.noreply.github.com'
+          git add assets/gh-stats.svg assets/gh-langs.svg
+          git commit -m 'chore: refresh GitHub stats cards'
+          # 用 GITHUB_TOKEN 推送。由 Actions 推送的提交默认不会再次触发
+          # workflow，因此不存在无限循环。
+          git push

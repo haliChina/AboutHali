@@ -25,9 +25,13 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT_DIR = resolve(ROOT, 'assets');
 const CHECK_ONLY = process.argv.includes('--check');
 const TIMEOUT_MS = 20000;
+
+/* 输出目录：默认 scripts/ 上一级的 assets/；用 --out=DIR 覆盖。
+   AboutHali 站点用默认 assets/，profile README 仓库用 --out=assets/readme。 */
+const outArg = process.argv.find(a => a.startsWith('--out='));
+const OUT_DIR = outArg ? resolve(ROOT, outArg.slice(6)) : resolve(ROOT, 'assets');
 
 /* 参数必须与线上历史完全一致，否则卡片样式/字段会对不上 */
 const BASE = 'https://github-stats-extended.vercel.app';
