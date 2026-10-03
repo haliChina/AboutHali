@@ -23,7 +23,7 @@
     <link rel="dns-prefetch" href="https://github-stats-extended.vercel.app">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=117">
+    <link rel="stylesheet" href="style.css?v=118">
     <script>
         /* 清掉本机 8765 / 旧预览残留的 Service Worker，避免 3D 版 skip-link 继续盖在流体页上 */
         if ('serviceWorker' in navigator) {
@@ -232,7 +232,17 @@
                 <div class="section-label section-label-left">贡献活动 · Contributions</div>
                 <div class="gh-activity-wrap">
                     <div id="gh-activity" data-user="haliChina">
-                        <div class="gha-loading">加载贡献图…</div>
+                        <div class="gha-loading">
+                            <div class="load-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+                            <div class="net-tip" role="note">
+                                <span class="net-tip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg></span>
+                                <div class="net-tip-body">
+                                    <div class="net-tip-title">正在加载贡献数据…</div>
+                                    <div class="net-tip-text">贡献日历取自 <code>github-contributions-api.jogruber.de</code>，仓库活跃度取自 <code>api.github.com</code>，均在境外，国内网络访问可能较慢或失败。</div>
+                                    <div class="net-tip-act">国内网络建议开启代理后重试。</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -377,7 +387,17 @@
         <div class="projects-wrap reveal">
             <div class="section-label">我的项目 · My Projects</div>
             <div class="projects-grid" id="projects-grid">
-                <div class="projects-loading" id="projects-loading">加载中...</div>
+                <div class="projects-loading" id="projects-loading">
+                    <div class="load-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+                    <div class="net-tip" role="note">
+                        <span class="net-tip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg></span>
+                        <div class="net-tip-body">
+                            <div class="net-tip-title">正在从 GitHub 拉取项目…</div>
+                            <div class="net-tip-text">项目数据实时取自 <code>api.github.com</code>，上方统计卡来自 <code>github-stats-extended.vercel.app</code>。两者均在境外，<code>*.vercel.app</code> 在中国大陆常被 DNS 污染，可能长时间无响应。</div>
+                            <div class="net-tip-act">国内网络建议开启代理后重试，或稍后再来。</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -385,8 +405,8 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved · <a href="https://rareui.com" target="_blank" rel="noopener" class="footer-credit">GitHub Activity by Rare UI</a></footer>
 
     <script src="shader.js?v=14" defer></script>
-    <script src="animations.js?v=60" defer></script>
-    <script src="github-activity.js?v=6" defer></script>
+    <script src="animations.js?v=61" defer></script>
+    <script src="github-activity.js?v=7" defer></script>
     <script src="fps.js?v=2" defer></script>
     
     <!-- Vercel Web Analytics -->

@@ -1138,12 +1138,45 @@
         });
     }
 
+    /* ===== 海外数据源提示 =====
+       本站项目列表与 GitHub 统计卡都依赖境外服务：api.github.com 在部分国内
+       网络不可达或极慢；github-stats-extended.vercel.app 更甚——*.vercel.app
+       在中国大陆常被 DNS 污染，会直接解析失败。所以「加载中」必须告诉用户
+       为什么慢、以及慢是正常的，否则会被当成站点坏了。 */
+    const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
+
+    function netTip(title, body, action){
+        return '<div class="net-tip" role="note">' +
+            '<span class="net-tip-icon" aria-hidden="true">' + NET_TIP_ICON + '</span>' +
+            '<div class="net-tip-body">' +
+                '<div class="net-tip-title">' + esc(title) + '</div>' +
+                '<div class="net-tip-text">' + body + '</div>' +
+                (action ? '<div class="net-tip-act">' + esc(action) + '</div>' : '') +
+            '</div>' +
+        '</div>';
+    }
+
+    const CN_PROJECT_TIP =
+        '项目数据实时取自 <code>api.github.com</code>，上方统计卡来自 <code>github-stats-extended.vercel.app</code>。' +
+        '两者均在境外，<code>*.vercel.app</code> 在中国大陆常被 DNS 污染，可能长时间无响应。';
+
+    function projectsLoading(){
+        return '<div class="projects-loading" id="projects-loading">' +
+            '<div class="load-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
+            netTip('正在从 GitHub 拉取项目…', CN_PROJECT_TIP, '国内网络建议开启代理后重试，或稍后再来。') +
+        '</div>';
+    }
+
     function showProjectsError(msg){
         const grid = document.getElementById('projects-grid');
         if (!grid) return;
-        grid.innerHTML = '<div class="projects-error"><div class="projects-error-text">'+esc(msg)+'</div><button class="projects-retry" id="projects-retry-btn">重新加载</button></div>';
+        grid.innerHTML = '<div class="projects-error">' +
+            '<div class="projects-error-text">' + esc(msg) + '</div>' +
+            netTip('多半是网络原因，不是站点故障', CN_PROJECT_TIP, '可开启代理后重试；本站其余内容不受影响。') +
+            '<button class="projects-retry" id="projects-retry-btn">重新加载</button>' +
+        '</div>';
         const btn = document.getElementById('projects-retry-btn');
-        if (btn) btn.addEventListener('click', () => { grid.innerHTML = '<div class="projects-loading">加载中...</div>'; loadProjects(); });
+        if (btn) btn.addEventListener('click', () => { grid.innerHTML = projectsLoading(); loadProjects(); });
     }
 
     async function loadProjects(){
@@ -1197,7 +1230,8 @@
         wrap.setAttribute('aria-label', label + ' 加载失败');
         wrap.innerHTML =
             '<div class="gh-fb-title">' + label + '</div>' +
-            '<div class="gh-fb-msg">加载失败</div>' +
+            '<div class="gh-fb-msg">统计图加载失败</div>' +
+            '<div class="gh-fb-note">该图由境外服务 <code>*.vercel.app</code> 生成，国内网络常因 DNS 污染无法访问；不代表数据或账号异常。</div>' +
             '<button class="gh-fb-retry" type="button">重试</button>';
         // 点击重试：把容器替换回 <img>，让浏览器重新发起请求
         wrap.querySelector('.gh-fb-retry').addEventListener('click', () => {

@@ -297,12 +297,39 @@
         }
     }
 
+    /* ===== 境外数据源提示 =====
+   贡献日历来自 github-contributions-api.jogruber.de（境外），活跃仓库来自
+   api.github.com。国内网络可能很慢或直接失败，加载前就讲清楚，免得被当成
+   站点坏了。 */
+    const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
+    function netTip(title, body, action) {
+        return '<div class="net-tip" role="note">' +
+            '<span class="net-tip-icon" aria-hidden="true">' + NET_TIP_ICON + '</span>' +
+            '<div class="net-tip-body">' +
+                '<div class="net-tip-title">' + esc(title) + '</div>' +
+                '<div class="net-tip-text">' + body + '</div>' +
+                (action ? '<div class="net-tip-act">' + esc(action) + '</div>' : '') +
+            '</div>' +
+        '</div>';
+    }
+    const CN_ACTIVITY_TIP =
+        '贡献日历取自 <code>github-contributions-api.jogruber.de</code>，仓库活跃度取自 <code>api.github.com</code>，' +
+        '均在境外，国内网络访问可能较慢或失败。';
+
+    function loadingHTML() {
+        return '<div class="gha-loading">' +
+            '<div class="load-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
+            netTip('正在加载贡献数据…', CN_ACTIVITY_TIP, '国内网络建议开启代理后重试。') +
+        '</div>';
+    }
+
     function fail(msg) {
         mount.innerHTML = '<div class="gha-card gha-fail">' +
             '<div class="gha-fail-msg">' + esc(msg) + '</div>' +
+            netTip('多半是网络原因，不是站点故障', CN_ACTIVITY_TIP, '本站其余内容不受影响。') +
             '<button class="gha-fail-retry" type="button">重试</button></div>';
         const btn = mount.querySelector('.gha-fail-retry');
-        if (btn) btn.addEventListener('click', () => { mount.innerHTML = '<div class="gha-loading">加载贡献图…</div>'; start(); });
+        if (btn) btn.addEventListener('click', () => { mount.innerHTML = loadingHTML(); start(); });
     }
 
     function start() {
