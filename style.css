@@ -290,8 +290,10 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     position:relative;overflow:hidden;backdrop-filter:blur(10px) saturate(125%);-webkit-backdrop-filter:blur(10px) saturate(125%);
     box-shadow:0 8px 24px -16px rgba(0,0,0,.6)}
 .proj-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
-.proj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:opacity .35s var(--ease)}
-.proj-card:hover::before{opacity:1}
+/* 原来这里有一条 hover 时出现的 3px 左侧粉色竖条（::before）。因为卡片有
+   border-radius:18px 而伪元素是直角矩形，方角会戳出圆角外侧，看起来像
+   一条悬空在卡片左边的粉色细线（见附件截图），故移除。
+   如需保留同类装饰，请让伪元素带与卡片一致的圆角，或改用 inset box-shadow。 */
 .proj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-height:0}
 .proj-name{font-size:1.25rem;font-weight:800;color:#fff;text-decoration:none;word-break:break-word;line-height:1.25;letter-spacing:-.01em}
 .proj-name:hover{color:var(--accent-2)}
