@@ -187,6 +187,12 @@ body.intro-lock{overflow:hidden}
 
 .gh-profile{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .gh-avatar{width:96px;height:96px;border-radius:24px;object-fit:cover;border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.7)}
+/* 头像加载失败时的首字母兜底（见 animations.js __avatarFallback） */
+.gh-avatar--letter{
+    display:grid;place-items:center;font-size:2.4rem;font-weight:800;line-height:1;
+    letter-spacing:1px;color:var(--accent-2);text-transform:uppercase;user-select:none;
+    background:linear-gradient(150deg,rgba(255,143,182,.24),rgba(255,107,157,.12));
+}
 .gh-meta{flex:1 1 260px;min-width:240px}
 .gh-name{font-size:1.4rem;font-weight:700}
 .gh-handle{font-size:1rem;font-weight:500;color:var(--accent-2);margin-left:6px}

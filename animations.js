@@ -1219,6 +1219,20 @@
         loadProjects();
     }
 
+    /* ===== 头像兜底 =====
+       avatars.githubusercontent.com 在境内经常连不上（与 *.vercel.app 同类的
+       境外可达性问题）。这个 <img> 原先没有 onerror，是整张卡片里唯一
+       裸奔的远程图 —— 加载失败时 96x96 的圆角框里只剩浏览器破图占位符。
+       兜底样式与仓库面板的首字母徽标一致，沿用站点粉色玻璃主题。 */
+    window.__avatarFallback = function (letter) {
+        const box = document.createElement('div');
+        box.className = 'gh-avatar gh-avatar--letter';
+        box.setAttribute('role', 'img');
+        box.setAttribute('aria-label', '头像加载失败');
+        box.textContent = letter || 'H';
+        return box;
+    };
+
     // ===== GitHub Stats / Top Languages 加载失败时的本地兜底卡片 =====
     // 用 inline SVG 替代原图，保持布局占位并提供"加载失败"提示与重试入口
     window.__ghStatsFallback = function(label) {
