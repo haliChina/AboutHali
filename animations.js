@@ -1292,11 +1292,15 @@
             if (onQq) toFace.removeAttribute('aria-hidden');
             else toFace.setAttribute('aria-hidden', 'true');
 
-            /* 面完全停靠(隐藏)时把它的内部滚动位复位到顶，
-               下次转回来总是从头像/标题开始，而不是停在上次读到的半截。
-               只在 parked(opacity:0) 时做，避免旋转中(near, 半透明可见)内容跳动。 */
-            if (fromFace && !turning && onQq && fromFace.scrollTop) fromFace.scrollTop = 0;
-            if (!turning && !onQq && toFace.scrollTop) toFace.scrollTop = 0;
+            /* 面"正对镜头且静止"时复位内部滚动位，保证每次转到该面都从顶部开始。
+               之前条件写反了：只在 turning=false && onQq（即 progress>=0.88、该面
+               已经 parked 不可见）时复位，结果滚回 GitHub 时仍保留上次的
+               scrollTop，标题/名字/bio 一直滚出去看不见，像是"被藏起来"。
+               正确条件是"该面正处于正面静止态"：
+                 fromFace 正面 => progress<=0.12（!turning && !onQq）
+                 toFace   正面 => progress>=0.88（!turning && onQq） */
+            if (fromFace && !turning && !onQq && fromFace.scrollTop) fromFace.scrollTop = 0;
+            if (toFace && !turning && onQq && toFace.scrollTop) toFace.scrollTop = 0;
         }
 
         if (reduced || mobile) {
@@ -1336,10 +1340,35 @@
             const p = progressFromScroll();
             ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
             setFaceState(p);
+            syncScrollHints();
+        }
+
+        /* 标记每个激活面是否还有内容可滚，供 CSS 显示顶部/底部渐隐提示。
+           滚动条被隐藏（3D 下会歪斜），没有这个信号用户会以为卡片被裁掉。 */
+        function syncScrollHints() {
+            [fromFace, toFace].forEach(function (face) {
+                if (!face) return;
+                if (!face.classList.contains('is-active')) {
+                    if (face.hasAttribute('data-more')) face.removeAttribute('data-more');
+                    return;
+                }
+                const canDown = face.scrollHeight - face.clientHeight - face.scrollTop > 4;
+                const canUp = face.scrollTop > 4;
+                // CSS 用属性选择器逐个开关上下渐隐，这里给出方向组合；
+                // 'both' 也要有对应规则，否则上下都不显示。
+                face.setAttribute('data-more',
+                    canDown && canUp ? 'both' : (canDown ? 'bottom' : (canUp ? 'top' : 'none')));
+            });
         }
         window.addEventListener('scroll', function () {
             if (!raf) raf = requestAnimationFrame(paint);
         }, { passive: true });
+        // 面自身滚动时也要更新提示（paint 只挂在 window scroll 上）
+        [fromFace, toFace].forEach(function (face) {
+            if (face) face.addEventListener('scroll', function () {
+                if (!raf) raf = requestAnimationFrame(syncScrollHints);
+            }, { passive: true });
+        });
         paint();
     })();
 

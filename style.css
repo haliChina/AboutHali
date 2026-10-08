@@ -774,6 +774,22 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     scrollbar-width:none;
 }
 .orbit-face.is-active::-webkit-scrollbar{width:0;height:0}
+/* 卡片可内部滚动但滚动条被隐藏（3D 变换下滑块会歪斜），没有提示的话
+   "下面还有内容"就完全看不出来，用户会以为卡片被裁掉了。
+   故在仍有内容可滚时显示底部渐隐 + 顶部渐隐作为可滚动信号。 */
+.orbit-face.is-active::before,
+.orbit-face.is-active::after{
+    content:'';position:absolute;left:0;right:0;height:56px;pointer-events:none;
+    opacity:0;transition:opacity .28s var(--ease);z-index:3;
+}
+.orbit-face.is-active::before{top:0;background:linear-gradient(to bottom,rgba(10,8,14,.9),transparent)}
+.orbit-face.is-active::after{bottom:0;background:linear-gradient(to top,rgba(10,8,14,.92),transparent)}
+.orbit-face.is-active[data-more="bottom"]::after{opacity:1}
+.orbit-face.is-active[data-more="both"]::after{opacity:1}
+.orbit-face.is-active[data-more="top"]::before{opacity:1}
+.orbit-face.is-active[data-more="both"]::before{opacity:1}
+.orbit-face.is-active[data-more="none"]::before,
+.orbit-face.is-active[data-more="none"]::after{opacity:0}
 .orbit-face .card{width:100%;max-width:880px;margin:0 auto;flex:0 0 auto}
 .orbit-track .page,
 .orbit-face.page,
