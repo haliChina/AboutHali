@@ -639,7 +639,15 @@
         if (target === '#netease' && orbitEnd && orbitEnd.getBoundingClientRect().height > 8) el = orbitEnd;
         else if (target === '#netease' && orbitPin) el = orbitPin;
         if (!el) return;
-        const y = el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+        let y = el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+        /* 轨道面在 sticky pin 里，getBoundingClientRect 反映的是"当前视觉位置"，
+           不是文档位置（pin 半路时点击会滚到错误地点）。orbit 面的锚点一律用
+           setupOrbit 测量好的阶段坐标：GitHub = 轨道起点，QQ音乐 = 旋转完成点。 */
+        const info = window.__orbitInfo;
+        if (info && !info.flat) {
+            if (target === '#github' && info.ghY != null) y = info.ghY;
+            else if (target === '#netease' && info.qqY != null) y = info.qqY;
+        }
         smoothScrollTo(y);
     }
     navBtns.forEach(btn => {
@@ -666,14 +674,26 @@
         return el ? (el.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0)) : 0;
     }
     function recomputeLayoutMetrics() {
-        const orbitEnd = document.getElementById('orbit-qq');
         sectionOffsets = sections.map((s, i) => {
             if (!s) return 0;
-            if (i === 2 && orbitEnd && orbitEnd.offsetHeight > 8) return pageY(orbitEnd);
+            /* 轨道动态撑高后，sticky 面的 rect 不再可靠；用 setupOrbit 广播的
+               阶段坐标（轨道起点 / 旋转完成点）做锚点。 */
+            const info = window.__orbitInfo;
+            if (info && !info.flat) {
+                if (i === 1 && info.ghY != null) return info.ghY;
+                if (i === 2 && info.qqY != null) return info.qqY;
+            }
+            if (i === 2) {
+                const orbitEnd = document.getElementById('orbit-qq');
+                if (orbitEnd && orbitEnd.offsetHeight > 8) return pageY(orbitEnd);
+            }
             return pageY(s);
         });
         scrollMax = document.documentElement.scrollHeight - window.innerHeight;
     }
+    /* 轨道内容异步变化（热力图/统计卡加载、resize）会重撑轨道并广播该事件，
+       这里同步刷新锚点与滚动上限。 */
+    window.addEventListener('orbit:metrics', () => { recomputeLayoutMetrics(); }, { passive: true });
     function updateScrollSpy(y) {
         if (navJump) return;
         let idx = 0;
@@ -740,7 +760,11 @@
     if (explore) explore.addEventListener('click', () => {
         const gh = document.querySelector('#github');
         if (!gh) return;
-        const y = gh.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+        /* #github 在 sticky pin 内，rect+scrollY 在 pin 半路时会算错；
+           优先用 setupOrbit 的轨道起点。 */
+        const info = window.__orbitInfo;
+        const y = (info && !info.flat && info.ghY != null) ? info.ghY
+            : gh.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
         smoothScrollTo(y);
     });
 
@@ -1264,7 +1288,7 @@
     if (document.readyState === 'complete') runIntro();
     else window.addEventListener('load', runIntro);
 
-    (function setupOrbit() {
+(function setupOrbit() {
         const track = document.getElementById('orbit-track');
         const ring = document.getElementById('orbit-ring');
         const fromFace = track && track.querySelector('.orbit-face--from');
@@ -1272,103 +1296,195 @@
         if (!track || !ring || !toFace) return;
 
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const mobile = matchMedia('(max-width: 768px)').matches;
+        const mobileMQ = matchMedia('(max-width: 768px)');
 
-        function setFaceState(progress) {
-            const onQq = progress > 0.5;
-            const turning = progress > 0.12 && progress < 0.88;
-            if (fromFace) {
-                fromFace.toggleAttribute('inert', onQq);
-                fromFace.classList.toggle('is-active', !onQq);
-                fromFace.classList.toggle('is-near', turning && onQq);
-                fromFace.classList.toggle('is-parked', !turning && onQq);
-                if (onQq) fromFace.setAttribute('aria-hidden', 'true');
-                else fromFace.removeAttribute('aria-hidden');
-            }
-            toFace.toggleAttribute('inert', !onQq);
-            toFace.classList.toggle('is-active', onQq);
-            toFace.classList.toggle('is-near', turning && !onQq);
-            toFace.classList.toggle('is-parked', !turning && !onQq);
-            if (onQq) toFace.removeAttribute('aria-hidden');
-            else toFace.setAttribute('aria-hidden', 'true');
-
-            /* 面"正对镜头且静止"时复位内部滚动位，保证每次转到该面都从顶部开始。
-               之前条件写反了：只在 turning=false && onQq（即 progress>=0.88、该面
-               已经 parked 不可见）时复位，结果滚回 GitHub 时仍保留上次的
-               scrollTop，标题/名字/bio 一直滚出去看不见，像是"被藏起来"。
-               正确条件是"该面正处于正面静止态"：
-                 fromFace 正面 => progress<=0.12（!turning && !onQq）
-                 toFace   正面 => progress>=0.88（!turning && onQq） */
-            if (fromFace && !turning && !onQq && fromFace.scrollTop) fromFace.scrollTop = 0;
-            if (toFace && !turning && onQq && toFace.scrollTop) toFace.scrollTop = 0;
+        /* ===== 三阶段高度感知编排 =====
+           旧方案把超高卡片塞进 100vh 的面里加 overflow-y:auto 内部滚动，
+           产生「滚动套滚动」：滚动条被藏、滚到一半像卡住、滚回顶部还有
+           「隐藏容器」错觉。根因是轨道只有 200vh 固定高度，没有给超高
+           内容留滚动空间。
+           新方案：测出每个面的内容溢出量 oG/oQ，把轨道撑高为
+               faceH + oG + R + oQ
+           并按页面滚动进度分三段编排：
+               A [0, oG)          GitHub 面朝前静止，卡片随页面滚动上移（读完全部内容）
+               B [oG, oG+R)       圆柱旋转 0→45deg
+               C [oG+R, oG+R+oQ)  QQ 面朝前静止，卡片随页面滚动上移
+           内容不再有内部滚动，一切交给页面级滚动：滚动条真实可见、
+           顶部永远可达、无卡死。内容不超高时 oG=oQ=0，行为与旧版完全一致。 */
+        const ghCard = fromFace && fromFace.querySelector('.card');
+        const qqCard = toFace.querySelector('.card');
+        if (fromFace && ghCard) {
+            const wrap = document.createElement('div');
+            wrap.className = 'orbit-inner';
+            fromFace.insertBefore(wrap, ghCard);
+            wrap.appendChild(ghCard);
         }
+        if (qqCard) {
+            const wrap = document.createElement('div');
+            wrap.className = 'orbit-inner';
+            toFace.insertBefore(wrap, qqCard);
+            wrap.appendChild(qqCard);
+        }
+        const ghWrap = fromFace && fromFace.querySelector('.orbit-inner');
+        const qqWrap = toFace.querySelector('.orbit-inner');
 
-        if (reduced || mobile) {
-            if (fromFace) {
-                fromFace.removeAttribute('inert');
-                fromFace.removeAttribute('aria-hidden');
-                fromFace.classList.remove('is-parked');
-            }
-            toFace.removeAttribute('inert');
-            toFace.removeAttribute('aria-hidden');
-            toFace.classList.remove('is-parked');
-            toFace.classList.remove('is-near');
-            if (fromFace) {
-                fromFace.classList.remove('is-near');
-                fromFace.classList.add('is-active');
-            }
-            toFace.classList.add('is-active');
+        function isFlat() { return reduced || mobileMQ.matches; }
+
+        /* 平铺模式（≤768px 或 reduce-motion）：CSS 媒体查询已把轨道压平成
+           普通文档流，这里只解锁两面的可交互性。桌面 reduce-motion 以前
+           会得到双面重叠的坏布局，CSS 现已同步平铺。 */
+        if (isFlat()) {
+            [fromFace, toFace].forEach(function (face) {
+                if (!face) return;
+                face.removeAttribute('inert');
+                face.removeAttribute('aria-hidden');
+                face.classList.remove('is-parked');
+                face.classList.remove('is-near');
+                face.classList.add('is-active');
+            });
+            track.style.height = '';
+            window.__orbitInfo = { flat: true, ghY: null, qqY: null };
+            window.dispatchEvent(new Event('orbit:metrics'));
+            if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', function (e) {
+                if (!e.matches && !reduced) location.reload(); /* 拉宽回桌面：重建 3D 轨道 */
+            });
             return;
         }
+
+        let oG = 0, oQ = 0, R = 0, faceH = 0, total = 0;
+        let measureTimer = 0;
+        let raf = 0, lastRotTxt = '', lastGhTxt = '', lastQqTxt = '', lastPhase = '';
+
+        function overflowOf(face, wrap) {
+            if (!face || !wrap) return 0;
+            const cs = getComputedStyle(face);
+            const visibleBottom = face.clientHeight - (parseFloat(cs.paddingBottom) || 0);
+            const contentBottom = wrap.offsetTop + wrap.offsetHeight;
+            return Math.max(0, Math.round(contentBottom - visibleBottom));
+        }
+
+        function measure() {
+            if (mobileMQ.matches) return; /* CSS 平铺接管，别写 3D 高度 */
+            faceH = (fromFace && fromFace.clientHeight) || window.innerHeight;
+            R = faceH; /* 旋转行程仍是一屏，与旧版手感一致 */
+            oG = overflowOf(fromFace, ghWrap);
+            oQ = overflowOf(toFace, qqWrap);
+            total = oG + R + oQ;
+            const top = track.getBoundingClientRect().top + (window.scrollY || document.documentElement.scrollTop || 0);
+            track.style.height = (faceH + total) + 'px';
+            const info = window.__orbitInfo || (window.__orbitInfo = {});
+            info.flat = false;
+            info.ghY = Math.round(top);
+            info.qqY = Math.round(top + oG + R);
+            /* 几何变了，清缓存让 paint 重写变换与面状态 */
+            lastRotTxt = ''; lastGhTxt = ''; lastQqTxt = ''; lastPhase = '';
+            window.dispatchEvent(new Event('orbit:metrics'));
+            paint();
+        }
+        /* 断点跨越：桌面→移动时 CSS 媒体查询把轨道压平，这里必须清掉
+           内联高度/变换（内联样式会盖过非 important 的平铺规则）；
+           移动→桌面则重测轨道恢复 3D。 */
+        if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', function (e) {
+            if (e.matches) {
+                track.style.height = '';
+                ring.style.transform = '';
+                if (ghWrap) ghWrap.style.transform = '';
+                if (qqWrap) qqWrap.style.transform = '';
+                [fromFace, toFace].forEach(function (face) {
+                    if (!face) return;
+                    face.removeAttribute('inert');
+                    face.removeAttribute('aria-hidden');
+                    face.classList.remove('is-parked');
+                    face.classList.remove('is-near');
+                    face.classList.add('is-active');
+                });
+                const info = window.__orbitInfo || (window.__orbitInfo = {});
+                info.flat = true; info.ghY = null; info.qqY = null;
+                window.dispatchEvent(new Event('orbit:metrics'));
+            } else if (!reduced) {
+                measure();
+            }
+        });
+
+        /* 卡片内容高度会异步变化（统计 SVG、贡献热力图懒加载、字体、
+           头像图）。ResizeObserver 盯卡片本体，变化即重测轨道。 */
+        if ('ResizeObserver' in window) {
+            const ro = new ResizeObserver(function () {
+                clearTimeout(measureTimer);
+                measureTimer = setTimeout(measure, 80);
+            });
+            if (ghWrap) ro.observe(ghWrap);
+            if (qqWrap) ro.observe(qqWrap);
+        }
+        if (document.readyState === 'complete') measure();
+        else window.addEventListener('load', measure);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setTimeout(measure, 0); });
 
         function syncRadius() {
             const w = window.innerWidth || 1;
             ring.style.setProperty('--orbit-r', Math.round(w * 1.2) + 'px');
         }
         syncRadius();
-        window.addEventListener('resize', syncRadius, { passive: true });
+        let rsTimer = 0;
+        window.addEventListener('resize', function () {
+            syncRadius();
+            clearTimeout(rsTimer);
+            rsTimer = setTimeout(measure, 120);
+        }, { passive: true });
 
-        function progressFromScroll() {
-            const rect = track.getBoundingClientRect();
-            const vh = window.innerHeight || 1;
-            const travel = Math.max(1, track.offsetHeight - vh);
-            return Math.max(0, Math.min(1, -rect.top / travel));
+        function setFaceState(phase) {
+            const onQq = phase === 'C';
+            const turning = phase === 'B';
+            if (fromFace) {
+                fromFace.toggleAttribute('inert', onQq);
+                fromFace.classList.toggle('is-active', phase === 'A');
+                fromFace.classList.toggle('is-near', turning);
+                fromFace.classList.toggle('is-parked', onQq);
+                if (onQq) fromFace.setAttribute('aria-hidden', 'true');
+                else fromFace.removeAttribute('aria-hidden');
+            }
+            toFace.toggleAttribute('inert', phase !== 'C');
+            toFace.classList.toggle('is-active', phase === 'C');
+            toFace.classList.toggle('is-near', turning);
+            toFace.classList.toggle('is-parked', phase === 'A');
+            if (onQq) toFace.removeAttribute('aria-hidden');
+            else toFace.setAttribute('aria-hidden', 'true');
         }
-        let raf = 0;
+
         function paint() {
             raf = 0;
-            const p = progressFromScroll();
-            ring.style.transform = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * p).toFixed(2) + 'deg)';
-            setFaceState(p);
-            syncScrollHints();
-        }
-
-        /* 标记每个激活面是否还有内容可滚，供 CSS 显示顶部/底部渐隐提示。
-           滚动条被隐藏（3D 下会歪斜），没有这个信号用户会以为卡片被裁掉。 */
-        function syncScrollHints() {
-            [fromFace, toFace].forEach(function (face) {
-                if (!face) return;
-                if (!face.classList.contains('is-active')) {
-                    if (face.hasAttribute('data-more')) face.removeAttribute('data-more');
-                    return;
-                }
-                const canDown = face.scrollHeight - face.clientHeight - face.scrollTop > 4;
-                const canUp = face.scrollTop > 4;
-                // CSS 用属性选择器逐个开关上下渐隐，这里给出方向组合；
-                // 'both' 也要有对应规则，否则上下都不显示。
-                face.setAttribute('data-more',
-                    canDown && canUp ? 'both' : (canDown ? 'bottom' : (canUp ? 'top' : 'none')));
-            });
+            if (mobileMQ.matches) return; /* 平铺模式交给文档流 */
+            const rect = track.getBoundingClientRect();
+            const s = Math.max(0, Math.min(total, -rect.top));
+            let rot = 0, ghShift = 0, qqShift = 0, phase;
+            if (s < oG) {
+                phase = 'A';
+                ghShift = s;
+            } else if (s < oG + R) {
+                phase = 'B';
+                rot = (s - oG) / R;
+                ghShift = oG;
+            } else {
+                phase = 'C';
+                rot = 1;
+                ghShift = oG;
+                qqShift = Math.min(oQ, s - oG - R);
+            }
+            const rotTxt = 'translateZ(calc(var(--orbit-r) * -1)) rotateY(' + (-45 * rot).toFixed(2) + 'deg)';
+            if (rotTxt !== lastRotTxt) { lastRotTxt = rotTxt; ring.style.transform = rotTxt; }
+            if (ghWrap) {
+                const t = ghShift > 0.5 ? 'translateY(' + (-Math.round(ghShift)) + 'px)' : '';
+                if (t !== lastGhTxt) { lastGhTxt = t; ghWrap.style.transform = t; }
+            }
+            if (qqWrap) {
+                const t = qqShift > 0.5 ? 'translateY(' + (-Math.round(qqShift)) + 'px)' : '';
+                if (t !== lastQqTxt) { lastQqTxt = t; qqWrap.style.transform = t; }
+            }
+            if (phase !== lastPhase) { lastPhase = phase; setFaceState(phase); }
         }
         window.addEventListener('scroll', function () {
             if (!raf) raf = requestAnimationFrame(paint);
         }, { passive: true });
-        // 面自身滚动时也要更新提示（paint 只挂在 window scroll 上）
-        [fromFace, toFace].forEach(function (face) {
-            if (face) face.addEventListener('scroll', function () {
-                if (!raf) raf = requestAnimationFrame(syncScrollHints);
-            }, { passive: true });
-        });
         paint();
     })();
 

@@ -753,7 +753,11 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     min-height:0;
     padding:max(72px, env(safe-area-inset-top, 0px)) 22px max(28px, env(safe-area-inset-bottom, 0px));
     overflow:hidden;
-    overscroll-behavior-y:none;
+    /* overscroll-behavior-y 千万别写 none：overflow:hidden 的盒子仍是
+       Chromium 眼里的滚动容器（内容超高），none 会把面内滚轮手势整条
+       吞掉、不给页面滚动链——指针悬在卡片上时滚轮"失灵/卡住"的元凶。
+       auto：面自身不可滚（overflow hidden），手势自然链到页面。 */
+    overscroll-behavior-y:auto;
     opacity:.16;
     visibility:hidden;
     pointer-events:none;
@@ -763,40 +767,21 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .orbit-face.is-near{visibility:visible;opacity:.48}
 .orbit-face.is-active{visibility:visible;opacity:1;z-index:2;pointer-events:auto}
 .orbit-face.is-parked{visibility:hidden;pointer-events:none;opacity:0}
-/* 正对镜头的那一面若内容高于视口（GitHub 面叠加贡献图后会超高），
-   允许其内部纵向滚动，避免头像/技能被永久裁掉。滚到边界后，滚轮手势
-   经 scroll-chaining 自然冒泡到页面 → 推进轨道旋转，于是「读 GitHub →
-   继续下滑 → 翻到 QQ」是一条连贯链路。overscroll-behavior-y:auto 保留链式滚动。
-   旋转过程中的面不可滚（overflow:hidden 默认），避免歪斜滚动。 */
-.orbit-face.is-active{
-    overflow-y:auto;
-    overscroll-behavior-y:auto;
-    scrollbar-width:none;
-}
-.orbit-face.is-active::-webkit-scrollbar{width:0;height:0}
-/* 卡片可内部滚动但滚动条被隐藏（3D 变换下滑块会歪斜），没有提示的话
-   "下面还有内容"就完全看不出来，用户会以为卡片被裁掉了。
-   故在仍有内容可滚时显示底部渐隐 + 顶部渐隐作为可滚动信号。 */
-.orbit-face.is-active::before,
-.orbit-face.is-active::after{
-    content:'';position:absolute;left:0;right:0;height:56px;pointer-events:none;
-    opacity:0;transition:opacity .28s var(--ease);z-index:3;
-}
-.orbit-face.is-active::before{top:0;background:linear-gradient(to bottom,rgba(10,8,14,.9),transparent)}
-.orbit-face.is-active::after{bottom:0;background:linear-gradient(to top,rgba(10,8,14,.92),transparent)}
-.orbit-face.is-active[data-more="bottom"]::after{opacity:1}
-.orbit-face.is-active[data-more="both"]::after{opacity:1}
-.orbit-face.is-active[data-more="top"]::before{opacity:1}
-.orbit-face.is-active[data-more="both"]::before{opacity:1}
-.orbit-face.is-active[data-more="none"]::before,
-.orbit-face.is-active[data-more="none"]::after{opacity:0}
+/* 超高内容不再用面内 overflow-y:auto 内部滚动（滚动套滚动 + 藏滚动条 =
+   「卡住 / 顶部有隐藏容器」错觉的根源），改由 JS 把轨道撑高、页面级
+   滚动直接平移 orbit-inner 揭示内容，见 animations.js setupOrbit。 */
+.orbit-inner{width:100%;will-change:transform}
 .orbit-face .card{width:100%;max-width:880px;margin:0 auto;flex:0 0 auto}
 .orbit-track .page,
 .orbit-face.page,
 #netease.orbit-face,
 #github.orbit-face{
     content-visibility:visible;contain-intrinsic-size:auto;
-    min-height:0;align-items:center;
+    min-height:0;
+    /* safe center：内容高于面时退回顶对齐，顶部永不裁掉。
+       这里若写普通 center（旧值），会盖掉 .orbit-face 的 safe center，
+       卡片上下各溢出一半，顶部内容被藏进视口外——"顶部有隐藏容器"。 */
+    align-items:safe center;
 }
 #github.orbit-face,
 #netease.orbit-face{padding:max(72px, env(safe-area-inset-top, 0px)) 22px max(28px, env(safe-area-inset-bottom, 0px))}
