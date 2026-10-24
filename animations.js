@@ -905,6 +905,15 @@
             handlePostIntro();
             return;
         }
+        /* 减少动态偏好的用户直接跳过整段装饰动画 */
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            rememberIntro();
+            intro.remove();
+            document.body.classList.remove('intro-lock');
+            revealIsland();
+            handlePostIntro();
+            return;
+        }
         const prefix = intro.querySelector('.intro-prefix');
         const first  = intro.querySelector('.intro-first');
         const rest   = intro.querySelector('.intro-rest');
@@ -1285,8 +1294,14 @@
         return wrap;
     };
 
-    if (document.readyState === 'complete') runIntro();
-    else window.addEventListener('load', runIntro);
+    /* 立即启动 intro（本脚本是 defer，执行时 DOM 已完整解析）。
+       旧版挂在 window.load 上：等所有外部资源（Google Fonts、jsdelivr
+       图标、GitHub 头像…）加载完才开动画。这些 CDN 在境内经常被卡住
+       连接 20-60s，期间 intro 文字全是 opacity:0、跳过监听还没注册、
+       body 又被 intro-lock 锁住——用户看到的就是"黑屏卡住、点不动"，
+       load 终于触发后再一点击就整段跳过直接进主页。
+       现在动画从第一帧就开跑，字体慢就先用回退字体，不再有黑屏期。 */
+    runIntro();
 
 (function setupOrbit() {
         const track = document.getElementById('orbit-track');

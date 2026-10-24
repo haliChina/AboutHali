@@ -129,10 +129,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     col = premulMix(layer2, col);
     col = premulMix(layer1, col);
     col += -0.15;
-    float crest = sat(length(grad) * 14.0);
-    col += vec3(1.0, 0.90, 0.95) * crest * crest * 0.42;
-    col.r += grad.x * 0.28;
-    col.b -= grad.x * 0.18;
+    /* 波峰高光与色散整体减半：高光是激进观感的主要来源，
+       大数值时樱花被亮带割裂。 */
+    float crest = sat(length(grad) * 7.0);
+    col += vec3(1.0, 0.90, 0.95) * crest * crest * 0.20;
+    col.r += grad.x * 0.12;
+    col.b -= grad.x * 0.08;
     fragColor = vec4(col,1.0);
 }`;
 
@@ -170,7 +172,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         '    }else{',
         '      r2=dot(p,p);',
         '    }',
-        '    hnew+=exp(-r2*52.0)*iSplat.z;',
+        '    hnew+=exp(-r2*30.0)*iSplat.z;',
         '  }',
         '  gl_FragColor=vec4(clamp(hnew,0.0,1.0),c.r,0.0,1.0);',
         '}'
@@ -331,7 +333,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         };
         gl.uniform1i(uniforms.src, 0);
         gl.uniform2f(uniforms.texel, 1 / SIM, 1 / SIM);
-        gl.uniform1f(uniforms.damping, 0.988);
+        gl.uniform1f(uniforms.damping, 0.972);
         gl.useProgram(prog);
         gl.uniform2f(uHeightTexel, 1 / SIM, 1 / SIM);
         return {
@@ -438,8 +440,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     function stepFluid() {
         if (!fluid) return;
         const speed = Math.hypot(pointer.vx, pointer.vy);
+        /* 水波纹柔化：入水强度从 0.42/2.4 降到 0.18/1.4，
+           快速划动不再炸出深坑，只有轻轻一圈涟漪。 */
         const strength = pointer.active && pointer.inside
-            ? Math.min(0.42, speed * 2.4)
+            ? Math.min(0.18, speed * 1.4)
             : 0;
         const aspect = (window.innerWidth || 1) / (window.innerHeight || 1);
         gl.bindFramebuffer(gl.FRAMEBUFFER, fluid.write.fbo);
@@ -477,7 +481,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
             const filter = fluid.fmt.linear ? gl.LINEAR : gl.NEAREST;
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-            gl.uniform1f(uWarp, 0.92);
+            gl.uniform1f(uWarp, 0.30);
         } else {
             gl.bindTexture(gl.TEXTURE_2D, restTex);
             gl.uniform1f(uWarp, 0);
