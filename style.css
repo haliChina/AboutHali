@@ -108,8 +108,12 @@ body.intro-lock{overflow:hidden}
     font-family:var(--font-display);letter-spacing:-.02em;
     background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 8px 30px rgba(255,107,157,.25)) drop-shadow(0 0 40px rgba(255,107,157,.15));cursor:default}
-.hn-char{display:inline-block;position:relative;will-change:transform;padding-bottom:.16em;
+    cursor:default}
+/* 不给渐变字加 filter:drop-shadow / will-change：
+   部分移动端内核（X5/Quark 等）会把 background-clip:text 的字形
+   连同投影滤镜重复绘制，高字 H/l 的影子最显眼，看起来就是
+   "hl 重影叠在 Hali 下方"，且每次刷新必现。宁可去掉柔光。 */
+.hn-char{display:inline-block;position:relative;padding-bottom:.16em;
     background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;
     transition:transform .45s var(--spring)}
@@ -232,9 +236,10 @@ body.intro-lock{overflow:hidden}
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .skill{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);
     position:relative;overflow:hidden;transition:transform .4s var(--spring),border-color .35s var(--ease),background .35s var(--ease)}
-.skill::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand);opacity:.9;transition:width .35s var(--ease)}
+/* ::before 品牌色竖条已移除：圆角卡左缘外侧贴着的 4px 色条突兀
+   （用户 DevTools 检查到的 div.skill::before 4×71）。hover 高亮
+   由 border-color + 背景混合提供，足够。 */
 .skill:hover{transform:translateY(-5px) rotate(-.5deg);border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent)}
-.skill:hover::before{width:6px}
 .skill-icon{width:34px;height:34px;flex-shrink:0}
 .skill-icon--mono{filter:brightness(0) invert(1)}
 .skill-glyph{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;background:var(--brand)}
