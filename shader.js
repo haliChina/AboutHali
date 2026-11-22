@@ -17,8 +17,10 @@
     /* 不要 will-change/translateZ/backface：WebView 会把 canvas 抬成独立合成层，
        层内首帧 WebGL 往往不刷新，看起来像开场几秒背景冻住。 */
 
-    // Reduce filter blur on mobile — full blur(2px) is a major GPU cost
-    if (isMobile) canvas.style.filter = 'blur(1px) brightness(.85) saturate(.95)';
+    /* 移动端压暗特调（内联样式优先级高于 stylesheet，桌面走 CSS brightness(.62)）。
+       花瓣大、压暗后易发闷：亮度 .85→.50、饱和 .95→.70（离线对比图选定 C 方案，
+       花瓣褪成暗梅紫仍可辨认）；blur 保持 1px —— 加大在移动端 GPU 成本高。 */
+    if (isMobile) canvas.style.filter = 'blur(1px) brightness(.50) saturate(.70)';
 
     const glOpts = {
         antialias: false,
@@ -115,7 +117,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     uv.x *= iResolution.x/iResolution.y;
     uv.y += iTime*0.18;
     uv.x -= iTime*0.06 + sin(iTime)*0.1;
-    uv *= 4.3;
+    /* uPetalScale：花瓣密度标度。桌面 1.0=原样；移动端 1.4（花瓣更碎，
+       避免「大花瓣+压暗=闷红糊面」，见 11-22 移动端视觉研发） */
+    uv *= 4.3 * uPetalScale;
     float screenY = sampleUV.y;
     vec3 col = vec3(1.0,0.7529,0.8235);
     float blur = abs(sampleUV.y-0.5)*1.4;
@@ -138,7 +142,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     fragColor = vec4(col,1.0);
 }`;
 
-    const FRAG = 'precision highp float;uniform vec3 iResolution;uniform float iTime;uniform sampler2D iHeight;uniform float iWarp;uniform vec2 iHeightTexel;\n'
+    const FRAG = 'precision highp float;uniform vec3 iResolution;uniform float iTime;uniform sampler2D iHeight;uniform float iWarp;uniform vec2 iHeightTexel;uniform float uPetalScale;\n'
         + SHADER
         + '\nvoid main(){vec4 c;mainImage(c, gl_FragCoord.xy);gl_FragColor=c;}';
 
@@ -220,9 +224,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
     const uHeight = gl.getUniformLocation(prog, 'iHeight');
     const uWarp = gl.getUniformLocation(prog, 'iWarp');
     const uHeightTexel = gl.getUniformLocation(prog, 'iHeightTexel');
+    const uPetal = gl.getUniformLocation(prog, 'uPetalScale');
     gl.uniform1i(uHeight, 0);
     gl.uniform1f(uWarp, 0);
     gl.uniform2f(uHeightTexel, 1, 1);
+    gl.uniform1f(uPetal, isMobile ? 1.5 : 1.0);
 
     const restTex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, restTex);

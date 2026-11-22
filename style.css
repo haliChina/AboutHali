@@ -127,6 +127,10 @@ body.intro-lock{overflow:hidden}
 .home-inner{width:100%;max-width:880px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
 .home-greet{margin:0;color:var(--text-dim);font-size:1.05rem;letter-spacing:2px}
 .home-role{margin:-2px 0 4px;color:var(--md-primary);font-size:.92rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;font-family:var(--font-mono)}
+/* 间隔点与后段绑成同行语义；窄屏两段各自成行、点隐藏（·挂行尾挤行的修复） */
+.home-role .hr-dot,.footer .ft-dot{margin:0 .5em}
+/* 一句话定位：给初访者的「干啥的」答案，标签（上一行）之外的实体内容 */
+.home-tagline{margin:6px 0 0;color:var(--text-dim);font-size:.95rem;line-height:1.8;max-width:36em}
 .home-name{margin:6px 0 14px -.14em;font-size:clamp(3rem,9vw,5.6rem);font-weight:900;line-height:1.16;padding:.04em .08em .14em;overflow:visible;
     font-family:var(--font-display);letter-spacing:-.02em;
     background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);
@@ -155,22 +159,22 @@ body.intro-lock{overflow:hidden}
 
 .social{width:100%;max-width:640px}
 .social-grid{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:16px}
-.social-btn{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+.social-btn{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);
     position:relative;overflow:hidden;cursor:pointer;
     transition:transform .45s var(--spring),background .35s var(--ease),border-color .35s var(--ease),box-shadow .35s var(--ease);
     animation:btnIn .6s var(--spring) backwards}
 .social-btn img{width:25px;height:25px;transition:transform .45s var(--spring),filter .35s var(--ease);filter:brightness(0) invert(1)}
 .social-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-130%);transition:transform .6s var(--ease)}
-.social-btn:hover{transform:translateY(-7px) scale(1.06);background:var(--brand);border-color:transparent;box-shadow:0 12px 30px -8px var(--brand)}
-.social-btn:hover::before{transform:translateX(130%)}
-.social-btn:hover img{transform:scale(1.18) rotate(6deg)}
+@media (hover:hover){.social-btn:hover{transform:translateY(-7px) scale(1.06);background:var(--brand);border-color:transparent;box-shadow:0 12px 30px -8px var(--brand)}}
+@media (hover:hover){.social-btn:hover::before{transform:translateX(130%)}}
+@media (hover:hover){.social-btn:hover img{transform:scale(1.18) rotate(6deg)}}
 .social-btn-img img{filter:none;border-radius:50%;object-fit:cover;width:30px;height:30px}
-.social-btn[data-invert]:hover img{filter:brightness(0)}
+@media (hover:hover){.social-btn[data-invert]:hover img{filter:brightness(0)}}
 .social-btn-svg{background:#1f1f23;border:1px solid rgba(255,255,255,.08);box-shadow:0 6px 18px -10px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05)}
 .social-btn-svg img{width:42px;height:42px;filter:none;border-radius:50%}
-.social-btn-svg:hover{background:var(--brand);border-color:transparent;box-shadow:0 12px 30px -8px var(--brand)}
-.social-btn-svg:hover img{transform:scale(1.10)}
+@media (hover:hover){.social-btn-svg:hover{background:var(--brand);border-color:transparent;box-shadow:0 12px 30px -8px var(--brand)}}
+@media (hover:hover){.social-btn-svg:hover img{transform:scale(1.10)}}
 @keyframes btnIn{0%{opacity:0;transform:translateY(22px) scale(.85)}100%{opacity:1;transform:none}}
 .social-grid .social-btn:nth-child(1){animation-delay:.05s}
 .social-grid .social-btn:nth-child(2){animation-delay:.10s}
@@ -187,7 +191,7 @@ body.intro-lock{overflow:hidden}
 .explore-btn{margin-top:48px;padding:14px 40px;font-size:1.05rem;font-weight:600;color:var(--md-on-primary);cursor:pointer;
     border:none;border-radius:999px;background:var(--md-primary);position:relative;overflow:hidden;
     transition:transform .45s var(--md-spring-standard),box-shadow .3s var(--md-spring-standard),filter .25s ease}
-.explore-btn:hover{transform:translateY(-3px);box-shadow:0 14px 36px -10px rgba(255,177,200,.5);filter:brightness(1.05)}
+@media (hover:hover){.explore-btn:hover{transform:translateY(-3px);box-shadow:0 14px 36px -10px rgba(255,177,200,.5);filter:brightness(1.05)}}
 
 .scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-faint);font-size:.85rem;animation:hintFloat 2.2s ease-in-out infinite}
 .scroll-arrow{width:14px;height:14px;border-right:2px solid var(--text-faint);border-bottom:2px solid var(--text-faint);transform:rotate(45deg)}
@@ -198,7 +202,7 @@ body.intro-lock{overflow:hidden}
     border:1px solid var(--md-outline-variant);border-radius:var(--md-corner-xl);
     overflow:hidden;
     box-shadow:var(--md-elev-3);transition:transform .5s var(--md-spring-standard),box-shadow .5s var(--md-spring-standard)}
-.card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),var(--md-elev-3)}
+@media (hover:hover){.card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),var(--md-elev-3)}}
 .card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--md-outline-variant);
     background:var(--md-surface-container-high)}
 .card-logo{width:30px;height:30px}
@@ -210,7 +214,7 @@ body.intro-lock{overflow:hidden}
 .card-btn{display:block;width:fit-content;margin:0 auto 26px;padding:11px 32px;border-radius:999px;text-decoration:none;font-weight:600;
     color:var(--md-on-primary);background:var(--md-primary);
     box-shadow:var(--md-elev-2);transition:transform .45s var(--md-spring-standard),box-shadow .3s var(--md-spring-standard)}
-.card-btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px -10px rgba(255,177,200,.45)}
+@media (hover:hover){.card-btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px -10px rgba(255,177,200,.45)}}
 
 .gh-profile{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .gh-avatar{width:96px;height:96px;border-radius:24px;object-fit:cover;border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.7)}
@@ -225,7 +229,7 @@ body.intro-lock{overflow:hidden}
 .gh-handle{font-size:1rem;font-weight:500;color:var(--accent-2);margin-left:6px}
 .gh-bio{color:var(--text-dim);margin:8px 0 14px;line-height:1.6}
 .gh-follow{display:inline-block;padding:8px 22px;border-radius:999px;border:1px solid var(--md-outline-variant);color:var(--md-primary);text-decoration:none;font-weight:600;transition:background-color .25s var(--md-spring-standard),transform .45s var(--md-spring-standard)}
-.gh-follow:hover{background:rgba(255,177,200,.10);transform:translateY(-2px)}
+@media (hover:hover){.gh-follow:hover{background:rgba(255,177,200,.10);transform:translateY(-2px)}}
 
 /* align-items:flex-start 是关键修复。
    默认 stretch 会把较矮的 stats 卡（自然高度 154px）拉伸到与 langs 卡
@@ -239,7 +243,7 @@ body.intro-lock{overflow:hidden}
    挤在一起、末行被裁（见附图）。 */
 .gh-stats-card{
     width:100%;max-width:380px;height:auto;aspect-ratio:auto;
-    border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+    border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line);
     padding:4px;object-fit:contain;
 }
 /* 兜底卡片是 div，需显式撑满同一格位保持两列对齐 */
@@ -261,7 +265,7 @@ body.intro-lock{overflow:hidden}
 /* ::before 品牌色竖条已移除：圆角卡左缘外侧贴着的 4px 色条突兀
    （用户 DevTools 检查到的 div.skill::before 4×71）。hover 高亮
    由 border-color + 背景混合提供，足够。 */
-.skill:hover{transform:translateY(-5px) rotate(-.5deg);border-color:var(--md-primary);background:color-mix(in srgb,var(--md-primary) 10%,transparent)}
+@media (hover:hover){.skill:hover{transform:translateY(-5px) rotate(-.5deg);border-color:var(--md-primary);background:color-mix(in srgb,var(--md-primary) 10%,transparent)}}
 .skill-icon{width:34px;height:34px;flex-shrink:0}
 .skill-icon--mono{filter:brightness(0) invert(1)}
 .skill-glyph{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;background:var(--brand)}
@@ -364,7 +368,7 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
     transition:transform .5s var(--md-spring-standard),box-shadow .5s var(--md-spring-standard),border-color .3s ease;
     position:relative;overflow:hidden;
     box-shadow:var(--md-elev-2)}
-.proj-card:hover{transform:translateY(-6px);border-color:var(--md-primary);box-shadow:0 24px 50px -20px rgba(0,0,0,.8),var(--md-elev-2)}
+@media (hover:hover){.proj-card:hover{transform:translateY(-6px);border-color:var(--md-primary);box-shadow:0 24px 50px -20px rgba(0,0,0,.8),var(--md-elev-2)}}
 /* 原来这里有一条 hover 时出现的 3px 左侧粉色竖条（::before）。因为卡片有
    border-radius:18px 而伪元素是直角矩形，方角会戳出圆角外侧，看起来像
    一条悬空在卡片左边的粉色细线（见附件截图），故移除。
@@ -388,9 +392,9 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
 .proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 20px;border-radius:999px;font-size:.85rem;font-weight:600;text-decoration:none;
     border:1px solid var(--md-outline-variant);color:var(--md-primary);transition:transform .45s var(--md-spring-standard),border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
-.proj-link:hover{background:rgba(255,177,200,.10);transform:translateY(-1px);border-color:var(--md-primary)}
+@media (hover:hover){.proj-link:hover{background:rgba(255,177,200,.10);transform:translateY(-1px);border-color:var(--md-primary)}}
 .proj-link--primary{background:var(--md-primary);color:var(--md-on-primary);border-color:transparent;box-shadow:var(--md-elev-2)}
-.proj-link--primary:hover{background:var(--md-primary);color:var(--md-on-primary);border-color:transparent;filter:brightness(1.06);box-shadow:0 10px 24px -8px rgba(255,177,200,.55)}
+@media (hover:hover){.proj-link--primary:hover{background:var(--md-primary);color:var(--md-on-primary);border-color:transparent;filter:brightness(1.06);box-shadow:0 10px 24px -8px rgba(255,177,200,.55)}}
 .proj-source{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px;flex-shrink:0}
 .proj-source[src="github"],.proj-source:not([src="dns"]){background:rgba(255,255,255,.08);color:var(--text-dim)}
 .proj-card .proj-source{background:rgba(255,255,255,.08);color:var(--text-dim)}
@@ -638,6 +642,13 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 
 /* ===== 移动端性能优化 ===== */
 @media (max-width:768px){
+    /* 0. 去噪点：scrim 的 feTurbulence 颗粒在大花瓣+压暗后显脏，移动端只留径向渐变；
+          桌面保留 film-grain 质感 */
+    .bg-scrim{background:radial-gradient(135% 125% at 50% 2%,rgba(9,7,13,.76),rgba(6,5,10,.94) 80%);opacity:.6}
+    /* · 不再挂行尾挤行：身份行/页脚窄屏改纵向分段 */
+    .home-role{letter-spacing:.16em;font-size:.8rem;line-height:1.7}
+    .home-role .hr-item,.footer .ft-item{display:block}
+    .home-role .hr-dot,.footer .ft-dot{display:none}
     /* 1. 关闭 backdrop-filter：背后是动态 canvas，每帧重模糊是移动端最大瓶颈 */
     .island-content{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:rgba(12,12,16,1)}
     /* 2. 关闭 page 全屏的 backdrop-filter（如果有） */
