@@ -129,8 +129,6 @@ body.intro-lock{overflow:hidden}
 .home-role{margin:-2px 0 4px;color:var(--md-primary);font-size:.92rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;font-family:var(--font-mono)}
 /* 间隔点与后段绑成同行语义；窄屏两段各自成行、点隐藏（·挂行尾挤行的修复） */
 .home-role .hr-dot,.footer .ft-dot{margin:0 .5em}
-/* 一句话定位：给初访者的「干啥的」答案，标签（上一行）之外的实体内容 */
-.home-tagline{margin:6px 0 0;color:var(--text-dim);font-size:.95rem;line-height:1.8;max-width:36em}
 .home-name{margin:6px 0 14px -.14em;font-size:clamp(3rem,9vw,5.6rem);font-weight:900;line-height:1.16;padding:.04em .08em .14em;overflow:visible;
     font-family:var(--font-display);letter-spacing:-.02em;
     background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);
