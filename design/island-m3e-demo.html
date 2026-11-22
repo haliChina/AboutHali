@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Island · M3 Expressive Demo</title>
+<meta name="robots" content="noindex">
+<style>
+/* =====================================================================
+   Dynamic Island M3 Expressive 迁移 demo —— 独立文件，不影响生产。
+
+   相对现状的三类改动（对照生产 style.css/animations.js）：
+   1. 运动：三次贝塞尔近似弹簧 → linear() 真弹簧曲线
+      spatial: ζ=0.68 ω0=10.5 650ms（~5% 过冲，形变那一下的回弹）
+      standard: ζ=1.0 临界阻尼 380ms（内容层进出）
+   2. 色彩：中性黑玻璃 → M3 暗色 tonal 阶梯（粉色 seed）
+      surface-container 做壳，surface-container-high 做内嵌面，
+      primary/on-primary 做填充按钮，primary-container/secondary-container
+      做 tonal 按钮，outline-variant 取代纯白描边
+   3. 形状：按钮全部 full-pill；XL 面 28 / 卡片 32；icon 按钮 50% 圆 + state-layer
+
+   生产文件未改动；效果确认后再回填 style.css / animations.js。
+   ===================================================================== */
+:root{
+    /* 页面底色 */
+    --stage:#08080c;
+
+    /* M3 tonal roles（粉色 seed，暗色阶梯为手调近似值） */
+    --md-surface-container:#1a171f;
+    --md-surface-container-high:#252029;
+    --md-primary:#ffb1c8;
+    --md-on-primary:#470f26;
+    --md-primary-container:#6e2946;
+    --md-on-primary-container:#ffd9e4;
+    --md-secondary-container:#54333f;
+    --md-on-secondary-container:#ffd9e4;
+    --md-outline-variant:rgba(255,177,200,.16);
+    --md-on-surface-variant:#d9c2cd;
+    --md-error:#ffb4ab;
+
+    /* M3E motion:阻尼谐振子采样成 linear() 曲线 */
+    --md-spring-spatial:linear(0.0, 0.0305, 0.1077, 0.2132, 0.3323, 0.4541, 0.5708, 0.6772, 0.7703, 0.8486, 0.9122, 0.9617, 0.9986, 1.0244, 1.0411, 1.0505, 1.0541, 1.0535, 1.05, 1.0447, 1.0384, 1.0318, 1.0253, 1.0193, 1.014, 1.0095, 1.0);
+    --md-spring-standard:linear(0.0, 0.0563, 0.1769, 0.3156, 0.4488, 0.5663, 0.6645, 0.744, 0.8067, 0.8554, 0.8926, 0.9208, 0.9418, 0.9575, 0.9691, 1.0);
+
+    --md-corner-xl:28px;
+    --md-corner-lg:24px;
+    --md-elev-2:0 4px 14px rgba(0,0,0,.4);
+    --md-elev-3:0 8px 28px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4);
+
+    --font-body:'Noto Sans JP','PingFang SC','Microsoft YaHei',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;background:var(--stage);color:#fff8fc;font-family:var(--font-body)}
+body{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;gap:28px;
+    padding:max(96px,env(safe-area-inset-top)) 20px 40px;
+    background:
+        radial-gradient(60% 34% at 50% 0%,rgba(255,143,182,.075),transparent 62%),
+        radial-gradient(45% 30% at 82% 84%,rgba(196,78,255,.045),transparent 55%),
+        var(--stage);
+    -webkit-font-smoothing:antialiased;
+}
+h1{font-size:1.05rem;font-weight:700;letter-spacing:.16em;color:var(--md-on-surface-variant);margin:0;text-transform:uppercase}
+
+/* ===== 岛壳 ===== */
+.dynamic-island{display:flex;justify-content:center;width:100%;pointer-events:none}
+.island-cluster{display:flex;align-items:flex-start;justify-content:center;gap:8px}
+.island-content,.music-satellite{
+    pointer-events:auto;
+    background:var(--md-surface-container);
+    border:1px solid var(--md-outline-variant);
+    box-shadow:var(--md-elev-3);
+}
+.island-content{
+    position:relative;cursor:pointer;overflow:hidden;
+    width:134px;height:36px;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    transition:width .62s var(--md-spring-spatial),height .62s var(--md-spring-spatial),
+               border-radius .62s var(--md-spring-spatial),background-color .3s ease;
+    touch-action:manipulation;contain:layout paint;
+}
+.island-layer{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:0;pointer-events:none;transform:scale(.88);filter:blur(5px);
+    transition:opacity .18s ease,transform .3s var(--md-spring-standard),filter .16s ease;
+}
+.island-layer.active-content{
+    opacity:1;pointer-events:auto;transform:scale(1);filter:blur(0);
+    transition:opacity .3s ease .08s,transform .5s var(--md-spring-spatial) .05s,filter .26s ease .06s;
+}
+</style>
+<style>
+/* ===== default 行 ===== */
+.island-default{position:absolute;inset:0;gap:7px}
+.island-idle-row{display:flex;align-items:center;gap:8px}
+.island-idle-row--time{position:absolute;right:12px}
+.island-idle-dot{width:5px;height:5px;border-radius:50%;background:var(--md-primary);box-shadow:0 0 8px rgba(255,143,182,.9);animation:idleDotPulse 2.4s ease-in-out infinite;flex-shrink:0}
+@keyframes idleDotPulse{0%,100%{opacity:.35}50%{opacity:1}}
+.island-idle-brand{white-space:nowrap;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.9)}
+.island-idle-clock{font-family:var(--font-mono);font-size:11px;color:var(--md-on-surface-variant);white-space:nowrap}
+
+/* ===== preview / hint / greet / toast ===== */
+.island-preview,.island-hint,.island-greet{gap:10px}
+.preview-section,.hint-section{font-size:.92rem;font-weight:700;color:#fff}
+.hint-prefix,.greet-cn{font-size:.85rem;color:var(--md-on-surface-variant)}
+.preview-dots{display:flex;gap:4px}
+.preview-dots i{width:5px;height:5px;border-radius:50%;background:var(--md-outline-variant);background:rgba(255,177,200,.25)}
+.preview-dots i.active{background:var(--md-primary)}
+.preview-pct,.sp-pct{font-family:var(--font-mono);font-size:.8rem;color:#fff}
+.greet-jp{font-size:.92rem;font-weight:700;color:#fff}
+.island-toast{gap:8px;font-size:.95rem;font-weight:500}
+.island-toast-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.8rem;color:var(--md-on-primary);background:var(--md-primary)}
+.island-content.toast-success .island-toast{color:var(--md-primary)}
+.island-content.toast-error .island-toast{color:var(--md-error)}
+.island-content.toast-error .island-toast-icon{background:var(--md-error)}
+@keyframes toastPop{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+.island-content.island-state-toast .island-toast{animation:toastPop .5s var(--md-spring-standard)}
+
+/* ===== EQ ===== */
+.island-eq{display:flex;align-items:center;justify-content:center;gap:2px;height:15px;flex-shrink:0}
+.island-eq i{display:block;width:1.5px;height:28%;border-radius:999px;background:var(--md-primary);transform-origin:center;opacity:.85}
+.island-eq i:nth-child(1){height:42%}.island-eq i:nth-child(2){height:76%}.island-eq i:nth-child(3){height:34%}
+.island-eq i:nth-child(4){height:58%}.island-eq i:nth-child(5){height:66%}.island-eq i:nth-child(6){height:48%}
+@keyframes eqA{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.15)}}
+body.audio-playing .island-eq i{animation:eqA .8s ease-in-out infinite}
+body.audio-playing .island-eq i:nth-child(2){animation-duration:.93s;animation-delay:-.18s}
+body.audio-playing .island-eq i:nth-child(3){animation-duration:.72s;animation-delay:-.34s}
+body.audio-playing .island-eq i:nth-child(4){animation-duration:1.05s;animation-delay:-.12s}
+body.audio-playing .island-eq i:nth-child(5){animation-duration:.87s;animation-delay:-.46s}
+body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-delay:-.28s}
+
+/* ===== music-bar / music-card ===== */
+.island-music-bar{justify-content:space-between;padding:0 10px}
+.ib-cover,.mc-cover,.sat-cover,.sat-card-cover{object-fit:cover;flex-shrink:0;border-radius:7px;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.ib-cover{width:24px;height:24px}
+.island-music-card{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:0;padding:16px 18px 13px}
+.mc-head{display:flex;align-items:center;gap:12px;min-width:0}
+.mc-cover{width:64px;height:64px;border-radius:16px;box-shadow:0 7px 18px rgba(0,0,0,.5)}
+.mc-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.mc-title,.sat-title{font-size:17px;font-weight:600;line-height:1.15;letter-spacing:-.15px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-artist,.sat-artist{font-size:13px;line-height:1.2;color:var(--md-on-surface-variant);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-progress-row,.sat-progress-row{height:24px;margin-top:10px;display:grid;grid-template-columns:34px minmax(0,1fr) 39px;align-items:center;column-gap:9px;font-size:10.5px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.42)}
+.mc-scrub,.sat-scrub{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:999px;background:rgba(255,177,200,.22);cursor:pointer;margin:0}
+.mc-scrub::-webkit-slider-thumb,.sat-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:0;height:0}
+.mc-cur,.sat-cur{min-width:0}
+.mc-rem,.sat-rem{text-align:right}
+.mc-ctrls,.sat-ctrls{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:auto;height:42px}
+
+/* M3 icon button + state-layer */
+.island-transport{appearance:none;border:0;background:none;width:52px;height:40px;padding:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;position:relative;border-radius:50%;transition:transform .3s var(--md-spring-standard),opacity .2s}
+.island-transport::after{content:'';position:absolute;inset:0;border-radius:50%;background:currentColor;opacity:0;transition:opacity .18s ease;pointer-events:none}
+.island-transport:hover::after{opacity:.08}
+.island-transport:active::after{opacity:.14}
+.island-transport svg{width:30px;height:30px;fill:currentColor;pointer-events:none}
+.island-transport--toggle{padding:0;color:var(--md-primary)}
+.island-transport--toggle svg{width:39px;height:39px}
+
+/* ===== nav ===== */
+.island-nav{flex-direction:column;justify-content:center;gap:2px;padding:10px 18px 4px}
+.pill-nav{position:relative;display:flex;align-items:center;gap:4px;padding:3px;margin-top:2px;
+    background:var(--md-surface-container-high);border:1px solid var(--md-outline-variant);
+    border-radius:999px}
+.pill-indicator{position:absolute;top:5px;bottom:5px;background:var(--md-primary);
+    border-radius:999px;box-shadow:0 2px 10px -2px rgba(255,177,200,.45);pointer-events:none;z-index:0;
+    transition:left .5s var(--md-spring-spatial),width .5s var(--md-spring-spatial),opacity .28s ease;opacity:0}
+.pill-indicator.ready{opacity:1}
+.island-nav-btn{color:var(--md-on-surface-variant);font-size:.93rem;font-weight:600;border-radius:999px;padding:7px 16px;text-decoration:none;
+    position:relative;z-index:1;white-space:nowrap;transition:color .25s ease,transform .45s var(--md-spring-standard);
+    opacity:0;transform:translateY(8px)}
+.island-content.island-state-nav .island-nav-btn{opacity:1;transform:none}
+.island-content.island-state-nav .island-nav-btn:nth-child(2){transition-delay:.08s}
+.island-content.island-state-nav .island-nav-btn:nth-child(3){transition-delay:.14s}
+.island-content.island-state-nav .island-nav-btn:nth-child(4){transition-delay:.20s}
+.island-content.island-state-nav .island-nav-btn:nth-child(5){transition-delay:.26s}
+.island-nav-btn:hover{color:#fff}
+.island-nav-btn.active{color:var(--md-on-primary)}
+.scroll-progress{width:100%;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(4px);transition:opacity .3s ease .2s,transform .3s ease .2s}
+.island-content.island-state-nav .scroll-progress{opacity:1;transform:none}
+.scroll-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:600;letter-spacing:.4px}
+.sp-section{color:var(--md-on-surface-variant)}
+.scroll-progress-container{position:relative;width:100%;height:5px;border-radius:999px;background:rgba(255,177,200,.14);overflow:hidden}
+.scroll-progress-bar{position:relative;height:100%;width:34%;border-radius:999px;background:var(--md-primary);transition:width .15s ease-out}
+
+/* ===== confirm ===== */
+.island-confirm{justify-content:flex-start;align-items:stretch;padding:14px 18px;flex-direction:column;gap:11px;overflow:hidden}
+.island-confirm-info{display:flex;align-items:center;gap:14px;width:100%;min-width:0}
+.island-confirm-icon{flex:0 0 auto;position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    border-radius:16px;background:var(--md-secondary-container);border:1px solid var(--md-outline-variant);overflow:hidden}
+.island-confirm-icon img{width:30px;height:30px;object-fit:contain}
+.island-confirm-icon .confirm-fallback{width:22px;height:22px;color:var(--md-on-secondary-container)}
+.island-confirm-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.island-confirm-title{font-size:1.04rem;font-weight:700;color:#fff;line-height:1.2}
+.island-confirm-host{font-size:.74rem;color:var(--md-on-surface-variant);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.island-confirm-countdown{position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,177,200,.14);overflow:hidden}
+.island-confirm-countdown-bar{position:absolute;left:0;top:0;height:100%;width:100%;border-radius:999px;transform-origin:left center;background:var(--md-primary)}
+.island-confirm-actions{flex:0 0 auto;display:flex;gap:10px;width:100%;margin-top:auto}
+.island-btn{display:flex;align-items:center;justify-content:center;min-width:0;height:42px;padding:0 20px;border-radius:999px;border:none;
+    font-size:.94rem;font-weight:600;letter-spacing:.1px;cursor:pointer;gap:6px;font-family:inherit;
+    position:relative;transition:transform .3s var(--md-spring-standard),background-color .2s ease,box-shadow .3s ease}
+.island-btn::after{content:'';position:absolute;inset:0;border-radius:inherit;background:currentColor;opacity:0;transition:opacity .18s ease;pointer-events:none}
+.island-btn:active::after{opacity:.12}
+.island-btn-cancel{flex:0 0 34%;background:transparent;color:var(--md-primary);border:1px solid var(--md-outline-variant)}
+.island-btn-cancel:hover{background:rgba(255,177,200,.10);transform:translateY(-1px)}
+.island-btn-confirm{flex:1 1 auto;background:var(--md-primary);color:var(--md-on-primary);box-shadow:var(--md-elev-2)}
+.island-btn-confirm:hover{transform:translateY(-1px);box-shadow:var(--md-elev-3)}
+.island-btn-confirm svg{width:16px;height:16px;flex-shrink:0;transition:transform .3s var(--md-spring-standard)}
+.island-btn-confirm:hover svg{transform:translateX(4px)}
+
+/* ===== email ===== */
+.island-email{flex-direction:column;gap:8px;padding:14px 20px}
+.island-email-title{font-size:.85rem;color:var(--md-on-surface-variant);align-self:flex-start;letter-spacing:1px}
+.island-email-list{display:flex;flex-direction:column;gap:8px;width:100%}
+.island-email-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+.island-email-addr{font-size:.92rem;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.island-email-copy{padding:4px 16px;border-radius:999px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit;
+    color:var(--md-on-secondary-container);background:var(--md-secondary-container);
+    transition:filter .2s ease,transform .3s var(--md-spring-standard);flex:0 0 auto;white-space:nowrap;position:relative}
+.island-email-copy:hover{filter:brightness(1.15);transform:translateY(-1px)}
+
+/* ===== autoplay ===== */
+.island-autoplay{display:flex;flex-direction:column;justify-content:center;padding:11px 14px 10px;text-align:left;color:#fff;gap:7px}
+.autoplay-head{display:flex;align-items:center;gap:10px}
+.autoplay-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;flex-shrink:0;
+    background:var(--md-primary);color:var(--md-on-primary)}
+.autoplay-icon svg{width:13px;height:13px;fill:currentColor}
+.autoplay-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.autoplay-title{font-size:.88rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
+.autoplay-sub{font-size:.68rem;color:var(--md-on-surface-variant);line-height:1.3;letter-spacing:.2px}
+.autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.autoplay-check{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--md-on-surface-variant);cursor:pointer;user-select:none;letter-spacing:.2px}
+.autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+.autoplay-check-box{display:inline-block;width:13px;height:13px;min-width:13px;flex-shrink:0;
+    border:1.3px solid var(--md-outline-variant);border-radius:4px;background:transparent;cursor:pointer;position:relative;
+    transition:border-color .18s ease,background .18s ease}
+.autoplay-checkbox:checked + .autoplay-check-box{background:var(--md-primary);border-color:transparent}
+.autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;left:3px;top:.5px;width:3px;height:6.5px;
+    border:solid var(--md-on-primary);border-width:0 1.8px 1.8px 0;transform:rotate(45deg)}
+.autoplay-btn{appearance:none;border:0;padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.3px;
+    cursor:pointer;font-family:inherit;line-height:1.2;position:relative;
+    transition:transform .3s var(--md-spring-standard),background-color .2s ease,filter .2s ease;touch-action:manipulation}
+.autoplay-later{background:transparent;color:var(--md-on-surface-variant);border:1px solid var(--md-outline-variant)}
+.autoplay-later:hover{background:rgba(255,177,200,.10);color:#fff}
+.autoplay-enable{background:var(--md-primary);color:var(--md-on-primary);box-shadow:var(--md-elev-2)}
+.autoplay-enable:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.autoplay-btn:active{transform:scale(.94)}
+
+/* ===== satellite ===== */
+.music-satellite{position:relative;overflow:hidden;width:0;height:36px;border-width:0;border-radius:18px;opacity:0;transform:scale(.6);margin-left:-8px;cursor:pointer;
+    transition:width .62s var(--md-spring-spatial),height .62s var(--md-spring-spatial),border-radius .62s var(--md-spring-spatial),
+               opacity .3s ease,transform .62s var(--md-spring-spatial),margin-left .62s var(--md-spring-spatial),border-width .3s ease}
+.music-satellite[data-mode="pill"]{width:68px;height:36px;border-width:1px;opacity:1;transform:none;margin-left:0}
+.music-satellite[data-mode="icon"]{width:36px;height:36px;border-width:1px;opacity:1;transform:none;margin-left:0}
+.music-satellite[data-mode="open"]{width:392px;height:184px;border-width:1px;border-radius:32px;opacity:1;transform:none;margin-left:0}
+.satellite-compact,.satellite-card{position:absolute;inset:0;transition:opacity .25s ease,transform .42s var(--md-spring-spatial),filter .25s ease}
+.satellite-compact{display:flex;align-items:center;justify-content:center;gap:8px;opacity:1;transform:scale(1)}
+.satellite-card{display:flex;flex-direction:column;padding:16px 18px 13px;opacity:0;pointer-events:none;transform:scale(.86);filter:blur(5px)}
+.music-satellite[data-mode="open"] .satellite-compact{opacity:0;pointer-events:none;transform:scale(.82);filter:blur(5px)}
+.music-satellite[data-mode="open"] .satellite-card{opacity:1;pointer-events:auto;transform:scale(1);filter:none;transition-delay:.1s}
+.music-satellite[data-mode="icon"] .satellite-compact{gap:0}
+.music-satellite[data-mode="icon"] .sat-cover{width:28px;height:28px;border-radius:50%}
+.music-satellite[data-mode="icon"] .island-eq{display:none}
+.sat-head{display:flex;align-items:center;gap:12px;min-width:0}
+.sat-card-cover{width:64px;height:64px;border-radius:16px;box-shadow:0 7px 18px rgba(0,0,0,.5)}
+.sat-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sat-progress-row{grid-template-columns:34px minmax(0,1fr) 39px}
+
+/* ===== 控制台 ===== */
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:640px}
+.ctl{appearance:none;cursor:pointer;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.4px;
+    color:var(--md-on-surface-variant);background:var(--md-surface-container);border:1px solid var(--md-outline-variant);
+    border-radius:999px;padding:8px 16px;transition:color .2s,background-color .2s,transform .3s var(--md-spring-standard)}
+.ctl:hover{color:#fff;background:var(--md-surface-container-high);transform:translateY(-1px)}
+.ctl.on{color:var(--md-on-primary);background:var(--md-primary);border-color:transparent}
+.ctl:active{transform:scale(.94)}
+.spec{max-width:560px;font-size:.78rem;line-height:1.8;color:var(--md-on-surface-variant);
+    border:1px solid var(--md-outline-variant);border-radius:var(--md-corner-lg);
+    background:var(--md-surface-container);padding:16px 20px}
+.spec b{color:#fff}
+.spec code{font-family:var(--font-mono);color:var(--md-primary);background:rgba(255,177,200,.09);padding:1px 5px;border-radius:4px}
+@media (max-width:560px){.satellite-card,.island-music-card{max-width:calc(100vw - 40px)}}
+</style>
+</head>
+<body class="audio-playing">
+<h1>Dynamic Island · M3 Expressive</h1>
+
+<div class="dynamic-island">
+    <div class="island-cluster">
+        <div class="island-content" id="island" data-state="default">
+            <div class="island-layer island-default active-content">
+                <div class="island-idle-row"><span class="island-idle-dot"></span><span class="island-idle-brand">userhali.com</span></div>
+                <div class="island-idle-row island-idle-row--time"><span class="island-idle-clock">14:52 · 11月22日</span></div>
+            </div>
+            <div class="island-layer island-preview">
+                <span class="preview-section">首页</span>
+                <span class="preview-dots"><i class="active"></i><i></i><i></i><i></i></span>
+                <span class="preview-pct">12%</span>
+            </div>
+            <div class="island-layer island-hint"><span class="hint-prefix">正在看</span><span class="hint-section">首页</span></div>
+            <div class="island-layer island-greet"><span class="greet-jp">はじめまして</span><span class="greet-cn">· 欢迎来访</span></div>
+            <div class="island-layer island-music-bar">
+                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="24" height="24">
+                <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <nav class="island-layer island-nav">
+                <div class="pill-nav" id="pillNav">
+                    <a href="javascript:void 0" class="island-nav-btn active" data-index="0">首页</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="1">GitHub</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="2">QQ音乐</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="3">Projects</a>
+                    <span class="pill-indicator" id="pillIndicator"></span>
+                </div>
+                <div class="scroll-progress">
+                    <div class="scroll-progress-meta"><span class="sp-section">首页</span><span class="sp-pct">34%</span></div>
+                    <div class="scroll-progress-container"><div class="scroll-progress-bar"></div></div>
+                </div>
+            </nav>
+            <div class="island-layer island-music-card">
+                <div class="mc-head">
+                    <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="64" height="64">
+                    <div class="mc-meta"><div class="mc-title">All The Things She Said</div><div class="mc-artist">t.A.T.u.</div></div>
+                    <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="mc-progress-row"><span class="mc-cur">1:24</span><input type="range" class="mc-scrub" min="0" max="1000" value="334" aria-label="播放进度"><span class="mc-rem">−2:33</span></div>
+                <div class="mc-ctrls">
+                    <button class="island-transport" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M10.62 16.89 L4.85 12.82 C4.29 12.42 4.29 11.58 4.85 11.19 L10.62 7.11 C11.29 6.65 12.2 7.12 12.2 7.93 V16.07 C12.2 16.88 11.29 17.35 10.62 16.89 Z M18.12 16.89 L12.35 12.82 C11.79 12.42 11.79 11.58 12.35 11.19 L18.12 7.11 C18.79 6.65 19.7 7.12 19.7 7.93 V16.07 C19.7 16.88 18.79 17.35 18.12 16.89 Z"/></svg></button>
+                    <button class="island-transport island-transport--toggle" aria-label="播放/暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+                    <button class="island-transport" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M5.88 16.89 L11.65 12.82 C12.21 12.42 12.21 11.58 11.65 11.19 L5.88 7.11 C5.21 6.65 4.3 7.12 4.3 7.93 V16.07 C4.3 16.88 5.21 17.35 5.88 16.89 Z M13.38 16.89 L19.15 12.82 C19.71 12.42 19.71 11.58 19.15 11.19 L13.38 7.11 C12.71 6.65 11.8 7.12 11.8 7.93 V16.07 C11.8 16.88 12.71 17.35 13.38 16.89 Z"/></svg></button>
+                </div>
+            </div>
+            <div class="island-layer island-confirm">
+                <div class="island-confirm-info">
+                    <div class="island-confirm-icon"><svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg></div>
+                    <div class="island-confirm-meta"><div class="island-confirm-title">Bilibili</div><div class="island-confirm-host">space.bilibili.com</div></div>
+                </div>
+                <div class="island-confirm-countdown"><span class="island-confirm-countdown-bar" id="cdBar"></span></div>
+                <div class="island-confirm-actions">
+                    <button class="island-btn island-btn-cancel">取消</button>
+                    <button class="island-btn island-btn-confirm"><span>前往</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+                </div>
+            </div>
+            <div class="island-layer island-email">
+                <div class="island-email-title">联系邮箱</div>
+                <div class="island-email-list">
+                    <div class="island-email-item"><span class="island-email-addr">admin@userhali.com</span><button class="island-email-copy">复制</button></div>
+                    <div class="island-email-item"><span class="island-email-addr">ema1laddresf0rw0rk@foxmail.com</span><button class="island-email-copy">复制</button></div>
+                </div>
+            </div>
+            <div class="island-layer island-toast"><span class="island-toast-icon">✓</span><span>已复制到剪贴板</span></div>
+            <div class="island-layer island-autoplay">
+                <div class="autoplay-head">
+                    <span class="autoplay-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+                    <div class="autoplay-text"><span class="autoplay-title">开启背景音乐</span><span class="autoplay-sub">进入即播放 · 沉浸氛围</span></div>
+                    <label class="autoplay-check"><input type="checkbox" class="autoplay-checkbox"><span class="autoplay-check-box"></span><span>不再提醒</span></label>
+                </div>
+                <div class="autoplay-foot"><button class="autoplay-btn autoplay-later">稍后</button><button class="autoplay-btn autoplay-enable">开启</button></div>
+            </div>
+        </div>
+
+        <div class="music-satellite" id="satellite" data-mode="hidden" aria-label="音乐活动">
+            <div class="satellite-compact">
+                <img class="sat-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="24" height="24">
+                <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="satellite-card">
+                <div class="sat-head"><img class="sat-card-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="64" height="64"><div class="sat-meta"><div class="sat-title">All The Things She Said</div><div class="sat-artist">t.A.T.u.</div></div></div>
+                <div class="sat-progress-row"><span class="sat-cur">1:24</span><input type="range" class="sat-scrub" min="0" max="1000" value="334" aria-label="分岛播放进度"><span class="sat-rem">−2:33</span></div>
+                <div class="sat-ctrls">
+                    <button class="island-transport" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M10.62 16.89 L4.85 12.82 C4.29 12.42 4.29 11.58 4.85 11.19 L10.62 7.11 C11.29 6.65 12.2 7.12 12.2 7.93 V16.07 C12.2 16.88 11.29 17.35 10.62 16.89 Z M18.12 16.89 L12.35 12.82 C11.79 12.42 11.79 11.58 12.35 11.19 L18.12 7.11 C18.79 6.65 19.7 7.12 19.7 7.93 V16.07 C19.7 16.88 18.79 17.35 18.12 16.89 Z"/></svg></button>
+                    <button class="island-transport island-transport--toggle" aria-label="播放/暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+                    <button class="island-transport" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M5.88 16.89 L11.65 12.82 C12.21 12.42 12.21 11.58 11.65 11.19 L5.88 7.11 C5.21 6.65 4.3 7.12 4.3 7.93 V16.07 C4.3 16.88 5.21 17.35 5.88 16.89 Z M13.38 16.89 L19.15 12.82 C19.71 12.42 19.71 11.58 19.15 11.19 L13.38 7.11 C12.71 6.65 11.8 7.12 11.8 7.93 V16.07 C11.8 16.88 12.71 17.35 13.38 16.89 Z"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="controls" id="controls"></div>
+
+<div class="spec">
+    <b>改动点</b>（对照生产版）：<br>
+    运动 <code>linear()</code> 弹簧：<code>--md-spring-spatial</code>（ζ0.68，~5% 过冲 650ms）驱动壳体形变，<code>--md-spring-standard</code>（临界阻尼 380ms）驱动内容层。<br>
+    色彩 M3 tonal 阶梯：壳 <code>surface-container</code>，内嵌面 <code>surface-container-high</code>，填充按钮 <code>primary / on-primary</code>，tonal 按钮 <code>secondary-container</code>，描边 <code>outline-variant</code>（粉调，替代纯白 10%）。<br>
+    形状：全部按钮 full-pill；icon 按钮 50% 圆 + M3 state-layer（hover 8% / pressed 14%）；XL 面 28 / 卡片 32；进度轨道改 primary 调。
+</div>
+
+<script>
+(function(){
+    'use strict';
+    const island = document.getElementById('island');
+    const satellite = document.getElementById('satellite');
+    const LAYOUTS = {
+        'default':{width:'134px',height:'36px',radius:'18px'},
+        'preview':{width:'224px',height:'36px',radius:'18px'},
+        'hint':{width:'228px',height:'36px',radius:'18px'},
+        'greet':{width:'244px',height:'36px',radius:'18px'},
+        'music-bar':{width:'192px',height:'36px',radius:'18px'},
+        'nav':{width:'408px',height:'56px',radius:'28px'},
+        'music-card':{width:'392px',height:'184px',radius:'32px'},
+        'confirm':{width:'344px',height:'156px',radius:'28px'},
+        'email':{width:'312px',height:'132px',radius:'28px'},
+        'toast':{width:'228px',height:'42px',radius:'21px'},
+        'autoplay':{width:'312px',height:'106px',radius:'28px'}
+    };
+    const LAYERS = {};
+    island.querySelectorAll('.island-layer').forEach(el => {
+        const name = Array.from(el.classList).find(c => c.startsWith('island-') && c !== 'island-layer');
+        LAYERS[name.replace('island-','')] = el;
+    });
+    let musicOn = true;
+
+    function setState(target){
+        const current = island.getAttribute('data-state');
+        if (current === target) return;
+        const cur = LAYERS[current], next = LAYERS[target];
+        if (cur) cur.classList.remove('active-content');
+        const l = LAYOUTS[target];
+        if (l){
+            island.style.width = l.width;
+            island.style.height = l.height;
+            island.style.borderRadius = l.radius;
+        }
+        island.setAttribute('data-state', target);
+        // 与生产版一致：data-state 驱动子级动画（nav 按钮错峰、scroll-progress 显隐）
+        Object.keys(LAYERS).forEach(s => island.classList.remove('island-state-' + s));
+        island.classList.add('island-state-' + target);
+        if (next) next.classList.add('active-content');
+        // 卫星：music 活动且主岛不在音乐两态时露出来
+        if (!musicOn) satellite.dataset.mode = 'hidden';
+        else if (['default','music-bar','music-card'].includes(target)) satellite.dataset.mode = 'hidden';
+        else if (['nav','confirm','email','autoplay'].includes(target)) satellite.dataset.mode = 'icon';
+        else satellite.dataset.mode = 'pill';
+        document.querySelectorAll('.ctl[data-state]').forEach(b =>
+            b.classList.toggle('on', b.dataset.state === target));
+    }
+
+    // 控制台
+    const controls = document.getElementById('controls');
+    const STATES = ['default','preview','hint','greet','music-bar','nav','music-card','confirm','email','toast','autoplay'];
+    STATES.forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'ctl' + (s === 'default' ? ' on' : '');
+        b.dataset.state = s;
+        b.textContent = s;
+        b.addEventListener('click', () => setState(s));
+        controls.appendChild(b);
+    });
+    const musicBtn = document.createElement('button');
+    musicBtn.className = 'ctl on';
+    musicBtn.textContent = '音乐:开';
+    musicBtn.addEventListener('click', () => {
+        musicOn = !musicOn;
+        document.body.classList.toggle('audio-playing', musicOn);
+        musicBtn.textContent = musicOn ? '音乐:开' : '音乐:关';
+        musicBtn.classList.toggle('on', musicOn);
+        setState(island.getAttribute('data-state') === musicOn ? island.getAttribute('data-state') : island.getAttribute('data-state'));
+        if (!musicOn && ['music-bar','music-card'].includes(island.getAttribute('data-state'))) setState('default');
+        else setState(island.getAttribute('data-state'));
+    });
+    controls.appendChild(musicBtn);
+
+    // confirm 倒计时
+    const cd = document.getElementById('cdBar');
+    setInterval(() => {
+        const cur = island.getAttribute('data-state');
+        if (cur !== 'confirm') { cd.style.transform = 'scaleX(1)'; return; }
+        const m = cd.style.transform.match(/scaleX\(([\d.]+)\)/);
+        let v = m ? parseFloat(m[1]) : 1;
+        v -= 0.012;
+        if (v <= 0) v = 1;
+        cd.style.transform = 'scaleX(' + v + ')';
+    }, 96);
+
+    // pill 指示器定位
+    const indicator = document.getElementById('pillIndicator');
+    function moveIndicator(){
+        const active = island.querySelector('.island-nav-btn.active');
+        if (!active || !indicator) return;
+        indicator.style.left = active.offsetLeft + 'px';
+        indicator.style.width = active.offsetWidth + 'px';
+        indicator.classList.add('ready');
+    }
+    island.querySelectorAll('.island-nav-btn').forEach(a => {
+        a.addEventListener('click', () => {
+            island.querySelectorAll('.island-nav-btn').forEach(x => x.classList.remove('active'));
+            a.classList.add('active');
+            moveIndicator();
+        });
+    });
+    let indTimer;
+    new MutationObserver(() => {
+        if (island.getAttribute('data-state') === 'nav') { clearTimeout(indTimer); indTimer = setTimeout(moveIndicator, 650); }
+        else indicator.classList.remove('ready');
+    }).observe(island, { attributes:true, attributeFilter:['data-state'] });
+})();
+</script>
+</body>
+</html>

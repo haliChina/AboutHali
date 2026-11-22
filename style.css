@@ -19,6 +19,28 @@
     --font-display:'Noto Serif JP','PingFang SC',serif;
     --font-body:'Noto Sans JP','PingFang SC','Microsoft YaHei',-apple-system,BlinkMacSystemFont,sans-serif;
     --font-mono:'JetBrains Mono',ui-monospace,monospace;
+
+    /* ===== M3 Expressive 令牌（常规组件迁移；island 未动，见 design/island-m3e-demo.html） =====
+       动效：阻尼谐振子采样成的 linear() 弹簧曲线，取代三次贝塞尔近似。
+       spatial（ζ0.68 ω0=10.5，~5% 过冲 650ms）用于大形变/位移；standard（临界阻尼 380ms）用于次级过渡。 */
+    --md-spring-spatial:linear(0.0, 0.0305, 0.1077, 0.2132, 0.3323, 0.4541, 0.5708, 0.6772, 0.7703, 0.8486, 0.9122, 0.9617, 0.9986, 1.0244, 1.0411, 1.0505, 1.0541, 1.0535, 1.05, 1.0447, 1.0384, 1.0318, 1.0253, 1.0193, 1.014, 1.0095, 1.0);
+    --md-spring-standard:linear(0.0, 0.0563, 0.1769, 0.3156, 0.4488, 0.5663, 0.6645, 0.744, 0.8067, 0.8554, 0.8926, 0.9208, 0.9418, 0.9575, 0.9691, 1.0);
+    /* 色彩：M3 暗色 tonal 阶梯，粉色 seed 手调近似值 */
+    --md-surface-container:#1a171f;
+    --md-surface-container-high:#252029;
+    --md-primary:#ffb1c8;
+    --md-on-primary:#470f26;
+    --md-primary-container:#6e2946;
+    --md-on-primary-container:#ffd9e4;
+    --md-secondary-container:#54333f;
+    --md-on-secondary-container:#ffd9e4;
+    --md-outline-variant:rgba(255,177,200,.16);
+    --md-on-surface-variant:#d9c2cd;
+    --md-error:#ffb4ab;
+    --md-corner-xl:28px;
+    --md-corner-lg:24px;
+    --md-elev-2:0 4px 14px rgba(0,0,0,.4);
+    --md-elev-3:0 8px 28px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4);
 }
 
 *{box-sizing:border-box}
@@ -55,13 +77,13 @@ body::before{
         radial-gradient(ellipse 60% 40% at 50% 100%,rgba(0,0,0,.4),transparent 60%);
 }
 
-.bg{position:fixed;inset:0;z-index:-10;overflow:hidden;background:#0a0a10}
-#sakura-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(1.2px) brightness(.82) saturate(.92)}
+.bg{position:fixed;inset:0;z-index:-10;overflow:hidden;background:#08080c}
+#sakura-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(1.2px) brightness(.62) saturate(.85)}
 .bg-scrim{position:absolute;inset:0;pointer-events:none;
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E") 0 0/200px 200px,
-        radial-gradient(135% 125% at 50% 2%,rgba(9,7,13,.62),rgba(6,5,10,.84) 80%);
-    opacity:.35;mix-blend-mode:overlay}
+        radial-gradient(135% 125% at 50% 2%,rgba(9,7,13,.74),rgba(6,5,10,.93) 80%);
+    opacity:.5;mix-blend-mode:overlay}
 
 body.intro-lock{overflow:hidden}
 .intro{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -104,6 +126,7 @@ body.intro-lock{overflow:hidden}
 .home{flex-direction:column}
 .home-inner{width:100%;max-width:880px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
 .home-greet{margin:0;color:var(--text-dim);font-size:1.05rem;letter-spacing:2px}
+.home-role{margin:-2px 0 4px;color:var(--md-primary);font-size:.92rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;font-family:var(--font-mono)}
 .home-name{margin:6px 0 14px -.14em;font-size:clamp(3rem,9vw,5.6rem);font-weight:900;line-height:1.16;padding:.04em .08em .14em;overflow:visible;
     font-family:var(--font-display);letter-spacing:-.02em;
     background:linear-gradient(120deg,#fff 0%,#ffd8e7 48%,#ff8fb6 100%);
@@ -161,34 +184,33 @@ body.intro-lock{overflow:hidden}
 .social-grid .social-btn:nth-child(10){animation-delay:.50s}
 .social-grid .social-btn:nth-child(11){animation-delay:.55s}
 
-.explore-btn{margin-top:48px;padding:14px 40px;font-size:1.05rem;font-weight:600;color:#fff;cursor:pointer;
-    border:1px solid var(--line);border-radius:30px;background:linear-gradient(120deg,rgba(255,143,182,.25),rgba(255,197,216,.18));
-    backdrop-filter:blur(10px);position:relative;overflow:hidden;
-    transition:transform .4s var(--spring),box-shadow .4s var(--ease),background .4s var(--ease)}
-.explore-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 36px -10px rgba(255,107,157,.6);background:linear-gradient(120deg,rgba(255,143,182,.45),rgba(255,197,216,.35))}
+.explore-btn{margin-top:48px;padding:14px 40px;font-size:1.05rem;font-weight:600;color:var(--md-on-primary);cursor:pointer;
+    border:none;border-radius:999px;background:var(--md-primary);position:relative;overflow:hidden;
+    transition:transform .45s var(--md-spring-standard),box-shadow .3s var(--md-spring-standard),filter .25s ease}
+.explore-btn:hover{transform:translateY(-3px);box-shadow:0 14px 36px -10px rgba(255,177,200,.5);filter:brightness(1.05)}
 
 .scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-faint);font-size:.85rem;animation:hintFloat 2.2s ease-in-out infinite}
 .scroll-arrow{width:14px;height:14px;border-right:2px solid var(--text-faint);border-bottom:2px solid var(--text-faint);transform:rotate(45deg)}
 @keyframes hintFloat{0%,100%{opacity:.4;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,8px)}}
 
 .card{width:100%;max-width:880px;
-    background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
-    border:1px solid var(--line);border-radius:26px;
-    backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);overflow:hidden;
-    box-shadow:0 30px 70px -30px rgba(0,0,0,.8),0 0 60px -20px rgba(255,143,182,.04);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
-.card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),0 0 80px -20px rgba(255,143,182,.08)}
-.card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--line);
-    background:linear-gradient(120deg,rgba(255,255,255,.05),transparent)}
+    background:var(--md-surface-container);
+    border:1px solid var(--md-outline-variant);border-radius:var(--md-corner-xl);
+    overflow:hidden;
+    box-shadow:var(--md-elev-3);transition:transform .5s var(--md-spring-standard),box-shadow .5s var(--md-spring-standard)}
+.card:hover{transform:translateY(-6px);box-shadow:0 40px 90px -35px rgba(0,0,0,.9),var(--md-elev-3)}
+.card-header{display:flex;align-items:center;gap:14px;padding:24px 30px;border-bottom:1px solid var(--md-outline-variant);
+    background:var(--md-surface-container-high)}
 .card-logo{width:30px;height:30px}
 .gh-logo{filter:brightness(0) invert(1)}
 /* QQ音乐 SVG 是多路径彩色图标(深灰底+白圆+灰音符)，brightness(0) invert(1) 会全白糊掉，这里只保留深灰底+白圆对比 */
 .ne-logo{filter:brightness(0.85) saturate(0.8)}
 .card-header h2{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:.5px;font-family:var(--font-display)}
 .card-body{padding:28px 30px}
-.card-btn{display:block;width:fit-content;margin:0 auto 26px;padding:11px 30px;border-radius:30px;text-decoration:none;font-weight:600;
-    color:#fff;background:linear-gradient(120deg,var(--accent),var(--accent-2));
-    box-shadow:0 12px 30px -12px var(--accent);transition:transform .35s var(--spring),box-shadow .35s var(--ease)}
-.card-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 18px 40px -12px var(--accent)}
+.card-btn{display:block;width:fit-content;margin:0 auto 26px;padding:11px 32px;border-radius:999px;text-decoration:none;font-weight:600;
+    color:var(--md-on-primary);background:var(--md-primary);
+    box-shadow:var(--md-elev-2);transition:transform .45s var(--md-spring-standard),box-shadow .3s var(--md-spring-standard)}
+.card-btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px -10px rgba(255,177,200,.45)}
 
 .gh-profile{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .gh-avatar{width:96px;height:96px;border-radius:24px;object-fit:cover;border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.7)}
@@ -202,8 +224,8 @@ body.intro-lock{overflow:hidden}
 .gh-name{font-size:1.4rem;font-weight:700}
 .gh-handle{font-size:1rem;font-weight:500;color:var(--accent-2);margin-left:6px}
 .gh-bio{color:var(--text-dim);margin:8px 0 14px;line-height:1.6}
-.gh-follow{display:inline-block;padding:8px 20px;border-radius:20px;border:1px solid var(--line);color:var(--text);text-decoration:none;font-weight:600;transition:background .3s var(--ease),transform .3s var(--spring)}
-.gh-follow:hover{background:var(--glass-strong);transform:translateY(-2px)}
+.gh-follow{display:inline-block;padding:8px 22px;border-radius:999px;border:1px solid var(--md-outline-variant);color:var(--md-primary);text-decoration:none;font-weight:600;transition:background-color .25s var(--md-spring-standard),transform .45s var(--md-spring-standard)}
+.gh-follow:hover{background:rgba(255,177,200,.10);transform:translateY(-2px)}
 
 /* align-items:flex-start 是关键修复。
    默认 stretch 会把较矮的 stats 卡（自然高度 154px）拉伸到与 langs 卡
@@ -234,12 +256,12 @@ body.intro-lock{overflow:hidden}
 .gh-stats-fallback .gh-fb-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-1px);border-color:var(--accent)}
 
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.skill{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);
-    position:relative;overflow:hidden;transition:transform .4s var(--spring),border-color .35s var(--ease),background .35s var(--ease)}
+.skill{display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--md-corner-lg);background:var(--md-surface-container-high);border:1px solid var(--md-outline-variant);
+    position:relative;overflow:hidden;transition:transform .45s var(--md-spring-standard),border-color .3s ease,background-color .3s ease}
 /* ::before 品牌色竖条已移除：圆角卡左缘外侧贴着的 4px 色条突兀
    （用户 DevTools 检查到的 div.skill::before 4×71）。hover 高亮
    由 border-color + 背景混合提供，足够。 */
-.skill:hover{transform:translateY(-5px) rotate(-.5deg);border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent)}
+.skill:hover{transform:translateY(-5px) rotate(-.5deg);border-color:var(--md-primary);background:color-mix(in srgb,var(--md-primary) 10%,transparent)}
 .skill-icon{width:34px;height:34px;flex-shrink:0}
 .skill-icon--mono{filter:brightness(0) invert(1)}
 .skill-glyph{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;background:var(--brand)}
@@ -337,12 +359,12 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .projects-error-text{color:var(--text-dim);font-size:.95rem}
 .projects-retry{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:14px;border:1px solid var(--line);color:var(--text);background:var(--glass-strong);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .25s var(--ease),transform .25s var(--spring),border-color .25s var(--ease)}
 .projects-retry:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);border-color:var(--accent)}
-.proj-card{border-radius:18px;background:linear-gradient(160deg,rgba(28,24,36,.62),rgba(16,14,22,.72));
-    border:1px solid rgba(255,255,255,.12);padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;
-    transition:transform .4s var(--spring),box-shadow .4s var(--ease),border-color .35s var(--ease);
-    position:relative;overflow:hidden;backdrop-filter:blur(10px) saturate(125%);-webkit-backdrop-filter:blur(10px) saturate(125%);
-    box-shadow:0 8px 24px -16px rgba(0,0,0,.6)}
-.proj-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
+.proj-card{border-radius:var(--md-corner-lg);background:var(--md-surface-container);
+    border:1px solid var(--md-outline-variant);padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;
+    transition:transform .5s var(--md-spring-standard),box-shadow .5s var(--md-spring-standard),border-color .3s ease;
+    position:relative;overflow:hidden;
+    box-shadow:var(--md-elev-2)}
+.proj-card:hover{transform:translateY(-6px);border-color:var(--md-primary);box-shadow:0 24px 50px -20px rgba(0,0,0,.8),var(--md-elev-2)}
 /* 原来这里有一条 hover 时出现的 3px 左侧粉色竖条（::before）。因为卡片有
    border-radius:18px 而伪元素是直角矩形，方角会戳出圆角外侧，看起来像
    一条悬空在卡片左边的粉色细线（见附件截图），故移除。
@@ -364,11 +386,11 @@ body.audio-playing .np-cover{animation:spin 18s linear infinite}
 .proj-stats span{display:flex;align-items:center;gap:4px}
 .proj-time{margin-left:auto}
 .proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
-.proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 18px;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;
-    border:1px solid var(--line);color:var(--text);transition:transform .25s var(--spring),border-color .25s var(--ease),filter .25s var(--ease),box-shadow .25s var(--ease)}
-.proj-link:hover{background:var(--glass-strong);transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
-.proj-link--primary{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent;box-shadow:0 6px 18px -8px rgba(255,107,157,.55)}
-.proj-link--primary:hover{background:linear-gradient(120deg,var(--accent),var(--accent-3));color:#1a0610;border-color:transparent;filter:brightness(1.08);box-shadow:0 10px 24px -8px rgba(255,107,159,.7)}
+.proj-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 20px;border-radius:999px;font-size:.85rem;font-weight:600;text-decoration:none;
+    border:1px solid var(--md-outline-variant);color:var(--md-primary);transition:transform .45s var(--md-spring-standard),border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
+.proj-link:hover{background:rgba(255,177,200,.10);transform:translateY(-1px);border-color:var(--md-primary)}
+.proj-link--primary{background:var(--md-primary);color:var(--md-on-primary);border-color:transparent;box-shadow:var(--md-elev-2)}
+.proj-link--primary:hover{background:var(--md-primary);color:var(--md-on-primary);border-color:transparent;filter:brightness(1.06);box-shadow:0 10px 24px -8px rgba(255,177,200,.55)}
 .proj-source{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px;flex-shrink:0}
 .proj-source[src="github"],.proj-source:not([src="dns"]){background:rgba(255,255,255,.08);color:var(--text-dim)}
 .proj-card .proj-source{background:rgba(255,255,255,.08);color:var(--text-dim)}
@@ -622,7 +644,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
     .intro{backdrop-filter:none;-webkit-backdrop-filter:none}
     /* 3. 关闭卡片 backdrop-filter：背后动态 canvas 每帧重模糊，移动端瓶颈；改用更不透明的背景兜底 */
     .card,.proj-card{backdrop-filter:none;-webkit-backdrop-filter:none;
-        background:linear-gradient(160deg,rgba(28,24,36,.82),rgba(16,14,22,.9))}
+        background:var(--md-surface-container)}
     /* 4. content-visibility 已提升为全端规则（见文件上方 MWG 注释处），此处不再重复 */
     /* 5. 投影与滤镜降级：阴影在移动端吃 GPU */
     .autoplay-enable{box-shadow:0 2px 6px rgba(255,107,157,.25)}
@@ -897,11 +919,10 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .gha-panel{
     position:absolute;left:12px;right:12px;bottom:12px;top:calc(100% - 68px);
     border-radius:16px;overflow:hidden;
-    background:rgba(14,12,20,.92);
-    border:1px solid var(--line);
-    backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);
+    background:var(--md-surface-container-high);
+    border:1px solid var(--md-outline-variant);
     box-shadow:0 18px 40px -18px rgba(0,0,0,.8);
-    transition:top .52s var(--spring);
+    transition:top .52s var(--md-spring-spatial);
 }
 .gha-panel[data-open="true"]{top:12px}
 .gha-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
@@ -964,7 +985,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 /* ===== 性能降级：perf-lite 关闭所有重动效（由 FPS 守卫注入） ===== */
 html.perf-lite #sakura-canvas{display:none!important}
 html.perf-lite .bg{background:
-    radial-gradient(135% 120% at 50% 0%,#1a1420 0%,#0c0a12 60%,#07070b 100%)!important}
+    radial-gradient(135% 120% at 50% 0%,#150f1a 0%,#0a0810 60%,#07070b 100%)!important}
 html.perf-lite .orbit-ring{will-change:auto!important}
 html.perf-lite *,
 html.perf-lite *::before,
