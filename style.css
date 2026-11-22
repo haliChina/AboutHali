@@ -516,7 +516,7 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 
 /* ===== autoplay prompt — Apple 内容语言（11-22）：信息行 + 操作行 =====
    图标 = 封面缩略图圆角方（iOS 通知语言，加载失败回退播放 glyph）；
-   下行 = 「不再提醒」iOS mini switch 靠左、按钮对靠右；
+   下行 = 「不再提醒」勾选框靠左、按钮对靠右；
    开启 = system pink #ff375f filled pill，稍后 = 纯文字钮；
    hover 一律收进 (hover:hover)，触屏 tap 不残留。 */
 .island-autoplay{
@@ -543,15 +543,15 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 .autoplay-check{display:flex;align-items:center;gap:8px;font-size:.72rem;color:rgba(255,255,255,.62);
     cursor:pointer;user-select:none;letter-spacing:.1px}
 .autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-/* iOS mini switch：开 = system green */
-.autoplay-check-box{display:inline-block;width:26px;height:16px;min-width:26px;flex-shrink:0;
-    border:none;border-radius:8px;background:rgba(120,120,128,.32);cursor:pointer;
-    position:relative;transition:background-color .22s var(--ease)}
-.autoplay-check-box::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;
-    box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .28s var(--md-spring-standard)}
-@media (hover:hover){.autoplay-check:hover .autoplay-check-box{background:rgba(120,120,128,.42)}}
-.autoplay-checkbox:checked + .autoplay-check-box{background:#30d158}
-.autoplay-checkbox:checked + .autoplay-check-box::after{transform:translateX(10px)}
+/* 勾选框：「不再提醒」是一次性确认，switch 语义不对（且窄屏缩放后不可读） */
+.autoplay-check-box{display:inline-block;width:15px;height:15px;min-width:15px;flex-shrink:0;
+    border:1.5px solid rgba(255,255,255,.35);border-radius:4px;background:transparent;cursor:pointer;
+    position:relative;transition:border-color .18s var(--ease),background-color .18s var(--ease)}
+@media (hover:hover){.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.7)}}
+.autoplay-checkbox:checked + .autoplay-check-box{background:#ff375f;border-color:transparent}
+.autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
+    left:4.5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg)}
 
 .autoplay-actions{display:flex;align-items:center;gap:6px}
 .autoplay-btn{appearance:none;-webkit-appearance:none;border:0;border-radius:999px;position:relative;
@@ -713,7 +713,7 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
 .autoplay-later{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75)}
 .autoplay-enable{padding-inline:15px;background:rgba(255,143,182,.16);border:1px solid rgba(255,143,182,.4);color:var(--accent-2);box-shadow:none}
 .autoplay-enable:hover{background:rgba(255,143,182,.28);filter:none;box-shadow:none}
-@media(max-width:768px){.island-hint{padding-inline:13px}.hint-prefix{font-size:11.5px}.hint-section{font-size:12px}.island-autoplay{padding:11px 14px;gap:10px}.autoplay-icon{width:26px;height:26px}.autoplay-icon svg{width:11px;height:11px}.autoplay-title{font-size:12px}.autoplay-sub{font-size:9.5px}.autoplay-check{gap:5px;font-size:10px}.autoplay-check-box{width:22px;height:13px;flex-basis:22px}.autoplay-check-box::after{left:2px;top:1.5px;width:10px;height:10px}.autoplay-checkbox:checked+.autoplay-check-box::after{transform:translateX(8px)}.autoplay-btn{padding:5px 10px;font-size:10.5px}.autoplay-enable{padding-inline:12px}}
+@media(max-width:768px){.island-hint{padding-inline:13px}.hint-prefix{font-size:11.5px}.hint-section{font-size:12px}.island-autoplay{padding:11px 14px;gap:10px}.autoplay-icon{width:26px;height:26px}.autoplay-icon svg{width:11px;height:11px}.autoplay-title{font-size:12px}.autoplay-sub{font-size:9.5px}.autoplay-check{gap:5px;font-size:10px}.autoplay-check-box{width:13px;height:13px;flex-basis:13px}.autoplay-checkbox:checked+.autoplay-check-box::after{left:3px;top:1px;width:3px;height:6px}.autoplay-btn{padding:5px 10px;font-size:10.5px}.autoplay-enable{padding-inline:12px}}
 
 /* Hint visibility is state-driven so reduced-motion/rapid scrolling cannot strand it transparent. */
 .island-content[data-state="hint"] .island-hint{opacity:1;pointer-events:auto}

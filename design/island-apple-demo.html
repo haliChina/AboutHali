@@ -17,7 +17,7 @@
       内容层临界阻尼 340ms。
    3. 色彩：白灰层级（1 / .62 / .38）替代 tonal 阶梯；
       强调色换 iOS system pink #ff375f，状态色 system green/red；
-      segmented control（导航）、iOS mini switch（不再提醒）。
+      segmented control（导航）、勾选框（不再提醒）。
    4. 字体：SF Pro 栈（-apple-system），标题 semibold 白，副文 .62 白。
 
    生产文件未改动；效果确认后再回填。
@@ -224,17 +224,17 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
 .autoplay-sub{font-size:.68rem;color:var(--ios-2);line-height:1.3;letter-spacing:.1px}
 .autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-/* iOS mini switch（不再提醒） */
+/* 勾选框（「不再提醒」是一次性确认，不用 switch） */
 .autoplay-check{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--ios-2);
     cursor:pointer;user-select:none;letter-spacing:.1px}
 .autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.autoplay-check-box{display:inline-block;width:26px;height:16px;min-width:26px;flex-shrink:0;
-    border:none;border-radius:8px;background:var(--ios-fill-2);cursor:pointer;position:relative;
-    transition:background-color .22s ease}
-.autoplay-check-box::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;
-    box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .28s var(--ios-spring-standard)}
-.autoplay-checkbox:checked + .autoplay-check-box{background:var(--ios-green)}
-.autoplay-checkbox:checked + .autoplay-check-box::after{transform:translateX(10px)}
+.autoplay-check-box{display:inline-block;width:15px;height:15px;min-width:15px;flex-shrink:0;
+    border:1.5px solid rgba(255,255,255,.35);border-radius:4px;background:transparent;cursor:pointer;position:relative;
+    transition:border-color .18s ease,background-color .18s ease}
+.autoplay-checkbox:checked + .autoplay-check-box{background:var(--ios-tint);border-color:transparent}
+.autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
+    left:4.5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg)}
 
 .autoplay-actions{display:flex;align-items:center;gap:6px}
 .autoplay-btn{appearance:none;border:0;border-radius:999px;font-size:.82rem;font-weight:600;letter-spacing:.1px;
@@ -388,7 +388,7 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
     形态：真黑 <code>#000</code> 胶囊、单条 hairline rim（无 inset 高光，避免圆角双线）；展开卡圆角 40，pill 态半径 = 高度一半；移动端有独立布局表（窄屏收窄，分岛不再顶出屏幕）。<br>
     运动：弹簧过冲 5%→1.5%（520ms，干净不弹跳），内容层临界阻尼 340ms。<br>
     色彩：白灰层级（1 / .62 / .38）；强调色 iOS system pink <code>#ff375f</code>；状态色 system green/red；EQ/进度条/倒计时全白。<br>
-    控件：导航 = iOS segmented control（白色浮起段）；「不再提醒」= iOS mini switch（开 = system green）；播放控件 = 裸白 glyph；邮箱「拷贝」= tinted 文本钮；confirm = 取消灰填充 + 前往 tint pill。<br>
+    控件：导航 = iOS segmented control（白色浮起段）；「不再提醒」= 勾选框（勾选 = tint 填充白勾）；播放控件 = 裸白 glyph；邮箱「拷贝」= tinted 文本钮；confirm = 取消灰填充 + 前往 tint pill。<br>
     字体：SF Pro 栈（-apple-system 优先）。
 </div>
 
