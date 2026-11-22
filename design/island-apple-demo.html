@@ -63,8 +63,9 @@ h1{font-size:1.02rem;font-weight:600;letter-spacing:.18em;color:var(--ios-2);mar
 .island-content,.music-satellite{
     pointer-events:auto;
     background:var(--ios-black);
-    border:none;
-    box-shadow:var(--elev),inset 0 1px 0 rgba(255,255,255,.05);
+    /* 黑底黑台面需要边缘分离：hairline 亮 rim（Apple Liquid Glass 暗色变体同款）+ 更深投影 */
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 16px 44px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07);
 }
 .island-content{
     position:relative;cursor:pointer;overflow:hidden;
@@ -422,6 +423,7 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
         island.setAttribute('data-state', target);
         Object.keys(LAYERS).forEach(function(s){ island.classList.remove('island-state-' + s); });
         island.classList.add('island-state-' + target);
+        if (target === 'confirm') startCountdown(); else resetCountdown();
         if (next) next.classList.add('active-content');
         if (!musicOn) satellite.dataset.mode = 'hidden';
         else if (['default','music-bar','music-card'].indexOf(target) >= 0) satellite.dataset.mode = 'hidden';
@@ -456,15 +458,21 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
     });
     controls.appendChild(musicBtn);
 
+    /* confirm 倒计时：CSS 线性过渡交给合成器（setInterval 步进只有 ~10fps）；
+       用 transform 不动 layout，与生产 CONFIRM_AUTO_MS=8000 口径一致 */
     var cd = document.getElementById('cdBar');
-    setInterval(function(){
-        if (island.getAttribute('data-state') !== 'confirm') { cd.style.transform = 'scaleX(1)'; return; }
-        var m = cd.style.transform.match(/scaleX\(([\d.]+)\)/);
-        var v = m ? parseFloat(m[1]) : 1;
-        v -= 0.012;
-        if (v <= 0) v = 1;
-        cd.style.transform = 'scaleX(' + v + ')';
-    }, 96);
+    var CONFIRM_MS = 8000;
+    function startCountdown(){
+        cd.style.transition = 'none';
+        cd.style.transform = 'scaleX(1)';
+        void cd.offsetWidth; /* 回填起点，保证过渡从满格起 */
+        cd.style.transition = 'transform ' + CONFIRM_MS + 'ms linear';
+        cd.style.transform = 'scaleX(0)';
+    }
+    function resetCountdown(){
+        cd.style.transition = 'none';
+        cd.style.transform = 'scaleX(1)';
+    }
 
     var indicator = document.getElementById('pillIndicator');
     function moveIndicator(){
