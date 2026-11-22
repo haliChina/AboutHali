@@ -490,9 +490,9 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 .island-btn-cancel{flex:0 0 34%;background:rgba(255,255,255,.14);color:#fff;border:none}
 .island-btn-cancel:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
 .island-btn-cancel:active{transform:translateY(0);filter:brightness(.92)}
-.island-btn-confirm{flex:1 1 auto;color:#fff;background:#ff375f;
-    box-shadow:0 4px 14px rgba(255,55,95,.35)}
-.island-btn-confirm:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,55,95,.45);filter:brightness(1.05)}
+.island-btn-confirm{flex:1 1 auto;color:#fff;background:#e02d52;
+    box-shadow:0 4px 14px rgba(224,45,82,.35)}
+.island-btn-confirm:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(224,45,82,.45);filter:brightness(1.05)}
 .island-btn-confirm:active{transform:translateY(0);filter:brightness(.95)}
 .island-btn-confirm svg{width:16px;height:16px;flex-shrink:0;transition:transform .25s var(--spring)}
 .island-btn-confirm:hover svg{transform:translateX(4px)}
@@ -561,8 +561,8 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 .autoplay-later{background:transparent;color:rgba(255,255,255,.62);padding:6px 12px}
 @media (hover:hover){.autoplay-later:hover{color:#fff}}
 .autoplay-later:active{transform:scale(.94)}
-.autoplay-enable{background:#ff375f;color:#fff;padding:7px 22px;font-weight:600;
-    box-shadow:0 4px 14px rgba(255,55,95,.3)}
+.autoplay-enable{background:#e02d52;color:#fff;padding:7px 22px;font-weight:600;
+    box-shadow:0 4px 14px rgba(224,45,82,.3)}
 .autoplay-enable:hover{filter:brightness(1.06)}
 .autoplay-enable:active{transform:scale(.94)}
 
