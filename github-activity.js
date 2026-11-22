@@ -10,8 +10,8 @@
 
    数据源：
      - 贡献日历: assets/gh-contributions.json（本站构建期产物, Actions 每日刷新)
-     - 活跃仓库: api.github.com/users/<u>/events/public  (PushEvent 提交数聚合)
-     - 仓库元信息: api.github.com/users/<u>/repos (主语言，失败可缺省)
+     - 活跃仓库: assets/gh-active.json（构建期快照, Actions 每日刷新; 缺失时回落 API）
+     - 仓库元信息: api.github.com/repos/<full> （仅当条目缺主语言时兜底取用)
    Credit: Rare UI — https://rareui.com */
 (function () {
     'use strict';
@@ -90,7 +90,15 @@
     }
 
     async function fetchTopRepos() {
-        // 首选：公开事件里的 PushEvent 提交数聚合（= rareui 口径）
+        // 首选：构建期快照（assets/gh-active.json，Actions 每日刷新，零境外直连）
+        try {
+            const res = await fetch('assets/gh-active.json', { cache: 'no-cache' });
+            if (res.ok) {
+                const json = await res.json();
+                if (json && Array.isArray(json.repos) && json.repos.length) return json.repos;
+            }
+        } catch (_) { /* fall through */ }
+        // 回落：公开事件里的 PushEvent 提交数聚合（= rareui 口径）
         try {
             const res = await fetch(GH_API + '/' + USER + '/events/public?per_page=100', {
                 headers: { 'Accept': 'application/vnd.github+json' }
@@ -129,9 +137,11 @@
         }
         if (cached && cached.cal) render(cached); // 先展示旧缓存
         const [cal, repos] = await Promise.all([fetchCalendar(), fetchTopRepos().catch(() => [])]);
-        // 主语言是锦上添花，失败不影响面板
-        const meta = await fetchRepoMeta();
-        repos.forEach(r => { if (!r.language && meta.has(r.full)) r.language = meta.get(r.full).language; });
+        // 主语言是锦上添花，失败不影响面板；构建期快照通常已带语言，仅在缺失时兜底
+        if (repos.some(r => !r.language)) {
+            const meta = await fetchRepoMeta();
+            repos.forEach(r => { if (!r.language && meta.has(r.full)) r.language = meta.get(r.full).language; });
+        }
         const data = { ts: Date.now(), cal, repos };
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (_) {}
         return data;

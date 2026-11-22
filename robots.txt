@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://userhali.com/sitemap.xml
+Sitemap: https://www.userhali.com/sitemap.xml

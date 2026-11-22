@@ -1019,10 +1019,10 @@
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    /* ===== Projects: GitHub API ===== */
-    const GITHUB_USER = 'haliChina';
-    const CACHE_KEY = 'projects_cache_v3';
-    const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+    /* ===== Projects: 构建期静态快照 =====
+       assets/projects.json 由 scripts/gen-projects.mjs（Actions 每日）生成：
+       精选仓库 + 手写实际用途简介，星标/语言/推送时间随 CI 刷新。
+       运行时零 api.github.com 直连 —— 境内访客不再等待、不再限流失空。 */
     const LANG_COLORS = {
         JavaScript:'#f1e05a',TypeScript:'#3178c6',Python:'#3572A5',Java:'#b07219',
         'C++':'#f34b7d',C:'#555555',Go:'#00ADD8',Rust:'#dea584',HTML:'#e34c26',
@@ -1042,48 +1042,14 @@
     }
     function esc(s){ return (s||'').replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 
-    /* --- 数据源: GitHub API (浏览器直连) --- */
-    async function fetchGitHubRepos(){
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
-        try {
-            const res = await fetch('https://api.github.com/users/'+GITHUB_USER+'/repos?sort=pushed&per_page=100', {
-                headers: {'Accept': 'application/vnd.github.v3+json'},
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!res.ok) {
-                if (res.status === 403) {
-                    console.warn('[Projects] GitHub API rate limited (403)');
-                    throw new Error('GitHub API rate limited');
-                }
-                if (res.status === 404) {
-                    console.warn('[Projects] GitHub user not found (404)');
-                    throw new Error('GitHub user not found');
-                }
-                throw new Error('GitHub HTTP '+res.status);
-            }
-            const data = await res.json();
-            console.log('[Projects] GitHub repos fetched:', data.length);
-            return data.filter(r => !r.fork).map(r => ({
-                name: r.name,
-                description: r.description || '',
-                language: r.language,
-                stars: r.stargazers_count || 0,
-                forks: r.forks_count || 0,
-                homepage: r.homepage || '',
-                html_url: r.html_url,
-                pushed_at: r.pushed_at,
-                source: 'github'
-            }));
-        } catch(e) {
-            clearTimeout(timeoutId);
-            if (e.name === 'AbortError') {
-                console.warn('[Projects] GitHub fetch timeout (12s)');
-                throw new Error('GitHub fetch timeout');
-            }
-            throw e;
-        }
+    /* --- 数据源: 本站构建期产物 --- */
+    async function fetchStaticProjects(){
+        const res = await fetch('assets/projects.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error('projects.json HTTP ' + res.status);
+        const json = await res.json();
+        const projects = (json && json.projects) || [];
+        console.log('[Projects] Static snapshot:', projects.length, 'projects, fetched', json.fetchedAt);
+        return projects;
     }
 
     function renderProjects(projects){
@@ -1101,9 +1067,10 @@
             const sourceLink = r.html_url
                 ? '<a class="proj-link" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">源码</a>'
                 : '';
+            const displayName = r.title || r.name;
             const nameLink = r.html_url
-                ? '<a class="proj-name" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.name)+'</a>'
-                : '<span class="proj-name">'+esc(r.name)+'</span>';
+                ? '<a class="proj-name" href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(displayName)+'</a>'
+                : '<span class="proj-name">'+esc(displayName)+'</span>';
             return '<div class="proj-card" data-i="'+i+'">'+
                 '<div class="proj-head">'+nameLink+sourceTag+'</div>'+
                 (r.description ? '<p class="proj-desc">'+esc(r.description)+'</p>' : '')+
@@ -1171,9 +1138,10 @@
         });
     }
 
-    /* ===== 境外数据源提示 =====
-       本站项目列表与活跃仓库提交数实时取自 api.github.com，在境内可能很慢或失败。
-       （贡献日历与统计卡均已改为构建期生成的本站静态资源，无运行时境外依赖。） */
+    /* ===== 数据源说明 =====
+       运行时已无境外 API 依赖：统计卡（gh-stats/langs）、贡献日历
+       （gh-contributions.json）、项目列表（projects.json）、活跃仓库
+       （gh-active.json）全部是构建期生成、随仓库提交的本站静态资源。 */
     const NET_TIP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg>';
 
     function netTip(title, body, action){
@@ -1188,13 +1156,13 @@
     }
 
     const CN_PROJECT_TIP =
-        '项目数据实时取自 <code>api.github.com</code>，该域名在境内可能较慢或被阻断。' +
-        '上方统计卡已改为本站静态资源，不再依赖境外服务，正常网络下无需等待。';
+        '项目数据是构建期生成的本站静态资源（精选仓库 + 手写简介），打开即有，不依赖境外 API。' +
+        '加载失败多半是网络异常或资源缺失。';
 
     function projectsLoading(){
         return '<div class="projects-loading" id="projects-loading">' +
             '<div class="load-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
-            netTip('正在从 GitHub 拉取项目…', CN_PROJECT_TIP, '国内网络建议开启代理后重试，或稍后再来。') +
+            netTip('正在载入项目…', CN_PROJECT_TIP, '若长时间未显示，可稍后重试。') +
         '</div>';
     }
 
@@ -1203,7 +1171,7 @@
         if (!grid) return;
         grid.innerHTML = '<div class="projects-error">' +
             '<div class="projects-error-text">' + esc(msg) + '</div>' +
-            netTip('多半是网络原因，不是站点故障', CN_PROJECT_TIP, '可开启代理后重试；本站其余内容不受影响。') +
+            netTip('加载失败，可重试', CN_PROJECT_TIP, '重试无效时请稍后再来；本站其余内容不受影响。') +
             '<button class="projects-retry" id="projects-retry-btn">重新加载</button>' +
         '</div>';
         const btn = document.getElementById('projects-retry-btn');
@@ -1213,31 +1181,16 @@
     async function loadProjects(){
         const grid = document.getElementById('projects-grid');
         if (!grid) return;
-        // 24小时缓存
-        const cached = (() => { try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch(_) { return null; } })();
-        if (cached && cached.ts && Date.now() - cached.ts < CACHE_TTL && cached.projects) {
-            console.log('[Projects] Using cache,', cached.projects.length, 'projects');
-            renderProjects(cached.projects); return;
-        }
-        // 有旧缓存先展示
-        if (cached && cached.projects) renderProjects(cached.projects);
-        // 浏览器直连 GitHub API
         try {
-            const projects = await fetchGitHubRepos();
-            console.log('[Projects] Fetched total:', projects.length);
-            if (!projects.length && !cached) {
-                showProjectsError('该 GitHub 账号下暂无公开仓库');
+            const projects = await fetchStaticProjects();
+            if (!projects.length) {
+                showProjectsError('暂无精选项目');
                 return;
             }
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), projects})); } catch(_){}
             renderProjects(projects);
         } catch(e) {
-            console.warn('[Projects] Fetch failed:', e.message, '(浏览器可能无法访问 api.github.com，部署到 Vercel 后会正常)');
-            if (!cached || !cached.projects) {
-                const isSandbox = location.hostname.includes('agent-sandbox') || location.hostname.includes('trae.cn');
-                const hint = isSandbox ? '（沙箱环境无法访问 GitHub API，部署到 Vercel 后可正常加载）' : '（请检查网络）';
-                showProjectsError('项目加载失败 ' + hint);
-            }
+            console.warn('[Projects] Load failed:', e.message);
+            showProjectsError('项目数据加载失败');
         }
     }
     /* MWG defer-work-until-scroll-ends: 项目数据推迟到 Projects 区接近视口再拉取，

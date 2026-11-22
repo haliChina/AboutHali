@@ -41,6 +41,11 @@ jobs:
         # 贡献日历原先也是运行时境外依赖（jogruber.de），现改为构建期落盘
         run: node scripts/gen-contributions.mjs
 
+      - name: Refresh curated projects & active repos
+        # 项目列表与活跃仓库提交数原先浏览器直连 api.github.com（境内慢/限流），
+        # 现改为构建期落盘。精选名单与手写简介在 scripts/gen-projects.mjs 的 CURATED。
+        run: node scripts/gen-projects.mjs
+
       - name: Validate generated SVGs
         # 生成脚本在失败时会 exit 0 并沿用旧产物（刻意不阻断构建），
         # 所以这里必须显式校验产物本身有效，否则一次静默失败会被当成
@@ -62,6 +67,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/gen-contributions.mjs --check
+          node scripts/gen-projects.mjs --check
           node -e "
             const d = require('./assets/gh-contributions.json');
             if (!Array.isArray(d.days) || d.days.length < 300) throw new Error('days 过少: ' + d.days.length);
@@ -77,7 +83,7 @@ jobs:
           # 后者只反映已跟踪文件的修改，看不见「新增/被删除后重建」，
           # 首次运行或产物被误删后会误判为「无变化」而跳过提交。
           changed=0
-          for f in assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json; do
+          for f in assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json assets/projects.json assets/gh-active.json; do
             if git diff --quiet -- "$f" && git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
               echo "  unchanged: $f"
             else
@@ -91,8 +97,8 @@ jobs:
           fi
           git config user.name  'haliChina'
           git config user.email '168755253+haliChina@users.noreply.github.com'
-          git add assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json
-          git commit -m 'chore: refresh GitHub stats cards and contributions data'
+          git add assets/gh-stats.svg assets/gh-langs.svg assets/gh-contributions.json assets/projects.json assets/gh-active.json
+          git commit -m 'chore: refresh GitHub stats cards, contributions and projects data'
           # 用 GITHUB_TOKEN 推送。由 Actions 推送的提交默认不会再次触发
           # workflow，因此不存在无限循环。
           git push

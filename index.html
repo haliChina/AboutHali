@@ -3,17 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>About Hali</title>
-    <meta name="description" content="Hali's personal portfolio - Code is like humor. When you have to explain it, it's bad.">
+    <title>Hali — Full-Stack Developer &amp; Security Researcher</title>
+    <meta name="description" content="全栈开发者 &amp; 安全研究者。写 Web 与 Android，也做安全研究与逆向 —— 项目、笔记与联系方式都在 userhali.com。">
     <meta name="theme-color" content="#07070b">
-    <meta property="og:title" content="About Hali">
-    <meta property="og:description" content="Hali's personal portfolio - Code is like humor. When you have to explain it, it's bad.">
+    <meta property="og:title" content="Hali — Full-Stack Developer &amp; Security Researcher">
+    <meta property="og:description" content="全栈开发者 &amp; 安全研究者。写 Web 与 Android，也做安全研究与逆向 —— 项目、笔记与联系方式都在 userhali.com。">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://userhali.com">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="About Hali">
-    <meta name="twitter:description" content="Hali's personal portfolio">
+    <meta property="og:url" content="https://www.userhali.com/">
+    <meta property="og:site_name" content="About Hali">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://www.userhali.com/assets/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Hali 的个人主页分享卡：暗色樱花背景与 userhali.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hali — Full-Stack Developer &amp; Security Researcher">
+    <meta name="twitter:description" content="全栈开发者 &amp; 安全研究者。写 Web 与 Android，也做安全研究与逆向。">
+    <meta name="twitter:image" content="https://www.userhali.com/assets/og.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+    <link rel="apple-touch-icon" href="/assets/icon-180.png">
+    <link rel="canonical" href="https://www.userhali.com/">
     <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +31,7 @@
     <link rel="dns-prefetch" href="https://avatars.githubusercontent.com">
     <link rel="dns-prefetch" href="https://vercel-insights.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=126">
+    <link rel="stylesheet" href="style.css?v=127">
     <script>
         /* 清掉本机 8765 / 旧预览残留的 Service Worker，避免 3D 版 skip-link 继续盖在流体页上 */
         if ('serviceWorker' in navigator) {
@@ -172,6 +181,7 @@
         <div class="home-inner reveal">
             <p class="home-greet">Hello, I'm</p>
             <h1 class="home-name"><span class="hn-char">H</span><span class="hn-char">a</span><span class="hn-char">l</span><span class="hn-char">i</span></h1>
+            <p class="home-role">Full-Stack Developer · Security Researcher</p>
             <div class="typewriter">
                 <span class="typewriter-text"></span><span class="typewriter-caret"></span>
             </div>
@@ -250,8 +260,8 @@
                                 <span class="net-tip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg></span>
                                 <div class="net-tip-body">
                                     <div class="net-tip-title">正在加载贡献数据…</div>
-                                    <div class="net-tip-text">贡献日历已改为本站静态资源，正常网络下无需等待；仅下方「活跃仓库」提交数实时取自 <code>api.github.com</code>，该域名在境内可能较慢或被阻断。</div>
-                                    <div class="net-tip-act">国内网络建议开启代理后重试。</div>
+                                    <div class="net-tip-text">贡献日历与「活跃仓库」提交数均为构建期生成的本站静态资源，正常网络下打开即有，不依赖境外 API。</div>
+                                    <div class="net-tip-act">若长时间未显示，可刷新重试。</div>
                                 </div>
                             </div>
                         </div>
@@ -404,9 +414,9 @@
                     <div class="net-tip" role="note">
                         <span class="net-tip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18-2.5-2.7-2.5-15.3 0-18z"/></svg></span>
                         <div class="net-tip-body">
-                            <div class="net-tip-title">正在从 GitHub 拉取项目…</div>
-                            <div class="net-tip-text">项目数据实时取自 <code>api.github.com</code>，该域名在境内可能较慢或被阻断。上方统计卡已改为本站静态资源，正常网络下无需等待。</div>
-                            <div class="net-tip-act">国内网络建议开启代理后重试，或稍后再来。</div>
+                            <div class="net-tip-title">正在载入项目…</div>
+                            <div class="net-tip-text">项目数据是构建期生成的本站静态资源（精选仓库 + 手写简介），打开即有，不依赖境外 API。</div>
+                            <div class="net-tip-act">若长时间未显示，可稍后重试。</div>
                         </div>
                     </div>
                 </div>
@@ -417,8 +427,8 @@
     <footer class="footer">© <span id="year"></span> Hali · userhali.com · All Rights Reserved · <a href="https://rareui.com" target="_blank" rel="noopener" class="footer-credit">GitHub Activity by Rare UI</a></footer>
 
     <script src="shader.js?v=15" defer></script>
-    <script src="animations.js?v=66" defer></script>
-    <script src="github-activity.js?v=8" defer></script>
+    <script src="animations.js?v=67" defer></script>
+    <script src="github-activity.js?v=9" defer></script>
     <script src="fps.js?v=2" defer></script>
     
     <!-- Vercel Web Analytics -->
