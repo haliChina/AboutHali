@@ -518,55 +518,55 @@ body.audio-playing .island-eq i:nth-child(1){animation:eqBarA .72s ease-in-out i
 .island-content.island-state-toast .island-toast{animation:toastPop .5s var(--spring)}
 @keyframes toastPop{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
 
-/* ===== autoplay prompt — compact 2-row toast ===== */
+/* ===== autoplay prompt — M3E 重设计（11-22）：信息行 + 操作行 =====
+   上行 = primary 填充圆图标 + 文案；下行 = 「不再提醒」靠左、按钮对靠右。
+   开启 = filled primary pill（强 CTA），稍后 = 纯文字钮（次级）；
+   hover 一律收进 (hover:hover)，触屏 tap 不残留。 */
 .island-autoplay{
     display:flex;flex-direction:column;justify-content:center;
-    padding:11px 14px 10px;text-align:left;color:#fff;
-    gap:7px}
+    align-items:stretch; /* 覆盖 .island-layer 的 center：信息行左锚、操作行撑满 */
+    padding:10px 16px;text-align:left;color:#fff;
+    gap:9px}
 
-/* 第 1 行：图标 + 标题副标题（信息层） */
-.autoplay-head{display:flex;align-items:center;gap:10px}
+.autoplay-head{display:flex;align-items:center;gap:12px;min-width:0}
 .autoplay-icon{display:inline-flex;align-items:center;justify-content:center;
-    width:28px;height:28px;border-radius:50%;flex-shrink:0;
-    background:linear-gradient(135deg,var(--accent),var(--accent-3));
-    box-shadow:0 2px 6px rgba(255,107,157,.28),inset 0 1px 0 rgba(255,255,255,.28)}
-.autoplay-icon svg{width:13px;height:13px;fill:#1a0610}
+    width:40px;height:40px;border-radius:50%;flex-shrink:0;
+    background:var(--md-primary)}
+.autoplay-icon svg{width:16px;height:16px;fill:var(--md-on-primary)}
 /* play 三角几何中心偏右，视觉上向左微调以获得光学居中 */
-.autoplay-icon .ic-play{transform:translateX(-.7px)}
+.autoplay-icon .ic-play{transform:translateX(-1px)}
 
-.autoplay-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
-.autoplay-title{font-size:.88rem;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1.2}
-.autoplay-sub{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.3;letter-spacing:.2px}
+.autoplay-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.autoplay-title{font-size:.92rem;font-weight:700;letter-spacing:.2px;color:#fff;line-height:1.2}
+.autoplay-sub{font-size:.68rem;color:var(--md-on-surface-variant);line-height:1.3;letter-spacing:.2px}
 
-/* 第 2 行：不再提示 + 稍后/开启 */
 .autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-.autoplay-check{display:flex;align-items:center;gap:6px;font-size:.7rem;color:rgba(255,255,255,.6);
+.autoplay-check{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--md-on-surface-variant);
     cursor:pointer;user-select:none;letter-spacing:.2px}
 .autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
-.autoplay-check-box{display:inline-block;width:13px;height:13px;min-width:13px;flex-shrink:0;
-    border:1.3px solid rgba(255,255,255,.32);border-radius:3px;background:rgba(255,255,255,.03);cursor:pointer;
-    position:relative;transition:border-color .18s var(--ease),background .18s var(--ease)}
-.autoplay-check:hover .autoplay-check-box{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
+.autoplay-check-box{display:inline-block;width:15px;height:15px;min-width:15px;flex-shrink:0;
+    border:1.5px solid var(--md-outline-variant);border-radius:4px;background:transparent;cursor:pointer;
+    position:relative;transition:border-color .18s var(--ease),background-color .18s var(--ease)}
+@media (hover:hover){.autoplay-check:hover .autoplay-check-box{border-color:var(--md-primary)}}
 .autoplay-checkbox:checked + .autoplay-check-box{
-    background:linear-gradient(135deg,var(--accent),var(--accent-3));border-color:transparent;
-    box-shadow:0 2px 5px rgba(255,107,157,.32)}
+    background:var(--md-primary);border-color:transparent}
 .autoplay-checkbox:checked + .autoplay-check-box::after{content:'';position:absolute;
-    left:3px;top:.5px;width:3px;height:6.5px;border:solid #1a0610;border-width:0 1.8px 1.8px 0;
-    transform:rotate(45deg);animation:apCheck .22s var(--spring)}
+    left:4.5px;top:1.5px;width:4px;height:8px;border:solid var(--md-on-primary);border-width:0 2px 2px 0;
+    transform:rotate(45deg);animation:apCheck .22s var(--md-spring-standard)}
 @keyframes apCheck{0%{transform:rotate(45deg) scale(0)}60%{transform:rotate(45deg) scale(1.15)}100%{transform:rotate(45deg) scale(1)}}
 
-.autoplay-actions{display:flex;gap:6px}
-.autoplay-btn{appearance:none;-webkit-appearance:none;border:0;padding:5px 12px;border-radius:12px;
-    font-size:.72rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
-    transition:transform .2s var(--spring),filter .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease),color .2s var(--ease);
+.autoplay-actions{display:flex;align-items:center;gap:6px}
+.autoplay-btn{appearance:none;-webkit-appearance:none;border:0;border-radius:999px;position:relative;
+    font-size:.78rem;font-weight:600;letter-spacing:.3px;cursor:pointer;font-family:inherit;line-height:1.2;
+    transition:transform .3s var(--md-spring-standard),filter .2s var(--ease),background-color .2s var(--ease),color .2s var(--ease);
     touch-action:manipulation}
-.autoplay-later{background:rgba(255,255,255,.10);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.08)}
-.autoplay-later:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.18)}
+.autoplay-later{background:transparent;color:var(--md-on-surface-variant);padding:6px 12px}
+@media (hover:hover){.autoplay-later:hover{background:rgba(255,177,200,.10);color:#fff}}
 .autoplay-later:active{transform:scale(.94)}
-.autoplay-enable{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#1a0610;
-    box-shadow:0 2px 8px rgba(255,107,157,.32)}
-.autoplay-enable:hover{filter:brightness(1.07);box-shadow:0 3px 12px rgba(255,107,157,.42)}
+.autoplay-enable{background:var(--md-primary);color:var(--md-on-primary);padding:7px 22px;font-weight:700;
+    box-shadow:var(--md-elev-2)}
+.autoplay-enable:hover{filter:brightness(1.06)}
 .autoplay-enable:active{transform:scale(.94)}
 
 .island-content.island-state-autoplay .island-autoplay{animation:toastPop .5s var(--spring)}
@@ -656,8 +656,8 @@ html::view-transition-group(*){animation-timing-function:var(--spring)}
         background:var(--md-surface-container)}
     /* 4. content-visibility 已提升为全端规则（见文件上方 MWG 注释处），此处不再重复 */
     /* 5. 投影与滤镜降级：阴影在移动端吃 GPU */
-    .autoplay-enable{box-shadow:0 2px 6px rgba(255,107,157,.25)}
-    .autoplay-icon{box-shadow:0 2px 5px rgba(255,107,157,.25),inset 0 1px 0 rgba(255,255,255,.28)}
+    .autoplay-enable{box-shadow:0 2px 6px rgba(0,0,0,.25)}
+    .autoplay-icon{box-shadow:none}
     /* 6. 减少 blurriness：text-shadow 在岛内很轻量，保留 */
     /* 7. 关闭 intro-first 的远距投影 */
     .intro-first{text-shadow:0 4px 18px rgba(237,165,179,.28)}
