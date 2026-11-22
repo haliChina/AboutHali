@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Island · Apple Design Demo</title>
+<meta name="robots" content="noindex">
+<style>
+/* =====================================================================
+   Dynamic Island · Apple Design demo —— 独立文件，不影响生产。
+   对照 M3E 版（design/island-m3e-demo.html）的设计语言切换：
+
+   1. 形态：真黑 #000 胶囊（OLED 与挖孔融合，Apple 原生岛的做法），
+      去描边，弱阴影 + 顶缘 1px 内高光做玻璃质感；
+      展开卡圆角 40（Apple 展开态比例），pill 态半径 = 高度一半。
+   2. 运动：弹簧过冲从 ~5% 收到 ~1.5%（Apple 克制手感，形变干净不弹跳）；
+      内容层临界阻尼 340ms。
+   3. 色彩：白灰层级（1 / .62 / .38）替代 tonal 阶梯；
+      强调色换 iOS system pink #ff375f，状态色 system green/red；
+      segmented control（导航）、iOS mini switch（不再提醒）。
+   4. 字体：SF Pro 栈（-apple-system），标题 semibold 白，副文 .62 白。
+
+   生产文件未改动；效果确认后再回填。
+   ===================================================================== */
+:root{
+    --stage:#08080c;
+
+    --ios-black:#000;
+    --ios-glass:rgba(16,16,20,.92);
+    --ios-fill:rgba(255,255,255,.14);
+    --ios-fill-2:rgba(120,120,128,.28);
+    --ios-white:#fff;
+    --ios-2:rgba(255,255,255,.62);
+    --ios-3:rgba(255,255,255,.38);
+    --ios-tint:#ff375f;
+    --ios-green:#30d158;
+    --ios-red:#ff453a;
+    --ios-sep:rgba(255,255,255,.08);
+
+    --ios-spring-spatial:linear(0.0, 0.0294, 0.1022, 0.1996, 0.3078, 0.4173, 0.5216, 0.6166, 0.7005, 0.7722, 0.8321, 0.8808, 0.9195, 0.9495, 0.972, 0.9884, 0.9999, 1.0074, 1.012, 1.0144, 1.0);
+    --ios-spring-standard:linear(0.0, 0.0595, 0.1857, 0.329, 0.4651, 0.5835, 0.6814, 0.7596, 0.8206, 0.8673, 0.9026, 0.929, 0.9485, 1.0);
+
+    --elev:0 10px 34px rgba(0,0,0,.55);
+    --font-ios:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Helvetica Neue','Noto Sans SC',sans-serif;
+    --font-mono:'SF Mono','JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;background:var(--stage);color:var(--ios-white);font-family:var(--font-ios)}
+body{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;gap:28px;
+    padding:max(96px,env(safe-area-inset-top)) 20px 40px;
+    background:
+        radial-gradient(60% 34% at 50% 0%,rgba(255,143,182,.06),transparent 62%),
+        var(--stage);
+    -webkit-font-smoothing:antialiased;
+}
+h1{font-size:1.02rem;font-weight:600;letter-spacing:.18em;color:var(--ios-2);margin:0;text-transform:uppercase}
+
+/* ===== 岛壳：真黑胶囊 ===== */
+.dynamic-island{display:flex;justify-content:center;width:100%;pointer-events:none}
+.island-cluster{display:flex;align-items:flex-start;justify-content:center;gap:8px}
+.island-content,.music-satellite{
+    pointer-events:auto;
+    background:var(--ios-black);
+    border:none;
+    box-shadow:var(--elev),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.island-content{
+    position:relative;cursor:pointer;overflow:hidden;
+    width:134px;height:36px;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    transition:width .55s var(--ios-spring-spatial),height .55s var(--ios-spring-spatial),
+               border-radius .55s var(--ios-spring-spatial);
+    touch-action:manipulation;contain:layout paint;
+}
+.island-layer{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:0;pointer-events:none;transform:scale(.94);
+    transition:opacity .16s ease,transform .3s var(--ios-spring-standard);
+}
+.island-layer.active-content{
+    opacity:1;pointer-events:auto;transform:scale(1);
+    transition:opacity .28s ease .06s,transform .42s var(--ios-spring-spatial) .04s;
+}
+</style>
+<style>
+/* ===== default 行（绿点 = Apple 摄像头/录制指示语言） ===== */
+.island-default{position:absolute;inset:0;gap:7px}
+.island-idle-row{display:flex;align-items:center;gap:8px}
+.island-idle-row--time{position:absolute;right:12px;display:none} /* 时钟只在 idle 态出现（与生产一致），134px 下会与品牌行叠字 */
+.island-idle-dot{width:6px;height:6px;border-radius:50%;background:var(--ios-green);box-shadow:0 0 6px rgba(48,209,88,.7);flex-shrink:0}
+.island-idle-brand{white-space:nowrap;font-size:11px;font-weight:600;letter-spacing:.3px;color:rgba(255,255,255,.85)}
+.island-idle-clock{font-size:11px;font-weight:500;color:var(--ios-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ===== preview / hint / greet / toast ===== */
+.island-preview,.island-hint,.island-greet{gap:10px}
+.preview-section,.hint-section{font-size:.9rem;font-weight:600;color:#fff}
+.hint-prefix,.greet-cn{font-size:.85rem;font-weight:400;color:var(--ios-2)}
+.preview-dots{display:flex;gap:4px}
+.preview-dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3)}
+.preview-dots i.active{background:#fff}
+.preview-pct,.sp-pct{font-size:.8rem;font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.greet-jp{font-size:.9rem;font-weight:600;color:#fff}
+.island-toast{gap:8px;font-size:.92rem;font-weight:500}
+.island-toast-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.8rem;color:#fff;background:var(--ios-green)}
+.island-content.toast-success .island-toast{color:#fff}
+.island-content.toast-error .island-toast{color:#fff}
+.island-content.toast-error .island-toast-icon{background:var(--ios-red)}
+@keyframes toastPop{0%{opacity:0;transform:scale(.9)}70%{transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
+.island-content.island-state-toast .island-toast{animation:toastPop .4s var(--ios-spring-standard)}
+
+/* ===== EQ：白色（Apple Now Playing 语言） ===== */
+.island-eq{display:flex;align-items:center;justify-content:center;gap:2px;height:15px;flex-shrink:0}
+.island-eq i{display:block;width:1.5px;height:28%;border-radius:999px;background:rgba(255,255,255,.9);transform-origin:center}
+.island-eq i:nth-child(1){height:42%}.island-eq i:nth-child(2){height:76%}.island-eq i:nth-child(3){height:34%}
+.island-eq i:nth-child(4){height:58%}.island-eq i:nth-child(5){height:66%}.island-eq i:nth-child(6){height:48%}
+@keyframes eqA{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.15)}}
+body.audio-playing .island-eq i{animation:eqA .8s ease-in-out infinite}
+body.audio-playing .island-eq i:nth-child(2){animation-duration:.93s;animation-delay:-.18s}
+body.audio-playing .island-eq i:nth-child(3){animation-duration:.72s;animation-delay:-.34s}
+body.audio-playing .island-eq i:nth-child(4){animation-duration:1.05s;animation-delay:-.12s}
+body.audio-playing .island-eq i:nth-child(5){animation-duration:.87s;animation-delay:-.46s}
+body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-delay:-.28s}
+
+/* ===== music-bar / music-card ===== */
+.island-music-bar{justify-content:space-between;padding:0 11px}
+.ib-cover,.mc-cover,.sat-cover,.sat-card-cover{object-fit:cover;flex-shrink:0;border-radius:7px}
+.ib-cover{width:24px;height:24px}
+.island-music-card{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:0;padding:16px 18px 13px}
+.mc-head{display:flex;align-items:center;gap:12px;min-width:0}
+.mc-cover{width:64px;height:64px;border-radius:14px}
+.mc-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.mc-title,.sat-title{font-size:15px;font-weight:600;line-height:1.2;letter-spacing:-.2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-artist,.sat-artist{font-size:12px;line-height:1.2;color:var(--ios-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-progress-row,.sat-progress-row{height:24px;margin-top:10px;display:grid;grid-template-columns:34px minmax(0,1fr) 39px;align-items:center;column-gap:9px;font-size:10.5px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ios-3)}
+.mc-scrub,.sat-scrub{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.24);cursor:pointer;margin:0}
+.mc-scrub::-webkit-slider-thumb,.sat-scrub::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:0;height:0}
+.mc-cur,.sat-cur{min-width:0}
+.mc-rem,.sat-rem{text-align:right}
+.mc-ctrls,.sat-ctrls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:auto;height:40px}
+
+/* 裸白 glyph 按钮（Apple Now Playing：控件不加底） */
+.island-transport{appearance:none;border:0;background:none;width:48px;height:40px;padding:4px;display:inline-flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;border-radius:50%;transition:transform .3s var(--ios-spring-standard),opacity .2s}
+.island-transport:hover{opacity:.75}
+.island-transport:active{opacity:.5}
+.island-transport svg{width:26px;height:26px;fill:currentColor;pointer-events:none}
+.island-transport--toggle{padding:0}
+.island-transport--toggle svg{width:34px;height:34px}
+
+/* ===== nav：iOS segmented control ===== */
+.island-nav{flex-direction:column;justify-content:center;gap:2px;padding:10px 18px 4px}
+.pill-nav{position:relative;display:flex;align-items:center;gap:4px;padding:3px;margin-top:2px;
+    background:var(--ios-fill-2);border:none;border-radius:999px}
+.pill-indicator{position:absolute;top:3px;bottom:3px;background:rgba(255,255,255,.18);
+    border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:none;z-index:0;
+    transition:left .45s var(--ios-spring-spatial),width .45s var(--ios-spring-spatial),opacity .25s ease;opacity:0}
+.pill-indicator.ready{opacity:1}
+.island-nav-btn{color:var(--ios-2);font-size:.9rem;font-weight:600;border-radius:999px;padding:6px 15px;text-decoration:none;
+    position:relative;z-index:1;white-space:nowrap;transition:color .25s ease,transform .4s var(--ios-spring-standard);
+    opacity:0;transform:translateY(6px)}
+.island-content.island-state-nav .island-nav-btn{opacity:1;transform:none}
+.island-content.island-state-nav .island-nav-btn:nth-child(2){transition-delay:.07s}
+.island-content.island-state-nav .island-nav-btn:nth-child(3){transition-delay:.12s}
+.island-content.island-state-nav .island-nav-btn:nth-child(4){transition-delay:.17s}
+.island-content.island-state-nav .island-nav-btn:nth-child(5){transition-delay:.22s}
+.island-nav-btn:hover{color:#fff}
+.island-nav-btn.active{color:#fff}
+.scroll-progress{width:100%;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(4px);transition:opacity .3s ease .2s,transform .3s ease .2s}
+.island-content.island-state-nav .scroll-progress{opacity:1;transform:none}
+.scroll-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:600;letter-spacing:.3px}
+.sp-section{color:var(--ios-2)}
+.scroll-progress-container{position:relative;width:100%;height:4px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden}
+.scroll-progress-bar{position:relative;height:100%;width:34%;border-radius:999px;background:#fff;transition:width .15s ease-out}
+
+/* ===== confirm：Apple 权限弹窗语言 ===== */
+.island-confirm{justify-content:flex-start;align-items:stretch;padding:14px 18px;flex-direction:column;gap:11px;overflow:hidden}
+.island-confirm-info{display:flex;align-items:center;gap:14px;width:100%;min-width:0}
+.island-confirm-icon{flex:0 0 auto;position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    border-radius:12px;background:var(--ios-fill);border:none;overflow:hidden}
+.island-confirm-icon img{width:30px;height:30px;object-fit:contain}
+.island-confirm-icon .confirm-fallback{width:22px;height:22px;color:#fff}
+.island-confirm-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.island-confirm-title{font-size:1rem;font-weight:600;color:#fff;line-height:1.2}
+.island-confirm-host{font-size:.72rem;color:var(--ios-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.island-confirm-countdown{position:relative;width:100%;height:3px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden}
+.island-confirm-countdown-bar{position:absolute;left:0;top:0;height:100%;width:100%;border-radius:999px;transform-origin:left center;background:#fff}
+.island-confirm-actions{flex:0 0 auto;display:flex;justify-content:flex-end;gap:8px;width:100%;margin-top:auto}
+.island-btn{display:flex;align-items:center;justify-content:center;min-width:0;height:38px;border-radius:999px;border:none;
+    font-size:.9rem;font-weight:600;letter-spacing:.1px;cursor:pointer;gap:5px;font-family:var(--font-ios);
+    position:relative;transition:transform .3s var(--ios-spring-standard),opacity .18s ease}
+.island-btn:active{transform:scale(.96)}
+.island-btn-cancel{background:var(--ios-fill);color:#fff;padding:0 18px}
+.island-btn-cancel:hover{opacity:.8}
+.island-btn-confirm{background:var(--ios-tint);color:#fff;padding:0 20px;font-weight:600;box-shadow:0 4px 14px rgba(255,55,95,.35)}
+.island-btn-confirm:hover{opacity:.88}
+.island-btn-confirm svg{width:15px;height:15px;flex-shrink:0;transition:transform .3s var(--ios-spring-standard)}
+.island-btn-confirm:hover svg{transform:translateX(3px)}
+
+/* ===== email：tinted 文本按钮 ===== */
+.island-email{flex-direction:column;gap:8px;padding:14px 20px}
+.island-email-title{font-size:.82rem;color:var(--ios-2);align-self:flex-start;letter-spacing:.5px}
+.island-email-list{display:flex;flex-direction:column;gap:8px;width:100%}
+.island-email-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+.island-email-addr{font-size:.9rem;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.island-email-copy{padding:4px 12px;border-radius:999px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;font-family:var(--font-ios);
+    color:var(--ios-tint);background:transparent;
+    transition:background-color .2s ease,transform .3s var(--ios-spring-standard);flex:0 0 auto;white-space:nowrap}
+.island-email-copy:hover{background:rgba(255,55,95,.16)}
+
+/* ===== autoplay：iOS 通知卡片语言 ===== */
+.island-autoplay{display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:11px 16px;text-align:left;color:#fff;gap:10px}
+.autoplay-head{display:flex;align-items:center;gap:12px;min-width:0}
+.autoplay-icon{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;flex-shrink:0;
+    background:var(--ios-fill);color:#fff}
+.autoplay-icon svg{width:16px;height:16px;fill:currentColor}
+.autoplay-icon .ic-play{transform:translateX(-1px)}
+.autoplay-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.autoplay-title{font-size:.92rem;font-weight:600;letter-spacing:.1px;color:#fff;line-height:1.2}
+.autoplay-sub{font-size:.68rem;color:var(--ios-2);line-height:1.3;letter-spacing:.1px}
+.autoplay-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* iOS mini switch（不再提醒） */
+.autoplay-check{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--ios-2);
+    cursor:pointer;user-select:none;letter-spacing:.1px}
+.autoplay-checkbox{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+.autoplay-check-box{display:inline-block;width:26px;height:16px;min-width:26px;flex-shrink:0;
+    border:none;border-radius:8px;background:var(--ios-fill-2);cursor:pointer;position:relative;
+    transition:background-color .22s ease}
+.autoplay-check-box::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .28s var(--ios-spring-standard)}
+.autoplay-checkbox:checked + .autoplay-check-box{background:var(--ios-green)}
+.autoplay-checkbox:checked + .autoplay-check-box::after{transform:translateX(10px)}
+
+.autoplay-actions{display:flex;align-items:center;gap:6px}
+.autoplay-btn{appearance:none;border:0;border-radius:999px;font-size:.82rem;font-weight:600;letter-spacing:.1px;
+    cursor:pointer;font-family:var(--font-ios);line-height:1.2;
+    transition:transform .3s var(--ios-spring-standard),opacity .18s ease,background-color .2s ease;touch-action:manipulation}
+.autoplay-later{background:transparent;color:var(--ios-2);padding:6px 12px}
+.autoplay-later:hover{color:#fff}
+.autoplay-later:active{transform:scale(.95)}
+.autoplay-enable{background:var(--ios-tint);color:#fff;padding:7px 22px;box-shadow:0 4px 14px rgba(255,55,95,.3)}
+.autoplay-enable:hover{opacity:.88}
+.autoplay-enable:active{transform:scale(.95)}
+
+/* ===== satellite ===== */
+.music-satellite{position:relative;overflow:hidden;width:0;height:36px;border-width:0;border-radius:18px;opacity:0;transform:scale(.6);margin-left:-8px;cursor:pointer;
+    transition:width .55s var(--ios-spring-spatial),height .55s var(--ios-spring-spatial),border-radius .55s var(--ios-spring-spatial),
+               opacity .28s ease,transform .55s var(--ios-spring-spatial),margin-left .55s var(--ios-spring-spatial)}
+.music-satellite[data-mode="pill"]{width:68px;height:36px;opacity:1;transform:none;margin-left:0}
+.music-satellite[data-mode="icon"]{width:36px;height:36px;opacity:1;transform:none;margin-left:0}
+.music-satellite[data-mode="open"]{width:392px;height:184px;border-radius:40px;opacity:1;transform:none;margin-left:0}
+.satellite-compact,.satellite-card{position:absolute;inset:0;transition:opacity .22s ease,transform .4s var(--ios-spring-spatial)}
+.satellite-compact{display:flex;align-items:center;justify-content:center;gap:8px;opacity:1;transform:scale(1)}
+.satellite-card{display:flex;flex-direction:column;padding:16px 18px 13px;opacity:0;pointer-events:none;transform:scale(.92)}
+.music-satellite[data-mode="open"] .satellite-compact{opacity:0;pointer-events:none;transform:scale(.88)}
+.music-satellite[data-mode="open"] .satellite-card{opacity:1;pointer-events:auto;transform:scale(1);transition-delay:.08s}
+.music-satellite[data-mode="icon"] .satellite-compact{gap:0}
+.music-satellite[data-mode="icon"] .sat-cover{width:28px;height:28px;border-radius:50%}
+.music-satellite[data-mode="icon"] .island-eq{display:none}
+.sat-head{display:flex;align-items:center;gap:12px;min-width:0}
+.sat-card-cover{width:64px;height:64px;border-radius:14px}
+.sat-meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sat-progress-row{grid-template-columns:34px minmax(0,1fr) 39px}
+
+/* ===== 控制台 ===== */
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:640px}
+.ctl{appearance:none;cursor:pointer;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.4px;
+    color:var(--ios-2);background:var(--ios-fill-2);border:none;
+    border-radius:999px;padding:8px 16px;transition:color .2s,background-color .2s,transform .3s var(--ios-spring-standard)}
+.ctl:hover{color:#fff;background:rgba(120,120,128,.42);transform:translateY(-1px)}
+.ctl.on{color:#fff;background:#0a84ff}
+.ctl:active{transform:scale(.94)}
+.spec{max-width:560px;font-size:.78rem;line-height:1.8;color:var(--ios-2);
+    border-radius:20px;
+    background:var(--ios-fill-2);padding:16px 20px}
+.spec b{color:#fff}
+.spec code{font-family:var(--font-mono);font-size:.92em;color:#fff;background:rgba(255,255,255,.12);padding:1px 5px;border-radius:4px}
+@media (max-width:560px){.satellite-card,.island-music-card{max-width:calc(100vw - 40px)}}
+</style>
+</head>
+<body class="audio-playing">
+<h1>Dynamic Island · Apple Design</h1>
+
+<div class="dynamic-island">
+    <div class="island-cluster">
+        <div class="island-content" id="island" data-state="default">
+            <div class="island-layer island-default active-content">
+                <div class="island-idle-row"><span class="island-idle-dot"></span><span class="island-idle-brand">userhali.com</span></div>
+                <div class="island-idle-row island-idle-row--time"><span class="island-idle-clock">16:25 · 11月22日</span></div>
+            </div>
+            <div class="island-layer island-preview">
+                <span class="preview-section">首页</span>
+                <span class="preview-dots"><i class="active"></i><i></i><i></i><i></i></span>
+                <span class="preview-pct">12%</span>
+            </div>
+            <div class="island-layer island-hint"><span class="hint-prefix">正在看</span><span class="hint-section">首页</span></div>
+            <div class="island-layer island-greet"><span class="greet-jp">はじめまして</span><span class="greet-cn">· 欢迎来访</span></div>
+            <div class="island-layer island-music-bar">
+                <img class="ib-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="24" height="24">
+                <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <nav class="island-layer island-nav">
+                <div class="pill-nav" id="pillNav">
+                    <a href="javascript:void 0" class="island-nav-btn active" data-index="0">首页</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="1">GitHub</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="2">QQ音乐</a>
+                    <a href="javascript:void 0" class="island-nav-btn" data-index="3">Projects</a>
+                    <span class="pill-indicator" id="pillIndicator"></span>
+                </div>
+                <div class="scroll-progress">
+                    <div class="scroll-progress-meta"><span class="sp-section">首页</span><span class="sp-pct">34%</span></div>
+                    <div class="scroll-progress-container"><div class="scroll-progress-bar"></div></div>
+                </div>
+            </nav>
+            <div class="island-layer island-music-card">
+                <div class="mc-head">
+                    <img class="mc-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="64" height="64">
+                    <div class="mc-meta"><div class="mc-title">All The Things She Said</div><div class="mc-artist">t.A.T.u.</div></div>
+                    <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="mc-progress-row"><span class="mc-cur">1:24</span><input type="range" class="mc-scrub" min="0" max="1000" value="334" aria-label="播放进度"><span class="mc-rem">−2:33</span></div>
+                <div class="mc-ctrls">
+                    <button class="island-transport" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M10.62 16.89 L4.85 12.82 C4.29 12.42 4.29 11.58 4.85 11.19 L10.62 7.11 C11.29 6.65 12.2 7.12 12.2 7.93 V16.07 C12.2 16.88 11.29 17.35 10.62 16.89 Z M18.12 16.89 L12.35 12.82 C11.79 12.42 11.79 11.58 12.35 11.19 L18.12 7.11 C18.79 6.65 19.7 7.12 19.7 7.93 V16.07 C19.7 16.88 18.79 17.35 18.12 16.89 Z"/></svg></button>
+                    <button class="island-transport island-transport--toggle" aria-label="播放/暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+                    <button class="island-transport" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M5.88 16.89 L11.65 12.82 C12.21 12.42 12.21 11.58 11.65 11.19 L5.88 7.11 C5.21 6.65 4.3 7.12 4.3 7.93 V16.07 C4.3 16.88 5.21 17.35 5.88 16.89 Z M13.38 16.89 L19.15 12.82 C19.71 12.42 19.71 11.58 19.15 11.19 L13.38 7.11 C12.71 6.65 11.8 7.12 11.8 7.93 V16.07 C11.8 16.88 12.71 17.35 13.38 16.89 Z"/></svg></button>
+                </div>
+            </div>
+            <div class="island-layer island-confirm">
+                <div class="island-confirm-info">
+                    <div class="island-confirm-icon"><svg class="confirm-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg></div>
+                    <div class="island-confirm-meta"><div class="island-confirm-title">Bilibili</div><div class="island-confirm-host">space.bilibili.com</div></div>
+                </div>
+                <div class="island-confirm-countdown"><span class="island-confirm-countdown-bar" id="cdBar"></span></div>
+                <div class="island-confirm-actions">
+                    <button class="island-btn island-btn-cancel">取消</button>
+                    <button class="island-btn island-btn-confirm"><span>前往</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+                </div>
+            </div>
+            <div class="island-layer island-email">
+                <div class="island-email-title">联系邮箱</div>
+                <div class="island-email-list">
+                    <div class="island-email-item"><span class="island-email-addr">admin@userhali.com</span><button class="island-email-copy">拷贝</button></div>
+                    <div class="island-email-item"><span class="island-email-addr">ema1laddresf0rw0rk@foxmail.com</span><button class="island-email-copy">拷贝</button></div>
+                </div>
+            </div>
+            <div class="island-layer island-toast"><span class="island-toast-icon">✓</span><span>已拷贝</span></div>
+            <div class="island-layer island-autoplay">
+                <div class="autoplay-head">
+                    <span class="autoplay-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+                    <div class="autoplay-text"><span class="autoplay-title">开启背景音乐</span><span class="autoplay-sub">进入即播放，沉浸氛围</span></div>
+                </div>
+                <div class="autoplay-foot"><label class="autoplay-check"><input type="checkbox" class="autoplay-checkbox"><span class="autoplay-check-box"></span><span>不再提醒</span></label><div class="autoplay-actions"><button class="autoplay-btn autoplay-later">稍后</button><button class="autoplay-btn autoplay-enable">开启</button></div></div>
+            </div>
+        </div>
+
+        <div class="music-satellite" id="satellite" data-mode="hidden" aria-label="音乐活动">
+            <div class="satellite-compact">
+                <img class="sat-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="24" height="24">
+                <div class="island-eq"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="satellite-card">
+                <div class="sat-head"><img class="sat-card-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" width="64" height="64"><div class="sat-meta"><div class="sat-title">All The Things She Said</div><div class="sat-artist">t.A.T.u.</div></div></div>
+                <div class="sat-progress-row"><span class="sat-cur">1:24</span><input type="range" class="sat-scrub" min="0" max="1000" value="334" aria-label="分岛播放进度"><span class="sat-rem">−2:33</span></div>
+                <div class="sat-ctrls">
+                    <button class="island-transport" aria-label="上一首"><svg viewBox="0 0 24 24"><path d="M10.62 16.89 L4.85 12.82 C4.29 12.42 4.29 11.58 4.85 11.19 L10.62 7.11 C11.29 6.65 12.2 7.12 12.2 7.93 V16.07 C12.2 16.88 11.29 17.35 10.62 16.89 Z M18.12 16.89 L12.35 12.82 C11.79 12.42 11.79 11.58 12.35 11.19 L18.12 7.11 C18.79 6.65 19.7 7.12 19.7 7.93 V16.07 C19.7 16.88 18.79 17.35 18.12 16.89 Z"/></svg></button>
+                    <button class="island-transport island-transport--toggle" aria-label="播放/暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+                    <button class="island-transport" aria-label="下一首"><svg viewBox="0 0 24 24"><path d="M5.88 16.89 L11.65 12.82 C12.21 12.42 12.21 11.58 11.65 11.19 L5.88 7.11 C5.21 6.65 4.3 7.12 4.3 7.93 V16.07 C4.3 16.88 5.21 17.35 5.88 16.89 Z M13.38 16.89 L19.15 12.82 C19.71 12.42 19.71 11.58 19.15 11.19 L13.38 7.11 C12.71 6.65 11.8 7.12 11.8 7.93 V16.07 C11.8 16.88 12.71 17.35 13.38 16.89 Z"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="controls" id="controls"></div>
+
+<div class="spec">
+    <b>对照 M3E 版的改动</b>（生产文件未动）：<br>
+    形态：真黑 <code>#000</code> 胶囊、零描边、顶缘 1px 内高光；展开卡圆角 40，pill 态半径 = 高度一半。<br>
+    运动：弹簧过冲 5%→1.5%（520ms，干净不弹跳），内容层临界阻尼 340ms。<br>
+    色彩：白灰层级（1 / .62 / .38）；强调色 iOS system pink <code>#ff375f</code>；状态色 system green/red；EQ/进度条/倒计时全白。<br>
+    控件：导航 = iOS segmented control（白色浮起段）；「不再提醒」= iOS mini switch（开 = system green）；播放控件 = 裸白 glyph；邮箱「拷贝」= tinted 文本钮；confirm = 取消灰填充 + 前往 tint pill。<br>
+    字体：SF Pro 栈（-apple-system 优先）。
+</div>
+
+<script>
+(function(){
+    'use strict';
+    var island = document.getElementById('island');
+    var satellite = document.getElementById('satellite');
+    var LAYOUTS = {
+        'default':{width:'134px',height:'36px',radius:'18px'},
+        'preview':{width:'224px',height:'36px',radius:'18px'},
+        'hint':{width:'228px',height:'36px',radius:'18px'},
+        'greet':{width:'244px',height:'36px',radius:'18px'},
+        'music-bar':{width:'192px',height:'36px',radius:'18px'},
+        'nav':{width:'408px',height:'56px',radius:'28px'},
+        'music-card':{width:'392px',height:'184px',radius:'40px'},
+        'confirm':{width:'344px',height:'156px',radius:'40px'},
+        'email':{width:'312px',height:'132px',radius:'40px'},
+        'toast':{width:'228px',height:'42px',radius:'21px'},
+        'autoplay':{width:'312px',height:'106px',radius:'40px'}
+    };
+    var LAYERS = {};
+    island.querySelectorAll('.island-layer').forEach(function(el){
+        var name = Array.from(el.classList).find(function(c){ return c.indexOf('island-') === 0 && c !== 'island-layer'; });
+        LAYERS[name.replace('island-','')] = el;
+    });
+    var musicOn = true;
+
+    function setState(target){
+        var current = island.getAttribute('data-state');
+        if (current === target) return;
+        var cur = LAYERS[current], next = LAYERS[target];
+        if (cur) cur.classList.remove('active-content');
+        var l = LAYOUTS[target];
+        if (l){
+            island.style.width = l.width;
+            island.style.height = l.height;
+            island.style.borderRadius = l.radius;
+        }
+        island.setAttribute('data-state', target);
+        Object.keys(LAYERS).forEach(function(s){ island.classList.remove('island-state-' + s); });
+        island.classList.add('island-state-' + target);
+        if (next) next.classList.add('active-content');
+        if (!musicOn) satellite.dataset.mode = 'hidden';
+        else if (['default','music-bar','music-card'].indexOf(target) >= 0) satellite.dataset.mode = 'hidden';
+        else if (['nav','confirm','email','autoplay'].indexOf(target) >= 0) satellite.dataset.mode = 'icon';
+        else satellite.dataset.mode = 'pill';
+        document.querySelectorAll('.ctl[data-state]').forEach(function(b){
+            b.classList.toggle('on', b.dataset.state === target);
+        });
+    }
+
+    var controls = document.getElementById('controls');
+    var STATES = ['default','preview','hint','greet','music-bar','nav','music-card','confirm','email','toast','autoplay'];
+    STATES.forEach(function(s){
+        var b = document.createElement('button');
+        b.className = 'ctl' + (s === 'default' ? ' on' : '');
+        b.dataset.state = s;
+        b.textContent = s;
+        b.addEventListener('click', function(){ setState(s); });
+        controls.appendChild(b);
+    });
+    var musicBtn = document.createElement('button');
+    musicBtn.className = 'ctl on';
+    musicBtn.textContent = '音乐:开';
+    musicBtn.addEventListener('click', function(){
+        musicOn = !musicOn;
+        document.body.classList.toggle('audio-playing', musicOn);
+        musicBtn.textContent = musicOn ? '音乐:开' : '音乐:关';
+        musicBtn.classList.toggle('on', musicOn);
+        var cur = island.getAttribute('data-state');
+        if (!musicOn && ['music-bar','music-card'].indexOf(cur) >= 0) setState('default');
+        else setState(cur);
+    });
+    controls.appendChild(musicBtn);
+
+    var cd = document.getElementById('cdBar');
+    setInterval(function(){
+        if (island.getAttribute('data-state') !== 'confirm') { cd.style.transform = 'scaleX(1)'; return; }
+        var m = cd.style.transform.match(/scaleX\(([\d.]+)\)/);
+        var v = m ? parseFloat(m[1]) : 1;
+        v -= 0.012;
+        if (v <= 0) v = 1;
+        cd.style.transform = 'scaleX(' + v + ')';
+    }, 96);
+
+    var indicator = document.getElementById('pillIndicator');
+    function moveIndicator(){
+        var active = island.querySelector('.island-nav-btn.active');
+        if (!active || !indicator) return;
+        indicator.style.left = active.offsetLeft + 'px';
+        indicator.style.width = active.offsetWidth + 'px';
+        indicator.classList.add('ready');
+    }
+    island.querySelectorAll('.island-nav-btn').forEach(function(a){
+        a.addEventListener('click', function(){
+            island.querySelectorAll('.island-nav-btn').forEach(function(x){ x.classList.remove('active'); });
+            a.classList.add('active');
+            moveIndicator();
+        });
+    });
+    var indTimer;
+    new MutationObserver(function(){
+        if (island.getAttribute('data-state') === 'nav') { clearTimeout(indTimer); indTimer = setTimeout(moveIndicator, 600); }
+        else indicator.classList.remove('ready');
+    }).observe(island, { attributes:true, attributeFilter:['data-state'] });
+})();
+</script>
+</body>
+</html>
