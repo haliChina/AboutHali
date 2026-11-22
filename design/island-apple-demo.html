@@ -63,9 +63,10 @@ h1{font-size:1.02rem;font-weight:600;letter-spacing:.18em;color:var(--ios-2);mar
 .island-content,.music-satellite{
     pointer-events:auto;
     background:var(--ios-black);
-    /* 黑底黑台面需要边缘分离：hairline 亮 rim（Apple Liquid Glass 暗色变体同款）+ 更深投影 */
+    /* 黑底黑台面需要边缘分离：只留一条 hairline 亮 rim —— inset 高光会与描边
+       在圆角处形成双线接缝（「外侧圆角像拼出来的」的来源），去掉 */
     border:1px solid rgba(255,255,255,.14);
-    box-shadow:0 16px 44px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07);
+    box-shadow:0 16px 44px rgba(0,0,0,.7);
 }
 .island-content{
     position:relative;cursor:pointer;overflow:hidden;
@@ -212,10 +213,12 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
 /* ===== autoplay：iOS 通知卡片语言 ===== */
 .island-autoplay{display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:11px 16px;text-align:left;color:#fff;gap:10px}
 .autoplay-head{display:flex;align-items:center;gap:12px;min-width:0}
-.autoplay-icon{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;flex-shrink:0;
-    background:var(--ios-fill);color:#fff}
-.autoplay-icon svg{width:16px;height:16px;fill:currentColor}
+.autoplay-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;flex-shrink:0;
+    overflow:hidden;background:var(--ios-fill);color:#fff}
+.autoplay-icon svg{position:absolute;width:16px;height:16px;fill:currentColor}
 .autoplay-icon .ic-play{transform:translateX(-1px)}
+/* 封面缩略图盖在 glyph 上，加载失败 onerror 移除后露出播放 glyph */
+.autoplay-icon .ai-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .autoplay-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
 .autoplay-title{font-size:.92rem;font-weight:600;letter-spacing:.1px;color:#fff;line-height:1.2}
 .autoplay-sub{font-size:.68rem;color:var(--ios-2);line-height:1.3;letter-spacing:.1px}
@@ -348,7 +351,7 @@ body.audio-playing .island-eq i:nth-child(6){animation-duration:.98s;animation-d
             <div class="island-layer island-toast"><span class="island-toast-icon">✓</span><span>已拷贝</span></div>
             <div class="island-layer island-autoplay">
                 <div class="autoplay-head">
-                    <span class="autoplay-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+                    <span class="autoplay-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><img class="ai-cover" src="https://p3.music.126.net/1bVvQcOLx96ZNhzfLk9bwg==/109951173376551048.jpg?param=300y300" alt="" onerror="this.remove()"></span>
                     <div class="autoplay-text"><span class="autoplay-title">开启背景音乐</span><span class="autoplay-sub">进入即播放，沉浸氛围</span></div>
                 </div>
                 <div class="autoplay-foot"><label class="autoplay-check"><input type="checkbox" class="autoplay-checkbox"><span class="autoplay-check-box"></span><span>不再提醒</span></label><div class="autoplay-actions"><button class="autoplay-btn autoplay-later">稍后</button><button class="autoplay-btn autoplay-enable">开启</button></div></div>
